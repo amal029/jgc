@@ -2,8 +2,16 @@
 \subsection{AGRC analysis}
 \label{sec:agrc-analysis}
 
-Just define graph, may must and algorithm. Avinash already described all
-problems.
+In order to statically determine the worst case memory consumption of a
+program targeting TP-JOP, one needs to analyze codes generated from both
+CNs and JDNs. The compiler is able to trivially determine the maximum
+memory footprint required for executing CN codes from any given SystemJ
+programs [] since there is no dynamic memory allocation required for
+executing this code. On the other hand, the data-flow analysis for JDNs
+is more intricate since it needs to analyze the original AGRC in order
+to retrieve the dependency edges, which are lost after splitting CNs and
+JDNs from the AGRC. We devote this section to illustrate this analysis
+technique.
 
 
 
