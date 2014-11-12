@@ -1344,6 +1344,7 @@ public boolean MethodCall0_0(){
     \end{Verbatim}
   \end{minipage}
 \end{lrbox}
+
 \begin{figure}[t!]
   \ContinuedFloat
   \centering
@@ -1631,14 +1632,153 @@ allocation in the permanent heap space.
 \section{Producing back-end code}
 \label{sec:prod-back-code}
 
+\newsavebox{\baone}
+\begin{lrbox}{\baone}
+  \begin{minipage}[b]{0.5\linewidth}
+    \begin{algo}
+      \SetKwData{Let}{let}
+      \SetKwFunction{Steptwo}{Step2}
+      \SetKwFunction{SortDescending}{sortDescending}
+      \SetKwFunction{Load}{load}
+      \SetKwFunction{ReplaceByteCode}{replaceByteCode}
+      \KwIn{maxMem: maximum memory address} 
+      \BlankLine
+      \Let $allocPtr \leftarrow$ maxMem\;
+      \Let $header\_size \leftarrow 2$\;
+      \ForEach{$(size,dd) \in defs$} {
+        \Let $dd \leftarrow$ \SortDescending($dd$)\;
+        \Let $M \leftarrow$ \Load($dd$)\;
+        \ForEach {$d \in dd$} {
+          \Let $allocPtr \leftarrow allocPtr - (size + header\_size)$\;
+          \lIf {$allocPtr < 0$} {\texttt{raise No\_mem}}\;
+          \ReplaceByteCode($allocPtr,d,M)$\;
+        }
+      }
+    \end{algo}
+  \end{minipage}
+\end{lrbox}
+
+\newsavebox{\batwo}
+\begin{lrbox}{\batwo}
+  \begin{minipage}[b]{0.5\linewidth}
+    \begin{algo}
+      \KwIn{$allocPtr$: allocation pointer}
+      \KwIn{pp: program point to replace} 
+      \KwIn{$M$: Method containing the program point} 
+      \SetKwData{Let}{let}
+      \SetKwData{GetArg}{getArg}
+      \SetKwData{ReplaceNew}{replaceNew}
+      \SetKwData{ReplaceNewA}{replaceNewArrayB}
+      \SetKwData{ReplaceNewAA}{replaceNewArrayO}
+      \SetKwData{AdjConditionals}{adjustConditionals}
+      \BlankLine
+      \uIf {$pp = \mathtt{new}$} {
+        \Let $arg \leftarrow$ \GetArg($pp$)\;
+        \ReplaceNew($pp$,$M$,$arg$)\;
+        \AdjConditionals($M$,22)\;
+      }
+      \uElseIf {$pp = \mathtt{newarray}$} {
+        \Let $arg \leftarrow$ \GetArg($pp$)\;
+        \uIf {$arg = \mathtt{Basic}$} {
+          \ReplaceNewA($pp$,$M$,$arg$)\;
+        }\lElse {\ReplaceNewAA($pp$,$M$,$arg$)\;}
+        \AdjConditionals($M$,22)\;
+      }
+      \lElse {\texttt{raise error}}
+    \end{algo}
+  \end{minipage}
+\end{lrbox}
+
+
+\newsavebox{\bone}
+\begin{lrbox}{\bone}
+  \begin{minipage}[b]{0.7\linewidth}
+    \begin{Verbatim}[numbers=right,commandchars=\\\[\]]
+--- constant-pool snippet ----
+#2 = Class     #79     //a/a
+#3 = Methodref #2.#78  //a/a.''<init>'':()V
+#4 = Fieldref  #12.#80 //test/test.A:La/a;
+---------- main method snippet --------
+0:new #2           // class a/a
+3:dup
+4:invokespecial #3 // Method a/a.''<init>'':()V
+7:putstatic     #4 // Field A:La/a;
+    \end{Verbatim}
+  \end{minipage}
+\end{lrbox}
+
+\newsavebox{\btwo}
+\begin{lrbox}{\btwo}
+  \begin{minipage}[b]{0.7\linewidth}
+    \begin{Verbatim}[numbers=right,commandchars=\\\[\]]
+--- constant-pool snippet ----
+#2 = Class     #79     //a/a
+#3 = Methodref #2.#78  //a/a.''<init>'':()V
+#4 = Fieldref  #12.#80 //test/test.A:La/a;
+.... //other constants
+#154 = Integer            65483
+#155 = Integer            65485
+---------- main method snippet --------
+ 0:ldc_w         #154 // int 65483
+ 3:dup 
+ 4:ldc_w         #155 // int 65485
+ 7:swap
+ 8:invokestatic  #151 // Method Native.wr:(II)V
+11:dup
+12:bipush        1
+14:iadd
+15:ldc_w         #2   // class a/a
+18:bipush        5
+20:iadd
+21:swap
+22:invokestatic  #151 // Method Native.wr:(II)V
+25:dup
+26:invokespecial #3   // Method a/a.''<init>'':()V
+29:putstatic     #4   // Field A:La/a;
+    \end{Verbatim}
+  \end{minipage}
+\end{lrbox}
+
+\begin{figure}[t!]
+  \centering
+  \subfloat[Bump-pointer memory allocation] {
+    \scalebox{0.7}{\usebox{\baone}}
+    \label{fig:11a}
+  }
+  \qquad
+  \subfloat[Replacing the \texttt{new}/\texttt{newarray} bytecodes] {
+    \scalebox{0.7}{\usebox{\batwo}}
+    \label{fig:11a}
+  }
+  
+  \subfloat[Java bytecode snippet and class constant-pool for example in
+  Figure~\ref{fig:8j}]{
+    \scalebox{0.55}{\usebox{\bone}}
+    \label{fig:11c}
+  }
+  \qquad
+  \subfloat[Java bytecode snippet and class constant-pool for example in
+  Figure~\ref{fig:8j} after \texttt{new} bytecode replacement]{
+    \scalebox{0.55}{\usebox{\btwo}}
+    \label{fig:11d}
+  }
+
+  \subfloat[Java object allocation in permanent heap]{
+    \includegraphics[scale=0.5]{oalloc}
+    \label{fig:11e}
+  }
+  \qquad\qquad
+  \subfloat[Java (2x2x2) array allocation in permanent heap]{
+    \includegraphics[scale=0.5]{aalloc}
+    \label{fig:11f}
+  }
+  \caption{The back-end code generation pseudo-algorithm and related
+    explanation}
+  \label{fig:11}
+\end{figure}
+
 \subsection{Object layout}
 \label{sec:object-layout}
-
-\subsection{Constant pool extension}
-\label{sec:const-pool-extens}
-
-\subsection{Replacing th "new" and "newarray" bytecodes}
-\label{sec:replacing-th-new}
 
 \section{Experimental results}
 \label{sec:experimental-results}
