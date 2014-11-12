@@ -20,6 +20,9 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{subfig}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage[inline]{enumitem}
 \renewcommand{\algorithmcfname}{ALGORITHM}
 \newenvironment{algo}{%
 \renewenvironment{algocf}[1][h]{}{}%
@@ -43,6 +46,21 @@
 \acmArticle{}
 \acmYear{2014}
 \acmMonth{11}
+
+\lstdefinestyle{sysj}{
+	belowcaptionskip=1\baselineskip,
+	breaklines=true,
+	xleftmargin=\parindent,
+	language=Java,
+	showstringspaces=false,
+	basicstyle=\small\ttfamily,
+	keywordstyle=\bfseries\color{green!40!black},
+	commentstyle=\itshape\color{purple!40!black},
+	identifierstyle=\color{blue},
+	stringstyle=\color{orange},
+	morekeywords={input,output,signal,channel,immediate,weak,sustain,send,receive,abort,await,emit,present,trap,pause,exit,wait_inbetween,wait_exact,wait_atleast,suspend},
+	tabsize=2
+}
 
 % Document starts
 \begin{document}
@@ -880,12 +898,7 @@ there is a control node \texttt{pause} that needs to be executed on
 ReCOP. We describe these AGRC and the data-flow analysis steps in the
 next sections.
 
-\subsection{AGRC analysis}
-\label{sec:agrc-analysis}
-
-Give formal definition of may and must. Then describe the algorithm that
-given a method, the callee method, gives the may and must caller
-methods.
+\input{agrc}
 
 \subsection{Data-flow analysis}
 \label{sec:data-flow-analysis}
