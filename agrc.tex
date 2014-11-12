@@ -2,47 +2,8 @@
 \subsection{AGRC analysis}
 \label{sec:agrc-analysis}
 
-The SystemJ program consists of two components; control and data. During
-compilation, the SystemJ compiler separates these components for
-execution on ReCOP and JOP processors, respectively
-(Section~\ref{sec:real-time-execution}).
-
-In order to statically determine the worst case memory consumption of a
-program targeting TP-JOP, one needs to analyze codes generated from
-JDNs. There is no need to perform the analysis on a program running on
-ReCOP since the compiler is able to trivially determine the maximum
-memory footprint required for executing CN codes from any given SystemJ
-programs [].
-
-Programmers can declare any instances of Java objects or primitive type
-variables, whose result can be emitted as a signal value. Consider 
-
-\begin{figure}[t!]
-	\newsavebox{\hja}
-	\begin{lrbox}{\hja}
-	\begin{lstlisting}[style=sysj]
-output Integer signal O, S;
-Integer i = new Integer();
-Util.compute();
-emit S(i);
-	\end{lstlisting}
-\end{lrbox}
-	\newsavebox{\hjb}
-	\begin{lrbox}{\hjb}
-	\begin{lstlisting}[style=sysj]
-output Integer signal O, S;
-Integer i = new Integer();
-emit O;
-emit S(i);
-	\end{lstlisting}
-\end{lrbox}
-	\centering
-	\subfloat[][sss]{\usebox{\hja}}
-	\hspace{2cm}
-	\subfloat[][ggg]{\usebox{\hjb}}
-	\caption{df}
-	\label{fig:d}
-\end{figure}
+Just define graph, may must and algorithm. Avinash already described all
+problems.
 
 
 
