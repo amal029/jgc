@@ -13,7 +13,19 @@ to retrieve the dependency edges, which are lost after splitting CNs and
 JDNs from the AGRC. We devote this section to illustrate this analysis
 technique.
 
+AGRC is a \textit{directed graph} of tuple $G =(V,E)$, where $V$ is the
+set of vertices (nodes of AGRC) and $E$ is the set of ordered pairs of
+vertices. Each edge $e = (v_i,v_j), \forall e \in E$ is a tuple denoting
+that the edge is directed from $v_i$ to $v_j$. Then a function
+$\lambda:v \rightarrow E_i$, $E_i \subseteq E$, maps \textit{each}
+vertex to a set of edge(s) where $\forall (v_i,v_j) \in E_i, v_j = v$
+and $E_i$ can be $\emptyset$. When $|E_i| = 1$ we call $v_i$
+\textit{must} be called before $v$ whereas when $|E_i| > 1$ we call any
+$v_i \in E_i$ \textit{may} be called before $v$.
 
+The algorithm for obtaining \textit{may} and \textit{must} relationships
+of the nodes in AGRC is shown in Algorithm~??. The input to algorithm is
+an AGRC  
 
 %Give formal definition of may and must. Then describe the algorithm that
 %given a method, the callee method, gives the may and must caller
