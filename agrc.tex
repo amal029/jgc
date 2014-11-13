@@ -37,7 +37,7 @@ technique.
 	\ForAll{$V \in V_{cd}$}{
 		\Let $V_{temp} = \emptyset$\;
 		\ForEach{$v \in V$}{
-			$V_{temp} = V_{temp} \cup$ \KwCrNode{$v,E$}
+			$V_{temp} = V_{temp} \cup$ \{\KwCrNode{$v,E$}\}
 		}
 		$mList = mList \cup \{V_{temp}\}$
 	}
