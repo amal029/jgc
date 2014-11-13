@@ -1219,7 +1219,13 @@ areturn
     \scalebox{0.7}{\usebox{\algfour}}
     \label{fig:8d}
   }
+  \caption{Data-flow analysis algorithm}
+  \label{fig:8}
+\end{figure}
 
+\begin{figure}
+  \centering
+  \ContinuedFloat
   \subfloat[Step5: Get object initialization for affected variables]{
     \scalebox{0.7}{\usebox{\algfive}}
     \label{fig:8e}
@@ -1229,7 +1235,6 @@ areturn
     \scalebox{0.7}{\usebox{\algsix}}
     \label{fig:8f}
   }
-
   \caption{Data-flow analysis algorithm}
   \label{fig:8}
 \end{figure}
@@ -1632,25 +1637,43 @@ allocation in the permanent heap space.
 \section{Producing back-end code}
 \label{sec:prod-back-code}
 
+The back-end code generation is a two step-procedure shown in
+Figures~\ref{fig:11a} and~\ref{fig:11b}, respectively. The memory
+allocation algorithm (Figure~\ref{fig:11a}) takes as input the maximum
+memory size, the program points (set $defs$) to replace and the whole
+program itself as input. Two variables: $allocPtr$ and $header\_size$
+are initialized to the maximum memory size and the constant 2,
+respectively. The $allocPtr$ is decremented by the size of the object to
+be allocated (obtained from the data-flow analysis algorithm,
+Figure~\ref{fig:8}) plus, the object header size (line~\ref{baone:l1})
+-- this simple \textit{bumping} of the allocation pointer is termed bump
+pointer memory allocation. If the resultant $allocPtr$ value is less
+than 0, then we have exhausted total permanent memory allocation and
+correspondingly an error is raised (line~\ref{baone:l2}). If there is
+enough memory available then, the object allocation bytecode at the
+program point is replaced by the second step in Figure~\ref{fig:11b}.
+
 \newsavebox{\baone}
 \begin{lrbox}{\baone}
   \begin{minipage}[b]{0.5\linewidth}
     \begin{algo}
       \SetKwData{Let}{let}
       \SetKwFunction{Steptwo}{Step2}
-      \SetKwFunction{SortDescending}{sortDescending}
+      \SetKwFunction{SortDescending}{sortUniqueDescending}
       \SetKwFunction{Load}{load}
       \SetKwFunction{ReplaceByteCode}{replaceByteCode}
-      \KwIn{maxMem: maximum memory address} 
+      \KwIn{maxMem: Maximum memory address} 
+      \KwIn{$defs$: The program points to replace} 
+      \KwIn{$program$: The program} 
       \BlankLine
       \Let $allocPtr \leftarrow$ maxMem\;
       \Let $header\_size \leftarrow 2$\;
       \ForEach{$(size,dd) \in defs$} {
         \Let $dd \leftarrow$ \SortDescending($dd$)\;
         \Let $M \leftarrow$ \Load($dd$)\;
+        \Let $allocPtr \leftarrow allocPtr - (size + header\_size)$\;\label{baone:l1}
+        \lIf {$allocPtr < 0$} {\texttt{raise No\_mem}}\;\label{baone:l2}
         \ForEach {$d \in dd$} {
-          \Let $allocPtr \leftarrow allocPtr - (size + header\_size)$\;
-          \lIf {$allocPtr < 0$} {\texttt{raise No\_mem}}\;
           \ReplaceByteCode($allocPtr,d,M)$\;
         }
       }
@@ -1674,21 +1697,104 @@ allocation in the permanent heap space.
       \BlankLine
       \uIf {$pp = \mathtt{new}$} {
         \Let $arg \leftarrow$ \GetArg($pp$)\;
-        \ReplaceNew($pp$,$M$,$arg$)\;
+        \ReplaceNew($pp$,$M$,$arg$)\;\label{batwo:l1}
         \AdjConditionals($M$,22)\;
       }
       \uElseIf {$pp = \mathtt{newarray}$} {
         \Let $arg \leftarrow$ \GetArg($pp$)\;
-        \uIf {$arg = \mathtt{Basic}$} {
-          \ReplaceNewA($pp$,$M$,$arg$)\;
-        }\lElse {\ReplaceNewAA($pp$,$M$,$arg$)\;}
-        \AdjConditionals($M$,22)\;
+        \uIf {$arg = \mathtt{primitive}$} {
+          \ReplaceNewA($pp$,$M$,$arg$)\;\label{batwo:l2}
+        }\lElse {
+          \ReplaceNewAA($pp$,$M$,$arg$)\;\label{batwo:l3}
+        }
+        \AdjConditionals($M$,22)\;\label{batwo:l4}
       }
       \lElse {\texttt{raise error}}
     \end{algo}
   \end{minipage}
 \end{lrbox}
 
+The algorithm (Figure~\ref{fig:11b}) used to replace the object
+allocation bytecodes takes as input three arguments: the allocation
+pointer, $allocPtr$, the program point to replace $pp$, and the method
+containing the program point, $M$. There are \textit{two} types of
+object allocation bytecodes as specified in the \textit{Java Virtual
+  Machine} (JVM) specification~\cite{meyer1997java}: the \texttt{new}
+and \texttt{newarray} bytecodes. Moreover, the \texttt{newarray}
+bytecode itself is of two varieties dependent upon the type of array
+being allocated: (1) The \texttt{newarray} bytecode that allocates space
+for arrays holding primitive values and (2) the \texttt{newarray}
+bytecode that allocates space for arrays holding object references. This
+distinction is important since the number of bytes used to represent
+each of these bytecodes varies. The \texttt{new} and \texttt{newrray}
+bytecodes that operate on object reference types are encoded in the
+class file with three bytes, whereas the \texttt{newarray} bytecode that
+allocates arrays of primitive type only uses 2 bytes in the class file
+representation.
+
+Different methods are called to replace each of these allocation
+variants: Figure~\ref{fig:11b}, line~\ref{batwo:l1} replacing
+\texttt{new}, line~\ref{batwo:l2} replacing \texttt{newarray} allocating
+arrays of primitive types, and line~\ref{batwo:l3} replacing
+\texttt{newarray} allocating arrays of object references. All methods
+pretty much do the same thing, except that some padding (represented as
+\texttt{nop} bytecodes) is needed in case of the two variants of the
+\texttt{newarray} bytecodes. This padding is needed to correctly update
+the conditional instruction's targets after replacement
+(line~\ref{batwo:l4}) -- all conditional instruction's following the
+object allocation bytecodes need to be shifted by 22 bytes after
+replacement.
+
+This 22 byte shift is made obvious by Figures~\ref{fig:11c}
+and~\ref{fig:11d}, which show the java bytecode snippets for the example
+program in Figure~\ref{fig:8j} before and after \texttt{new} bytecode
+replacement, respectively~\footnote{In both these figures, the line
+  numbers are shown on the right of the program. The numbers adjacent to
+  the bytecodes are the starting bytes for each of the bytecodes as
+  obtained by the \texttt{javap -c -v} command}. Figure~\ref{fig:11c}
+shows the bytecode produced by the Java compiler for the \texttt{A}
+object allocation in the \texttt{main} method. The very first bytecode,
+\texttt{new}, takes as argument an index (\texttt{2}) to the constant
+pool that holds the type (class) of object to allocate. The returned
+object reference is then duplicated (\texttt{dup} instruction). Next,
+the constructor of the class \texttt{a} is invoked to initialize the
+returned reference and finally, the returned reference is put into a
+static class field of the class containing the \texttt{main} method. The
+\texttt{new} bytecode is timing \textit{unpredictable}, because it might
+invoke the GC, which has an unbounded collection cycle. It might also
+generate a runtime out of memory exception, thereby violating safety
+criticality. We replace this \texttt{new} bytecode with timing
+predictable bytecodes as shown in Figure~\ref{fig:11d}.
+
+A single \texttt{new} bytecode (consuming 3 bytes in the class file) is
+replaced with a list of bytecodes lines~\ref{btwo:l1}-\ref{btwo:l2}
+(consuming 25 bytes in the class file). The core idea is very simple;
+since we have already allocated memory for the object
+(Figure~\ref{fig:11a}), we can simply replace the \texttt{new} bytecode
+with a bytecode that loads the allocation pointer ($allocPtr$) onto the
+stack (line~\ref{btwo:l1}) as the object reference. The rest of the
+bytecodes setup the object header for the allocated object. Our object
+header is \textit{just} 2 words (the object structure for the running
+example is shown in Figure~\ref{fig:11e}), the first word contains the
+pointer to the start of data, in the current example it is the address
+65485. The first word of the object header is initialized in
+lines~\ref{btwo:l3}-\ref{btwo:l4}. The second word of the object header
+is the pointer to the first method structure of the class
+(c.f. Figure~\ref{fig:6b}). The second word of the object header is
+initialized in lines~\ref{btwo:l5}-\ref{btwo:l6}.
+
+In case of \texttt{newarray} bytecode, the array object structure (shown
+in Figure~\ref{fig:11f}) differs from standard JVM implementations. For
+array allocation, we again use a 2 word object header. The first word
+contains the pointer to the start of array data. The second word of the
+object header contains the size of the array. Other than the smaller
+object header size compared to standard JVM object header size, which
+uses spines~\cite{pizlo2010schism} and handles~\cite{msch05} for arrays
+and regular objects, respectively, we also structure our arrays
+differently. We have decided to place arrays in the row major order and
+contiguously irrespective of the array dimensions (as in `C') rather
+than using linked lists for array traversal in order to allow $O(1)$
+heap accesses.
 
 \newsavebox{\bone}
 \begin{lrbox}{\bone}
@@ -1719,19 +1825,19 @@ allocation in the permanent heap space.
 #154 = Integer            65483
 #155 = Integer            65485
 ---------- main method snippet --------
- 0:ldc_w         #154 // int 65483
+ 0:ldc_w         #154 // int 65483\label[btwo:l1]
  3:dup 
- 4:ldc_w         #155 // int 65485
+ 4:ldc_w         #155 // int 65485\label[btwo:l3]
  7:swap
- 8:invokestatic  #151 // Method Native.wr:(II)V
-11:dup
+ 8:invokestatic  #151 // Method Native.wr:(II)V\label[btwo:l4]
+11:dup\label[btwo:l5]
 12:bipush        1
 14:iadd
 15:ldc_w         #2   // class a/a
 18:bipush        5
 20:iadd
 21:swap
-22:invokestatic  #151 // Method Native.wr:(II)V
+22:invokestatic  #151 // Method Native.wr:(II)V\label[btwo:l2]\label[btwo:l6]
 25:dup
 26:invokespecial #3   // Method a/a.''<init>'':()V
 29:putstatic     #4   // Field A:La/a;
@@ -1748,9 +1854,16 @@ allocation in the permanent heap space.
   \qquad
   \subfloat[Replacing the \texttt{new}/\texttt{newarray} bytecodes] {
     \scalebox{0.7}{\usebox{\batwo}}
-    \label{fig:11a}
+    \label{fig:11b}
   }
-  
+  \caption{The back-end code generation pseudo-algorithm and related
+    explanation}
+  \label{fig:11}
+\end{figure}
+
+\begin{figure}[t!]
+  \centering
+  \ContinuedFloat
   \subfloat[Java bytecode snippet and class constant-pool for example in
   Figure~\ref{fig:8j}]{
     \scalebox{0.55}{\usebox{\bone}}
@@ -1777,22 +1890,193 @@ allocation in the permanent heap space.
   \label{fig:11}
 \end{figure}
 
-\subsection{Object layout}
-\label{sec:object-layout}
-
 \section{Experimental results}
 \label{sec:experimental-results}
+
+We have carried out two sets of experiments: micro-benchmarks and wcrt
+analysis on well established real-time benchmarks to study the efficacy
+of the proposed memory model compared to two different real-time garbage
+collection implementations~\cite{msch05,ipat13}. The RTGC proposed
+in~\cite{msch05}, is a concurrent version of Cheney's copy collector
+developed by Baker~\cite{baker1978list} in the rest of the section we
+call it JOP-GC. The second one proposed in~\cite{ipat13} is a variation
+of the implementation of the allocation and collector described
+in~\cite{pizlo2010schism}, in the rest of the section we term it
+AGC. All our micro-benchmark experiments are run in ModelSim simulating
+the real-time hardware implemented JVM called JOP running at 100 MHz,
+256KB of main memory, 1KB of method cache, and 4KB of stack cache.
 
 \subsection{Micro benchmarks}
 \label{sec:micro-benchmarks}
 
-\subsection{WCRT estimation}
+We carry out three micro-benchmarks: (1) simple object allocation, where
+we allocate, in a tight loop, on a single thread, in each iteration, 2
+objects with 1 word field each. (2) Simple array allocation, where we
+allocate, in a tight loop, on a single thread, 2 objects; an object with
+an array type reference field, which is itself initialized to a 20 word
+1D array of primitive \texttt{int} type, in each iteration of the
+loop. (3) Complex object allocation, in this case we use a nested 2D
+loop. In every outer loop iteration, a \texttt{reference} type 1D array
+of dimension 20 is allocated. In every iteration of the inner loop, 2
+objects are allocated and the second object's reference is set as the
+array value, the example benchmarks are available from~\cite{ipat13}.
+
+\begin{figure}[t!]
+  \centering
+  \subfloat[Simple object memory allocation runtime without GC]{
+    \includegraphics[scale=0.4]{soruntime}
+    \label{fig:12a}
+  }
+  \subfloat[Simple object memory allocation runtime with GC]{
+    \includegraphics[scale=0.4]{sogruntime}
+    \label{fig:12b}
+  }
+
+  \subfloat[Simple array memory allocation runtime without GC]{
+    \includegraphics[scale=0.4]{aoruntime}
+    \label{fig:12c}
+  }
+  \subfloat[Simple array memory allocation runtime with GC]{
+    \includegraphics[scale=0.4]{aogruntime}
+    \label{fig:12d}
+  }
+
+  \subfloat[Complex object memory allocation runtime without GC]{
+    \includegraphics[scale=0.4]{coruntime}
+    \label{fig:12e}
+  }
+  \subfloat[Complex object memory allocation runtime with GC]{
+    \includegraphics[scale=0.4]{cogruntime}
+    \label{fig:12f}
+  }
+  \caption{Runtime for micro-benchmarks}
+  \label{fig:12}
+\end{figure}
+
+The runtime comparison between the three approaches for each of the
+micro-benchmarks is shown in Figure~\ref{fig:12}. Figure~\ref{fig:12}
+gives runtime in two cases: (1) when the GC is not invoked, i.e., there
+is enough memory available to allocate the request space and (2) when
+the GC is invoked to collect the garbage when enough memory is not
+available upon a memory allocation from the mutator. All the runtimes
+are computed with a stop the world GC configuration. The proposed
+approach is approximately 3$\times$ faster compared to the compared RTGC
+based approaches~\footnote{JOP-GC could not perform garbage collection
+  correctly, when it ran out of space and hence, we have only compared
+  with AGC in such cases.}. There is a greater speedup in case of array
+allocations compared to simple object allocations. The runtime memory
+allocation time difference is significant in the case of GC invocation
+when compared to the case of no GC invocation. There are multiple
+reasons for the obtained speedups. In case of memory allocation time
+when no GC is invoked, there are two major reasons for the speedup: (1)
+there are no read/write barriers (\texttt{synchrnonized} method calls in
+Java terms) when allocating memory, which are needed by both: JOP-GC and
+AGC, since RTGCs are pre-emptable. (2) The current \texttt{new} and
+\texttt{newarray} bytecodes are implemented in software, which means, on
+every invocation (loop iteration) a method needs to be loaded into the
+method cache, which results in increased program latency. These runtime
+numbers are important, because they influence the WCET/WCRT as we will
+see in the next section. (3) In case of \texttt{newarray} bytecode
+execution, array spines need to be initialized for
+AGC~\cite{pizlo2008study,ipat13}, which leads to further slow down in
+memory allocation times.
+
+\begin{table}[t!]
+  \centering
+  \begin{tabular}{|c|c|c|c|}
+    \hline 
+    \# of loop iterations & No-GC (Words) & JOP-GC (Words) & AGC (Words)\\
+    \hline
+    100 & 28 & 2145 & 2995 \\
+    \hline
+    200 & 28 & 4290 & 5590 \\
+    \hline
+    400 & 28 & 8580 & 11180 \\
+    \hline
+    500 & 28 & 10725 & 13975 \\
+    \hline
+    1000 & 28 & 21450 & 27950 \\
+    \hline
+    2000 & 28 & 42900 & 55900 \\
+    \hline
+    4000 & 28 & 85800 & 111800 \\
+    \hline
+  \end{tabular}
+  \caption{Comparison of memory words allocated for the complex object
+    allocation. Each word = 4 bytes}
+  \label{tab:1}
+\end{table}
+
+Table~\ref{tab:1} gives the number of words allocated for the complex
+object allocation benchmark for all the three approaches. In the
+proposed approach, every iteration of the loop reuses the space
+allocated on the permanent heap space (same allocation would be achieved
+if the program was recursive rather than iterative). The GC approches on
+the other hand, allocate memory on each \texttt{new}/\texttt{newarray}
+bytecode execution. Another important point to note is that AGC although
+faster when it comes to memory allocation runtime compared to JOP-GC,
+allocates more words, because AGC uses block based GC allocation,
+whereas JOP-GC uses fragmented object allocation strategy with
+semi-space~\footnote{In the numbers in Table~\ref{tab:1}, we have not
+  included the semi-space reserved by JOP-GC.}.
+
+\subsection{WCRT comparisons}
 \label{sec:wcrt-estimation}
 
-\section{Discussion}
-\label{sec:discussion}
+In this section we compare the static WCRT/WCET obtained by applying the
+technique described in Section~\ref{sec:static-wcrt-analysis} on a set
+of real-time benchmarks. To keep ourselves honest, we chose the
+benchmarks whose memory allocation requests fit within the allocated
+heap space without GC invocation. This was a necessary step, because one
+cannot \textit{practically} bound the GC cycle time for purpose of
+static analysis. We chose 5 real-time synchronous programs for
+bench-marking. \texttt{Cruise control}\cite{charles1996representation}
+is the cruise speed controller found in
+cars. \texttt{Hrtcs}~\cite{DBLP:conf/rtcsa/HJpark2014} is a human
+response time gathering system. \texttt{Conveyor controller} is the
+motivating example described in this
+paper. \texttt{Motor}~\cite{bourke122009delays} is a stepper motor
+control system for a robot. Finally,
+\texttt{Pacemaker}~\cite{ParkMNS14}, is a real-time pacemaker used to
+control arrhythmia. These benchmarks are compiled to the TP-JOP
+architecture for execution and their WCRT values are analyzed. The
+results are shown in Figure~\ref{fig:13a}. Ignoring the \texttt{Motor}
+example, on average the proposed, No-GC approaches WCRT is around 23\%
+shorter. The \texttt{Motor} example is an outlier, with a 4000\%
+improvement in WCRT, because a number of object allocations are
+performed when emitting events to control the motor coils. In other
+examples, object allocations are used to in computations on the
+transient heap space, with relatively fewer object allocations on the
+permanent heap. This requires, deep copying objects from the transient
+to the permanent heap space, which balances out the WCRT times between
+the No-GC and the AGC approaches. Note that, the method cache load times
+and synchornized heap access overheads are still present in the AGC
+approach to real-time system design.
 
-\section{Conclusions and future work}
+Finally, Figure~\ref{fig:13b} gives the average method size comparisons
+for the generated Java program. Since we replace a single object
+allocation bytecode \texttt{new}/\texttt{newarray} with a list of other
+bytecodes, which increases the method size. This consequently also has a
+penalty on the WCRT analysis as the method cache load time increases,
+but it is not as significant as loading the methods implementing the
+object allocation for every \texttt{new}/\texttt{newarray} bytecode
+executions in the AGC approach.
+
+\begin{figure}[t!]
+  \centering
+  \subfloat[Statically analyzed WCET values for benchmarks without GC invocation]{
+    \includegraphics[scale=0.4]{wcetb}
+    \label{fig:13a}
+  }
+  \subfloat[Statically analyzed method sizes for benchmarks]{
+    \includegraphics[scale=0.4]{msizeb}
+    \label{fig:13b}
+  }
+  \caption{WCET and method size comparison: No-GC vs. AGC}
+  \label{fig:13}
+\end{figure}
+
+\section{Conclusion and discussion}
 \label{sec:concl-future-work}
 
 
@@ -1808,13 +2092,13 @@ allocation in the permanent heap space.
 % \received{February 2007}{March 2009}{June 2009}
 
 % Electronic Appendix
-\elecappendix
+% \elecappendix
 
-\medskip
+% \medskip
 
-\section{This is an example of Appendix section head}
+% \section{This is an example of Appendix section head}
 
-\section{Appendix section head}
+% \section{Appendix section head}
 
 
 \end{document}
