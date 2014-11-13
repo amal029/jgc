@@ -1,0 +1,209 @@
+
+\subsection{AGRC analysis}
+\label{sec:agrc-analysis}
+
+In order to statically determine the worst case memory consumption of a
+program targeting TP-JOP, one needs to analyze codes generated from both
+CNs and JDNs. The compiler is able to trivially determine the maximum
+memory footprint required for executing CN codes from any given SystemJ
+programs [] since there is no dynamic memory allocation required for
+executing this code. On the other hand, the data-flow analysis for JDNs
+is more intricate since it needs to analyze the original AGRC in order
+to retrieve the dependency edges, which are lost after splitting CNs and
+JDNs from the AGRC. We devote this section to illustrate this analysis
+technique.
+
+
+\begin{algorithm}[t!]
+	\DontPrintSemicolon
+	\SetKw{Let}{let}
+	\SetKw{Fn}{Function}
+	\SetAlgoNoEnd
+	\SetKwFunction{KwCol}{collect\_cd\_nodes}
+	\SetKwFunction{KwCrNode}{create\_node}
+	\SetKwFunction{KwFindFork}{find\_matching\_fork}
+	\KwIn{$AGRC$ : $(V,E)$}
+	\KwOut{$mList$: a set of set of $mNode$}
+	\KwData{$V_{cd}$: a set of set of clock-domain nodes}
+	\KwData{$mNode$ = [$Name$:string,$Must$:$mNode$,$May$:set of $mNode$] }
+	\tcc{Grouping nodes for each clock-domain}
+	\Let{$V_r = \emptyset \cup V$}\;
+	\Let{$V_{cd} = \emptyset$}\;
+	\ForEach{$v \in V$}{
+		\lForEach{$(v_i,v_j) \in E$}{\lIf{$v_j = v$}{$V_r = V_r \backslash \{v\}$}}
+	}
+	\lForEach{$v \in V_r$}{$V_{cd} = V_{cd} \cup$ \{\KwCol{$v,E$}\}}\;
+	\tcc{Perform May and Must analysis}
+	\ForAll{$V \in V_{cd}$}{
+		\Let $V_{temp} = \emptyset$\;
+		\ForEach{$v \in V$}{
+			$V_{temp} = V_{temp} \cup$ \{\KwCrNode{$v,E$}\}
+		}
+		$mList = mList \cup \{V_{temp}\}$
+	}
+	\;
+	\Fn \KwCrNode{$v,E$}:\;
+	\Begin{
+		\Let{$E_i = \lambda(v)$}\;
+		\If{$v = ActionNode$}{
+			\If{$|E_i| = 1$}{
+				\Let{$\{(v_i,v_j)\} = E_i$}\;
+				\Let $newNode = [Name \leftarrow get\_name(v_j); Must
+				\leftarrow \KwCrNode{$v_i,E$}; May \leftarrow Null]$\;
+				\Return{newNode}
+			}
+			\ElseIf{$|E_i| > 1$}{
+				\Let $V_{temp} = \emptyset$\;
+				\ForEach{$(v_i,v_j) \in E_i$}{
+					$V_{temp} = V_{temp} \cup \{\KwCrNode{$v_i,E$}\}$
+				}
+				\Return{$[Name \leftarrow get\_name(v_j); Must
+				\leftarrow Null ; May \leftarrow V_{temp}]$}
+			}
+			\ElseIf{$|E_i| = 0 $}{
+				\Return{$[Name \leftarrow get\_name(v_j); Must
+				\leftarrow Null; May \leftarrow Null]$}
+			}
+		}
+		\ElseIf{$v =JoinNode$}{
+			\Let{$v = $ \KwFindFork{$v$}}\;
+			\Let{$(v_i,v_j) = \lambda(v)$}\;
+			\Return{\KwCrNode{$v_i,E$}}
+		}
+		\Else{
+			\If{$|E_i| = 0$}{\Return{Null}}
+			\ElseIf{$|E_i| = 1$}{\Return{\KwCrNode{$v_i,E$}}}
+		}
+	}
+	\;
+	\Fn \KwCol{$v,E$}:\;
+	\Begin{
+		\Let $V_{temp} = \emptyset$\;
+		\ForEach{$(v_i,v_j) \in E$}{\If{$v = v_i$}{
+			$V_{temp} = V_{temp} \cup \{v_j\}$\;
+			$V_{temp} = V_{temp} \cup$ \KwCol{$v_j,E$}
+		}}
+		\Return{$V_{temp}$}
+	}
+	\caption{May and Must analysis}
+	\label{alg:agrc}
+	
+\end{algorithm}
+
+AGRC is a \textit{directed graph} of tuple $G =(V,E)$, where $V$ is the
+set of vertices (nodes of AGRC) and $E$ is the set of ordered pairs of
+vertices. Each edge $e = (v_i,v_j), \forall e \in E, v_i \in V, v_j \in
+V$ is a tuple denoting that the edge is directed from $v_i$ to $v_j$.
+Then a lambda  function $\lambda:v \rightarrow E_i$, $E_i \subseteq E$,
+maps \textit{each} vertex to a set of edge(s) where $\forall (v_i,v_j)
+\in E_i, v_j = v$ and $E_i$ can be $\emptyset$. When $|E_i| = 1$ we call
+$v_i$ \textit{must} be called before $v$ whereas when $|E_i| > 1$ we
+call any $v_i \in E_i$ \textit{may} be called before $v$.
+
+The algorithm for obtaining \textit{may} and \textit{must} relationships
+between the AGRC nodes is shown in Algorithm~\ref{alg:agrc}. The input
+to this algorithm is an AGRC, which is a tuple $(V,E)$ as explained
+previously. The first part of the algorithm, lines 1-5, groups all the
+nodes, which are belonging to the same clock-domain. For instance, lines
+3-4 initializes a set $V_r$, which consists of a root node of all
+clock-domains in AGRC. The algorithm then traverses every clock-domain
+graph, starting from these root nodes via a recursive function
+\texttt{collect\_cd\_nodes($v,E$)} (line 5). A result is a set of set of
+AGRC nodes $V_{cd}$. Next \textit{May} and \textit{Must} analysis is
+performed (lines 6-10). Every node in $V_{cd}$ is given as an input to
+the function \texttt{create\_node($v,E$)} (line 9), which traverses the
+graph backward starting from the input until it reaches the root node.
+Function \texttt{create\_node} first maps the input node to a set of
+edges $E_i$ using the lambda function (line 14). It is then divided into
+three parts:
+
+\begin{enumerate}
+
+	\item If the current node type is an \texttt{Action} node (line 15)
+		and
+
+		\begin{enumerate}
+
+			\item a number of element in $E_i$ is 1, then the only parent node
+				$v_i$ \textit{Must} be called before $v_j$. Then a new node type
+				of $mNode$ is created with its field $Must$ initialized to the
+				result of recursive call of \texttt{create\_note}.
+
+			\item a number of element in $E_i$ is greater than 1, then any
+				parent nodes $v_i \in E_i$ \textit{May} be called before $v_j$.
+				A set of $mList$, consists of return results of
+				\texttt{create\_node} from each parent node $v_i \in E_i$, is
+				assigned to the field $May$ of a newly created $mNode$. 
+
+			\item a number of element in $E_i$ is 0, then a new $mNode$ is
+				created with both its $Must$ and $May$ fields initialized to
+				$Null$.
+
+		\end{enumerate}
+
+	\item If the current node type is \texttt{Join} node, this means that
+		there are two or more parallel reactions forked at the \texttt{Fork}
+		node, which \textit{Must} be found in one of the recursive parents
+		of the current node. Hence, the algorithm must continue the backward
+		traversal from this \texttt{Fork} node. During compilation, the
+		compiler has already constructed a Hashtable which maps each
+		\texttt{Join} node to its corresponding \texttt{Fork} node as shown
+		in line 28. 
+
+	\item If the current node type is other than \texttt{Action} node (line
+		31) and
+
+		\begin{enumerate}
+
+			\item a number of parent node ($|E_i|$) is 0 , then \textit{Null}
+				is returned
+
+			\item a number of parent node is 1, then a result of
+				\texttt{create\_node} is returned.
+
+		\end{enumerate}
+
+\end{enumerate}
+
+It should be noted that if the current node is other than
+\texttt{Action} node, only \texttt{Join} node can have more than one
+parent. Therefore, there is no need for the algorithm to consider the
+case $|E_i| > 1$ (lines 32-25) when the node type is neither
+\texttt{Action} nor \texttt{Join} node.
+
+
+%Give formal definition of may and must. Then describe the algorithm that
+%given a method, the callee method, gives the may and must caller
+%methods.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
