@@ -58,29 +58,30 @@ call any $v_i \in E_i$ \textit{may} be called before $v$.
 	\label{fig:maymust}
 \end{figure}
 
-In this section, we illustrate how a data-structure, which contains
+In this section, we illustrate how the data-structure, which contains
 information on the \textit{may} and \textit{must} relationships between
 the nodes, is obtained from the AGRC. Consider a snippet of AGRC graph
 shown in Figure~\ref{fig:aagrc}. Here, a root node, \texttt{JDN1}, has
 no parent whereas it has an immediate child \texttt{CN1}. \texttt{CN1}
 has two children, \texttt{JDN2} and \texttt{JDN3}, and both of these
-JDNs have an identical child \texttt{JDN4}. A result of the analysis of
-this graph is shown in Figure~\ref{fig:tttt}, which is written in
-S-expression format. An output of the analysis is a set of nodes called
-\texttt{mNode}. \texttt{mNode} has three fields, a node name of type
-string, \texttt{Must} of type \texttt{mNode} and \texttt{May} of a set
-of type \texttt{mNode}. Our analysis tool then use this data-structure
-to identify potential callers of each \texttt{JDN}. For instance, since
-\texttt{JDN1} has no parents, its \texttt{Must} and \texttt{May} fields
-are both \texttt{Null} (line 2).  On the other hand, \texttt{JDN1} must
-be calling \texttt{JDN2} or \texttt{JDN3}, hence \texttt{Must} of both
-\texttt{JDN2} and \texttt{JDN3} is \texttt{JDN1} (lines 4 and 7).
-Lastly, \texttt{JDN4} has two parent nodes; \texttt{JDN2} and
-\texttt{JDN3}. Therefore, its \texttt{May} field has both \texttt{JDN2}
-and \texttt{JDN3} (lines 11-16). It should be noted that we are only
-interested in callers of \texttt{JDNs}, hence \texttt{CNs} are not
-included in the final result (Figure~\ref{fig:tttt}). A complete
-algorithm of our AGRC analysis is shown in Appendix~\ref{ap:1}.
+JDNs have an identical child \texttt{JDN4}. This graph is then given as
+an input to our analysis tool, which returns a result in S-expression
+format as shown in Figure~\ref{fig:tttt}. The resultant data-structure
+consists of a set of nodes called \texttt{mNode}, which has three
+fields; a node name of type string, \texttt{Must} of type \texttt{mNode}
+and \texttt{May} of a set of type \texttt{mNode}. This is then used as a
+basis to identify potential callers of each \texttt{JDN} in the AGRC
+graph. For example, since \texttt{JDN1} has no parents, its
+\texttt{Must} and \texttt{May} fields are both \texttt{Null} (line 2).
+On the other hand, \texttt{JDN1} must be calling \texttt{JDN2} or
+\texttt{JDN3}, hence \texttt{Must} of both \texttt{JDN2} and
+\texttt{JDN3} is \texttt{JDN1} (lines 4 and 7).  Lastly, \texttt{JDN4}
+has two parent nodes; \texttt{JDN2} and \texttt{JDN3}. Therefore, its
+\texttt{May} field has both \texttt{JDN2} and \texttt{JDN3} (lines
+11-16). It should be noted that we are only interested in callers of
+\texttt{JDNs}, hence \texttt{CNs} are not included in the final result
+(Figure~\ref{fig:tttt}). A complete algorithm of our AGRC analysis is
+shown in Appendix~\ref{ap:1}.
 
 
 
