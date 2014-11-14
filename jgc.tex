@@ -47,20 +47,14 @@
 \acmYear{2014}
 \acmMonth{11}
 
-\lstdefinestyle{sysj}{
-	belowcaptionskip=1\baselineskip,
-	breaklines=true,
-	xleftmargin=\parindent,
-	language=Java,
-	showstringspaces=false,
-	basicstyle=\small\ttfamily,
-	keywordstyle=\bfseries\color{green!40!black},
-	commentstyle=\itshape\color{purple!40!black},
-	identifierstyle=\color{blue},
-	stringstyle=\color{orange},
-	morekeywords={input,output,signal,channel,immediate,weak,sustain,send,receive,abort,await,emit,present,trap,pause,exit,wait_inbetween,wait_exact,wait_atleast,suspend},
-	tabsize=2
-}
+\lstdefinestyle{sysj}{ belowcaptionskip=1\baselineskip, breaklines=true,
+  xleftmargin=\parindent, language=Java, showstringspaces=false,
+  basicstyle=\small\ttfamily,
+  keywordstyle=\bfseries\color{green!40!black},
+  commentstyle=\itshape\color{purple!40!black},
+  identifierstyle=\color{blue}, stringstyle=\color{orange},
+  morekeywords={input,output,signal,channel,immediate,weak,sustain,send,receive,abort,await,emit,present,trap,pause,exit,wait_inbetween,wait_exact,wait_atleast,suspend},
+  tabsize=2 }
 
 % Document starts
 \begin{document}
@@ -2089,9 +2083,49 @@ executions in the AGC approach.
   \label{fig:13}
 \end{figure}
 
-\section{Conclusion and discussion}
+\section{Conclusion and future work}
 \label{sec:concl-future-work}
 
+In this paper we have presented a new memory organization and model for
+hard real-time and safety-critical systems programmed with managed
+language runtimes, primarily Java. The presented approach takes a
+departure from the current practice of building new memory allocation
+and garbage collection algorithms that can meet at best soft real-time
+guarantees. The presented approach utilizes the formal synchronous
+programming model provided by SystemJ, to divide the Java objects into
+two types: (1) transient objects, which are allocated for a single
+program transition \textit{only} and are collected by simple pointer
+reset. (2) Permanent objects, which are alive throughout the life time
+of the application. Adhering to the synchronous model of computation,
+allows us to perform compile time memory allocation, which means that
+our programs are guaranteed to be free of execution time out of memory
+exceptions. Furthermore, we are able to replace object allocation
+bytecodes, with real-time analyzable alternatives, which makes our
+approach amenable to worst case execution (reaction) time analysis 
+
+It is impossible to bound the garbage collection cycle times to bounds
+that are of practical use, and hence, preemptive scheduling approaches
+have been the only solution to programming real-time systems with
+managed runtime environments to date. Preemptive scheduling generally
+leads to explosion in the number of states that need to be checked by
+automated formal verification tools, and hence, makes building safety
+critical systems hard, if not impossible -- our proposal provides a
+solution to this problem. All the aforementioned improvements are
+further accompanied by improvements in the program throughput
+(approximately $3\times$ faster memory allocation times) and worst case
+times, as synchronization barriers necessary in real-time garbage
+collection approaches become unnecessary in the proposed approach. Not
+to mention the improvements in the number and size and improved layout
+of allocated Java objects and arrays.
+
+But, the proposed approach is not a penance. The proposed memory model,
+does indeed require the programmer to carefully design their real-time
+applications as deep object copies need to be made explicitly by the
+programmer. Furthermore, we see many opportunities for future
+optimization, especially getting rid of the object escapement
+restrictions currently enforced by the proposed data-flow analysis. We
+also see an opportunity to reuse permanent memory heap allocations
+across ticks, which we plan to address in the future.
 
 % Bibliography
 \bibliographystyle{ACM-Reference-Format-Journals}
