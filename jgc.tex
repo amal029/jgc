@@ -133,17 +133,17 @@ for managed languages, especially
 Java~\cite{khav00,pizlo2008study,scj2013}.
 
 For any given real-time system, \textit{Worst Case Execution Time}
-(WCET) of a task should be statically known so that one or more of such
-tasks can be scheduled to meet their individual
+(WCET) of a task should be statically known so that real-time tasks can
+be scheduled to meet their individual
 deadlines~\cite{wilhelm08}. Computing WCET of a task programmed in a
 non-managed language such as `C' is a non-trivial task since detailed
-knowledge of hardware and interaction of the task on this hardware needs
-to be known a-priori. Managed languages need a runtime environment with
-\textit{Just In Time} (JIT) compilation, which exacerbates the problem
-of computing the WCET of task programmed in a managed language to such
-an extent as to render it unfeasible. In order to skirt this problem,
-researches (both academic and commercial) either perform ahead of time
-compilation of their Java
+knowledge of hardware and interaction of the task and the underlying
+hardware needs to be known a-priori. Managed languages need a runtime
+environment with \textit{Just In Time} (JIT) compilation, which
+exacerbates the problem of computing the WCET of task programmed in a
+managed language to such an extent as to render it unfeasible. In order
+to skirt this problem, researches (both academic and commercial) either
+perform ahead of time compilation of their Java
 programs~\cite{kalibera2011scheduling,pizlo2010schism} or use hardware
 implemented Java virtual machines~\cite{msch05}. In either case, the JIT
 compilation interference is no longer a problem in determining the WCET
@@ -154,14 +154,13 @@ framework.
 
 Many approaches to \textit{Real-time Garbage Collection} (RTGC) have
 been proposed, a good survey of RTGCs can be found
-in~\citeyear{pizlo2008study}. There are multiple requirements that a
-RTGC needs to satisfy. From the perspective of the real-time task the
-main requirement is that: (1) the maximum blocking time for a GC should
-be bounded and (2) the number of \textit{times} a task may be
-interrupted by the GC should be bounded. From the perspective of the GC
-itself, one needs to statically guarantee that enough memory is
-available to keep pace with the memory allocations demanded by the
-real-time task.
+in~\cite{pizlo2008study}. There are multiple requirements that a RTGC
+needs to satisfy. From the perspective of the real-time task, the main
+requirement is that: (1) the maximum blocking time for a GC should be
+bounded and (2) the number of \textit{times} a task may be interrupted
+by the GC should be bounded. From the perspective of the GC itself, one
+needs to statically guarantee that enough memory is available to keep
+pace with the memory allocations demanded by the real-time task.
 
 There are two principle approaches to integrating RTGCs within a
 real-time framework. The first approach pioneered by
@@ -177,7 +176,7 @@ by a higher priority real-time task or an asynchronous event. In the
 second approach real-time tasks themselves need to be preempted by the
 GC task. This need for preemptability has two drastic consequences: (1)
 every access to heap allocated object needs to be guarded by read and
-write barriers, thereby increasing time for every data access and also
+write barriers, thereby increasing time for every heap access and also
 memory allocation itself, which in turn increases the task's WCET. (2)
 Automated functional verification of priority preemptive multi-tasking
 model via approaches such as model-checking~\cite{clarke-book00,khav00}
@@ -186,16 +185,11 @@ thereby making it unfeasible to automatically verify such systems for
 functional correctness.
 
 The question then becomes: \textit{is programming real-time
-  safety-critical systems using a manged language just impractical?}
-One would think so, considering that the latest specification of safety
-critical java does not include any form of GC~\cite{scj2013}. But still
-proposes a priority preemptive multi-tasking model for safety critical
-system design.
-
-In this paper we argue that a well thought out programming model along
-with compiler assisted memory management is not only a practical, but
-also an efficient approach to programming real-time and safety-critical
-systems using managed languages.
+  safety-critical systems using a manged language just impractical?} In
+this paper we argue that a well thought out programming model along with
+compiler assisted memory management is not only a practical, but also an
+efficient approach to programming real-time and safety-critical systems
+using managed languages.
 
 The most important requirement is that the programming model of the
 managed language be formally verifiable or at least not be proactively
@@ -209,9 +203,10 @@ formal verification. Synchronous languages such as
 Esterel~\cite{gber931}, Lustre~\cite{nhal91}, Signal~\cite{pgue91} and
 \textit{Globally Asynchronous Locally Synchronous} (GALS) languages such
 as SystemJ~\cite{amal10} have been used to design large real-time and
-safety-critical systems~\cite{bouali1998xeve,ParkMNS14,LiMS14}. All
-these languages are not only based on formal mathematical semantics, but
-are also designed to be amenable to automated formal
+safety-critical
+systems~\cite{bouali1998xeve,ParkMNS14,LiMS14,malik12}. All these
+languages are not only based on formal mathematical semantics, but are
+also designed to be amenable to automated formal
 verification. Especially imperative languages Esterel and its derivation
 SystemJ have been designed to reduce the state space explosion problem
 exhibited during formal verification, by adhering to a very strict
@@ -220,15 +215,15 @@ for these languages can be described as follows: a synchronous program
 is quiescent until one or more events occur from the environment. Upon
 detecting the event, the synchronous program \textit{reacts}
 \textit{instantaneously} in zero logical time to respond to these inputs
-and becomes quiescent until the next input(s) arrive(s). The start and
-end of this reaction transition demarcate states of the program -- note
-that internal data changes do not lead to change in the program state
-thereby reducing the state space explosion problem. Furthermore, the
-reaction being logically in zero-time is by definition \textit{atomic}
-and always faster than the incoming input events, thereby guaranteeing
-that none of the incoming events are missed. In reality the reaction
-does take sometime, all one needs to do is find out the \textit{Worst
-  Case Reaction Time} (WCRT) of any given synchronous program. This WCRT
+and becomes quiescent until the next inputs arrive. The start and end of
+this reaction transition demarcate states of the program -- note that
+internal data changes do not lead to change in the program state thereby
+reducing the state space explosion problem. Furthermore, the reaction
+being logically in zero-time is by definition \textit{atomic} and always
+faster than the incoming input events, thereby guaranteeing that none of
+the incoming events are missed. In reality the reaction does take
+sometime, all one needs to do is find out the \textit{Worst Case
+  Reaction Time} (WCRT) of any given synchronous program. This WCRT
 value determines the inter-arrival time for input events from the
 environment.
 
@@ -253,12 +248,13 @@ concretely our contributions can be refined as follows:
 \item \textit{Programming model inspired memory organization}: In this
   paper we present a new memory organization/model for Java and
   accompanying static WCRT analysis based on the SystemJ MoC.
-\item \textit{Compiler supported memory allocation}: We next present the
+\item \textit{Compiler supported memory allocation}: We present the
   compiler transformations that are needed to statically guarantee the
   \textit{Worst Case Memory Consumption} (WCMC) and \textit{allocation}.
-\item \textit{Extensive benchmarks}: Finally, we provide extensive
-  benchmarks comparing the proposed memory model vs. the state of the
-  art RTGC approach to real-time system design.
+\item \textit{Real-time analyzable back-end code generation}: We present
+  a strategy to replace the object allocation bytecodes with real-time
+  analyzable alternatives. Furthermore, we also present an object
+  placement strategy, which allows for O(1) heap accesses in every case.
 \end{itemize}
 
 The rest of the paper....
@@ -267,7 +263,7 @@ The rest of the paper....
 \label{sec:preliminaries}
 
 Before we present the key contributions of the paper, we dedicate this
-section to describe the preliminary information needed by the reader.
+section to describing the preliminary information needed by the reader.
 
 \subsection{The SystemJ programming language}
 \label{sec:syst-progr-lang}
@@ -299,33 +295,35 @@ only interested in the synchronous subset of SystemJ.
 \begin{figure}[t!]
   \centering
   \[
-  \begin{array}[h!]{|c|c|}
-    \hline
-    \mathbf{noop}  & \mathrm{do\ nothing}\\
-    \hline
-    \mathbf{pause}  & \mathrm{complete\ a\ logical\ tick}\\
-    \hline
-    \mathbf{[input] [output] [type] signal\ \sigma} &  \mathrm{declare\ signal\ \sigma} \\
-    \hline
-    \mathbf{emit\ \sigma [value]} &  \mathrm{broadcast\ signal\ \sigma} \\
-    \hline
-    \mathbf{abort\ (\sigma)\ s} &  \mathrm{preempt\ statement\ s\ if\ \sigma\ is\ true} \\
-    \hline
-    \mathbf{suspend\ (\sigma)\ s} &  \mathrm{suspend\ statement\ s\ for\
-      one\ tick\ if\ \sigma\ is\ true} \\
-    \hline
-    \mathbf{present\ (\sigma)\ s1\ else\ s2} &  \mathrm{do\ s1\ if\
-      \sigma\ is\ true\ else\ do\ s2} \\
-    \hline
-    \mathbf{s1;s2} &  \mathrm{do\ s1\ and\ then\ s2} \\
-    \hline
-    \mathbf{s1||s2} &  \mathrm{do\ s1\ and\ s2\ in\ lockstep\ parallel} \\
-    \hline
-    \mathbf{while(true)\ s} &  \mathrm{do\ s\ forever} \\
-    \hline
-    \mathbf{jterm} &  \mathrm{Java\ data\ term} \\
-    \hline
-  \end{array}
+  \begin{scriptsize}
+    \begin{array}[h!]{|c|c|}
+      \hline
+      \mathbf{noop}  & \mathrm{do\ nothing}\\
+      \hline
+      \mathbf{pause}  & \mathrm{complete\ a\ logical\ tick}\\
+      \hline
+      \mathbf{[input] [output] [type] signal\ \sigma} &  \mathrm{declare\ signal\ \sigma} \\
+      \hline
+      \mathbf{emit\ \sigma [value]} &  \mathrm{broadcast\ signal\ \sigma} \\
+      \hline
+      \mathbf{abort\ (\sigma)\ s} &  \mathrm{preempt\ statement\ s\ if\ \sigma\ is\ true} \\
+      \hline
+      \mathbf{suspend\ (\sigma)\ s} &  \mathrm{suspend\ statement\ s\ for\
+                                      one\ tick\ if\ \sigma\ is\ true} \\
+      \hline
+      \mathbf{present\ (\sigma)\ s1\ else\ s2} &  \mathrm{do\ s1\ if\
+                                                 \sigma\ is\ true\ else\ do\ s2} \\
+      \hline
+      \mathbf{s1;s2} &  \mathrm{do\ s1\ and\ then\ s2} \\
+      \hline
+      \mathbf{s1||s2} &  \mathrm{do\ s1\ and\ s2\ in\ lockstep\ parallel} \\
+      \hline
+      \mathbf{while(true)\ s} &  \mathrm{do\ s\ forever} \\
+      \hline
+      \mathbf{jterm} &  \mathrm{Java\ data\ term} \\
+      \hline
+    \end{array}
+  \end{scriptsize}
   \]
   \caption{Syntax of the synchronous subset of the SystemJ language}
   \label{fig:1}
@@ -338,7 +336,7 @@ called a pure signal and only consists of a Boolean status, which can be
 set to \texttt{true} or \texttt{false} via signal emission. A typed
 signal is called a valued signal, and consists of a value (of any Java
 data-type) in conjunction to the status. The value of a typed signal can
-also be set optionally via the $\mathbf{emit}$ statement. Once emitted
+also be set optionally via the $\mathbf{emit}$ statement. Once emitted,
 the status of a signal is \texttt{true} only for a single tick, but the
 value of a signal is persistent over ticks. Emission of a signal
 broadcasts is across all reactions within the clock-domain. Moreover,
@@ -350,7 +348,7 @@ $\mathbf{present}$, $\mathbf{abort}$, and $\mathbf{suspend}$, that
 change the control-flow of a SystemJ program depending upon signal
 statuses. The control-flow of a program can also be altered via standard
 Java conditional constructs. Synchronous (lock-step) parallel execution
-of reactions within a SystemJ program is capture using the synchronous
+of reactions within a SystemJ program is captured using the synchronous
 parallel ($||$) operator~\footnote{Standard Java threading model is not
   allowed within SystemJ, instead synchronous and asynchronous
   parallelism needs to be used.}. Furthermore, shared variable
@@ -367,7 +365,7 @@ and bounded data-loops like in standard programming languages.
 
 Every static WCRT analysis technique needs intimate knowledge of the
 hardware that executes the program. For our purpose we choose a
-multi-core real-time predictable execution platform called
+multi-core time predictable execution platform called
 \textit{Tandem-Java Optimized Processor}
 (TP-JOP)~\cite{DBLP:journals/tecs/SalcicM13,nadeem2011rjop}. There are
 two main reasons we chose this processor architecture: (1) efficiency --
@@ -379,7 +377,7 @@ SystemJ programs on the TP-JOP architecture~\cite{LiMS14}.
 
 \begin{figure}[t!]
   \centering
-  \includegraphics[scale=1.2]{tpjop}
+  \includegraphics[scale=0.7]{tpjop}
   \caption{Overview of the TP-JOP architecture}
   \label{fig:3}
 \end{figure}
@@ -404,36 +402,37 @@ are two caches in JOP. The first is the stack cache that acts as a
 replacement for the data cache found in general purpose processors. The
 second is the method cache that acts as a replacement for program
 cache. A complete Java method is loaded into the cache before executing
-it and hence, there are only two program points: the \textit{invoke}
-bytecodes and the \textit{return} bytecode that can lead to a method
-cache miss, which can be accounted for in the static WCRT analysis
-procedure with ease. Finally, the interface connecting the ReCOP and JOP
-has single clock cycle latency as described
-in~\cite{DBLP:journals/tecs/SalcicM13}.
+it and hence, there are only two program points: the \textit{invoke} and
+the \textit{return} bytecodes that can lead to a method cache miss,
+which can be accounted for in the static WCRT analysis procedure with
+ease. Finally, the interface connecting the ReCOP and JOP has single
+clock cycle latency as described in~\cite{DBLP:journals/tecs/SalcicM13}.
 
 The overall program execution on the TP-JOP architecture proceeds as
 follows: the ReCOP leads the program execution since it executes the
 control-flow graph of the SystemJ program. When a data computation node
 is encountered a call is dispatched to the JOP core with an method
-ID. Upon dispatch the ReCOP itself stops processing further instructions
-until a result is returned from JOP. The JOP core polls continuously for
-an incoming request from ReCOP. Once a request is received, JOP decodes
-the method ID and loads the method into the method cache. Once loaded,
-the requested method is executed and upon completion of execution, the
-result is returned back to ReCOP.
+ID. Upon dispatch, the ReCOP itself stops processing further
+instructions until a result is returned from JOP. The JOP core polls
+continuously for an incoming request from ReCOP. Once a request is
+received, JOP decodes the method ID and loads the method into the method
+cache. Once loaded, the requested method is executed and upon completion
+of execution, the result is returned back to ReCOP.
 
-\section{A motivating example -- the current approach to static WCRT
-  estimate for SystemJ programs}
+\section{A motivating example -- statically estimating WCRT of SystemJ
+  synchronous clock-domains}
 \label{sec:motiv-example-curr}
 
 We present a motivating example of fruit sorter control system for
 elucidating the synchronous semantics of the SystemJ language and
 explaining the approach employed for static WCRT analysis of SystemJ
-synchronous programs.
+synchronous clock-domains.
 
 \begin{lrbox}{\verbboxx}
   \begin{minipage}[b]{0.5\linewidth}
-\begin{Verbatim}[frame=lines,numbers=left,commandchars=\\\[\]]
+    \begin{scriptsize}
+      
+\begin{Verbatim}[numbers=left,commandchars=\\\[\]]
 import fruitsorter.*;
 //Declare the SystemJ clock-domain 
 //with its interface signals
@@ -479,6 +478,7 @@ FruitSorterController(
  }
 }
 \end{Verbatim}
+    \end{scriptsize}
   \end{minipage}
 \end{lrbox}
 \begin{figure}[t!]
@@ -497,11 +497,11 @@ As shown in Figure~\ref{fig:2}, the fruit sorter consists of a fruit
 loader, a conveyor belt, a mechanical arm, a camera and two sensors.
 The fruit loader places fruit items on the left end of conveyor belt at
 a constant speed and the conveyor belt moves from left to right carrying
-fruit items. The structure of SystemJ program controlling the fruit
-sorter controller is also shown in Figure~\ref{fig:2}. The program
-contains only one synchronous clock-domain consisting of six reactions
-(from R1 to R6). The presence of a fruit item loaded at the left end of
-the conveyor belt is detected by Sensor 1 that produces an input signal
+fruit items. The structure of SystemJ clock-domain controlling the fruit
+sorter is also shown in Figure~\ref{fig:4}. The clock-domain contains
+only one synchronous clock-domain consisting of six reactions (from R1
+to R6). The presence of a fruit item loaded at the left end of the
+conveyor belt is detected by Sensor 1 that produces an input signal
 NEW\_ITEM to R1. Upon arrival of this signal, a picture of the fruit is
 taken in R1 and analyzed to determine the type of the item (either apple
 or pear in this example) in R2. This analysis is then used to sort the
@@ -527,7 +527,7 @@ mechanical arm back to its initial position.
 %   \label{fig:4}
 % \end{figure}
 
-The SystemJ program implementing this control logic is shown in
+The SystemJ clock-domain implementing this control logic is shown in
 Figure~\ref{fig:4}. There are two hard real-time requirements for the
 control logic: (1) the time spent on item recognition should be shorter
 than the incoming input signal NEW\_ITEM, else, the type of the fruit
@@ -542,11 +542,11 @@ inter-arrival time of input events.
 \subsection{Static WCRT analysis of a SystemJ synchronous clock-domain}
 \label{sec:static-wcrt-analysis}
 
-In order to guarantee the aforementioned timing requirements we need to
-statically determine the WCRT of the fruit sorter controller
-clock-domain. The static analysis performed to estimate the WCRT of any
-synchronous SystemJ clock-domain in described in~\cite{LiMS14}. Here in
-we give a brief overview of the procedure.
+In order to guarantee the timing requirements of the fruit sorter
+control logic we need to statically determine the WCRT of the fruit
+sorter controller clock-domain. The static analysis performed to
+estimate the WCRT of any synchronous SystemJ clock-domain is described
+in~\cite{LiMS14}. Here in we give a brief overview of the procedure.
 
 \begin{lrbox}{\verbbox}
   \begin{minipage}[b]{0.5\linewidth}
@@ -605,28 +605,29 @@ Every SystemJ clock-domain is compiled into an intermediate format
 called the \textit{Asynchronous Graph Code} (AGRC)~\cite{amal10}. The
 AGRC format of the fruit sorter controller clock-domain is shown in
 Figure~\ref{fig:5a}. The AGRC intermediate format is akin to the
-control-flow graph of a standard programming language, except that it
-also encodes parallelism and state representation specific to SystemJ. A
-single clock-domain transition from the start of a tick to the end of a
-tick is a single traversal of the AGRC graph.
+control-flow graph of a program developed in a standard programming
+language, except that it also encodes parallelism and state
+representation specific to SystemJ. A single clock-domain tick (or
+reaction) transition is a single traversal of the AGRC graph.
 
 Every AGRC starts with the \texttt{AforkNode} representing forking of
 multiple clock-domains, in case of the fruit sorter controller, a single
 clock-domain is forked. The \texttt{Enter} and \texttt{Switch} nodes
 together encode the state information. The \texttt{Enter} node sets the
 value of a \texttt{Switch} node in any given program transition. The
-\texttt{Switch} node then uses this value in the next tick to choose a
-branch for execution. The synchronous parallelism is captured using
-\texttt{Fork} and \texttt{Join} nodes. Every \texttt{Fork} node forks
-multiple synchronous parallel reactions for execution, which are then
-synchronized to the clock-domain tick at the \texttt{Join} node. The
-signal emissions and Java data-computations are captured within the
-\texttt{Action} nodes. The \texttt{Test} nodes are used for branching on
-signal statuses. Finally, \texttt{Terminate} nodes, capture the
-termination context of the currently executing tick. A program is
-considered alive and ready to execute the next tick if the AGRC pass
-terminates with value of 1, else a value of 0 means completion of the
-program and all further program transitions are disabled.
+\texttt{Switch} node then uses this value in the next transition to
+choose a branch for execution. The synchronous parallelism is captured
+using \texttt{Fork} and \texttt{Join} nodes. Every \texttt{Fork} node
+forks multiple synchronous parallel reactions for execution, which are
+then synchronized to the clock-domain tick at the \texttt{Join}
+node. The signal emissions and Java data-computations are captured
+within the \texttt{Action} nodes. The \texttt{Test} nodes are used for
+branching on signal statuses. Finally, \texttt{Terminate} nodes, capture
+the termination context of the currently executing clock-domain
+transition. A program is considered alive and ready to execute the next
+tick if the AGRC pass terminates with value of 1, a value of 0 means
+completion of the program and all further program transitions are
+disabled.
 
 The AGRC graph needs to be annotated with timing information in order to
 compute the WCRT of the clock-domain. As stated previously, all
@@ -638,22 +639,22 @@ as all native ReCOP instructions take 3 clock cycles to execute. The
 individual Java methods (see Figure~\ref{fig:5b}, line~\ref{fig:5bl1}),
 for execution on JOP. One needs to compute the \textit{Worst Case
   Execution Time} (WCET) for each of these JDNs, using the JOP provided
-worst case analysis tool~\cite{msch05}. The computed worst case
+worst case analysis tool (WCA)~\cite{msch05}. The computed worst case
 execution times for both: CNs and JDNs are back annotated onto the AGRC
 shown by the numeric annotations on the AGRC nodes in
 Figure~\ref{fig:5}. Once, annotated, the AGRC model is further
 translated into a labeled transition system (LTS) for input into the
 Uppaal model-checker~\cite{gbeh04}. A computational tree logic
-(CTL)~\cite{clarke-book00} property of the form: \mbox{$A[] (wcrt <
-  num)$}, which informally asks the model-checker to \textit{verify}
-that there exists no path in the program with a wcrt value greater than
-some number $num$. The integer value $wcrt$ is incremented on the LTS by
-the WCET value of the AGRC node encountered.
+(CTL)~\cite{clarke-book00} property of the form:
+\mbox{$A[] (wcrt < num)$}, which, put informally, asks the model-checker
+to \textit{verify} that there exists no path in the program with a wcrt
+value greater than some number $num$. The integer value $wcrt$ is
+incremented on the LTS by the WCET value of the AGRC node encountered.
 
 This model-checking approach to computing the WCRT of a SystemJ
 clock-domain is essential, because SystemJ clock-domains are
 \textit{open} systems, unlike standard transformational programs and
-hence, all possible paths need to be explored to guarantee find the
+hence, all possible paths need to be explored to guarantee find a tight
 WCRT of a SystemJ clock-domain.
 
 \section{A new memory model for SystemJ}
@@ -661,50 +662,51 @@ WCRT of a SystemJ clock-domain.
 
 The WCRT approach described above is suitable \textit{only} for programs
 that do not invoke \textit{Garbage Collection} (GC), since the GC
-execution time is unaccounted for in the aforementioned WCRT
-analysis. The main reason for this lack of GC incorporation is that GC
+execution time is unaccounted for in the aforementioned WCRT analysis
+framework. The main reason for this lack of GC incorporation is that GC
 cycle time cannot be \textit{practically} bounded as the number of heap
 allocations in a Java program depends upon the application and during
 garbage collection a linked list of allocated objects needs to be
 traversed as one of the collection phases.
 
-One needs to include the GC time within the WCRT analysis of SystemJ
-clock-domain for the WCRT analysis to be of any practical use. The very
-first approach might be to include an incremental RTGC as described in
-Section~\ref{sec:introduction}, but all current RTGC proposals require
-preemptive scheduling, which does not bode well with the atomic tick
-based execution of SystemJ clock-domains. Giving up on atomicity of
-SystemJ clock-domain execution is not a viable option, since atomic tick
-based clock-domain execution is the corner stone for formal verification
-and WCRT analysis of synchronous programs. Of course, an RTGC might be
-scheduled in the slack time -- time between completion of a clock-domain
-transition and arrival of next set of input events, but one still
-suffers from the problem of unbounded GC cycle time, since a GC cycle
-needs to complete within the available slack.
+One needs to include the GC time within the WCRT analysis framework of
+SystemJ clock-domain for the WCRT analysis to be of any practical
+use. The very first approach might be to include an incremental RTGC as
+described in Section~\ref{sec:introduction}, but all current RTGC
+proposals require preemptive scheduling, which does not bode well with
+the atomic tick based execution of SystemJ clock-domains. Giving up on
+atomicity of SystemJ clock-domain execution is not a viable option,
+since atomic tick based clock-domain execution is the corner stone for
+formal verification and WCRT analysis of synchronous programs. Of
+course, an RTGC might be scheduled in the slack time -- time between
+completion of a clock-domain transition and arrival of next set of input
+events, but one still suffers from the problem of unbounded GC cycle
+time, since a GC cycle needs to complete within the available slack.
 
-Our solution to the above problem is to divide the heap space into two
-parts: a bounded permanent heap and a transient heap with bump pointer
-based object allocation and a simple pointer reset based garbage
-collection, which are both bounded and efficient.
+Our solution to the above problem is to remove garbage collection
+altogether. More concretely, we divide the heap space into two parts: a
+bounded permanent heap and a transient heap with bump pointer based
+object allocation and a simple pointer reset based garbage collection,
+which are both: time and space bounded and efficient.
 
 Signals (valued or pure) are the only communication primitive within a
 SystemJ clock-domain. Upon emission of a valued signal, its status and
 value become visible to the other reactions in the \textit{next}
 clock-domain tick transition. Signals, internally themselves implemented
 as Java objects (see Figure~\ref{fig:5b}), are alive throughout the
-lifetime of the application. The new heap organization is based on one
-\textbf{key insight}; there are two types of Java objects in a SystemJ
-clock-domain:
-\begin{enumerate}
+lifetime of the application. The proposed heap organization is based on
+one \textbf{key insight}; there are two types of Java objects in a
+SystemJ clock-domain:
+\begin{itemize}
 \item \textit{Permanent objects}: Java objects that are emitted via
-  signals. These objects like signals are potentially alive during the
-  whole life time of the application.
+  signals. These objects like signals are potentially alive throughout
+  the application lifetime.
 \item \textit{Transient objects}: Java objects that are created
   internally for computation, but are never emitted via
   signals. Transient objects are only alive during a single clock-domain
   tick transition and can be garbage collected at the end of the
   transition.
-\end{enumerate}
+\end{itemize}
 
 The basic idea is to allocate the permanent objects, we consider signals
 to be permanent objects as well, within a special memory area called
@@ -742,19 +744,20 @@ method structure table for instance method invocation, references to
 static objects, etc. The major point of difference is that the
 \textit{GC info} word does not exist in the new runtime memory structure
 and the \textit{heap} space is divided into two parts; the transient
-heap and the permanent heap. Looking at the runtime memory organization
-two aspects become very important:
+heap and the permanent heap. Looking at this new runtime memory
+organization two \underline{requirements} become very important:
 
-\begin{itemize}
+\begin{enumerate}
 \item There should be no pointer pointing from the permanent heap to the
   transient heap, else an application might terminate at runtime with a
-  \texttt{NullPointer} exception. Or in the much worse scenario, an
-  incorrect value might be read, in which case the application will
-  be functionally incorrect!
+  \texttt{NullPointer} exception -- since the transient heap may be
+  zeroed or overwritten at the end of the clock-domain tick. Or in the
+  much worse scenario, an incorrect value might be read, in which case
+  the application will be functionally incorrect!
 \item The permanent heap is never garbage collected and hence, permanent
   heap space should be judiciously allocated. In fact, we need to bound
   the permanent heap space at compile time.
-\end{itemize}
+\end{enumerate}
 
 In the rest of the paper we describe compiler transformations that
 achieve the described memory reorganization.
@@ -772,8 +775,10 @@ platform. Two types of compiler analysis are then performed on the
 produced native ReCOP assembler and Java bytecode, respectively: (1)
 AGRC analysis is used to determine the \textit{must} and \textit{may}
 Java reachable methods from any given Java program point and (2)
-\textit{forward} and \textit{backward} data-flow analysis to find the
-objects/arrays that need to be allocated to the permanent heap.
+\textit{forward} and \textit{backward} data-flow analysis is performed
+to find the objects/arrays that need to be allocated to the permanent
+heap. Finally, these object allocations bytecodes are replaced by time
+predictable alternatives.
 
 \begin{lrbox}{\eone}
   \begin{minipage}[b]{0.5\linewidth}
@@ -781,8 +786,13 @@ objects/arrays that need to be allocated to the permanent heap.
 int signal S;\label[l1]
 int a = 0;\label[l2]
 a = a + 1;\label[l3]
-pause;\label[l7]
 emit S(a);\label[l4]
+pause;\label[l7]
+/*Variable values can 
+ only be carried 
+ over tick boundaries
+ via signals */
+a = #S;\label[l8]
 a = a + 1;\label[l5]
 emit S(a);\label[l6]
     \end{Verbatim}
@@ -790,6 +800,8 @@ emit S(a);\label[l6]
 \end{lrbox}
 \begin{lrbox}{\etwo}
   \begin{minipage}[b]{0.7\linewidth}
+    \begin{scriptsize}
+      
     \begin{Verbatim}[numbers=left,commandchars=\\\[\]]
 public class FruitSorterController {
  //signal S declaration
@@ -823,16 +835,18 @@ public class FruitSorterController {
    S.setValue(new Integer(a));
  }
  private static boolean MethodCall2_0(){
+   a = S.getPreValue(); //get value from previous tick via S
    a = a + 1;
    S.setValue(new Integer(a));
  }
 }
     \end{Verbatim}
+    \end{scriptsize}
   \end{minipage}
 \end{lrbox}
 
 \begin{figure}[t!]
-  % \centering
+  \centering
   \subfloat[SystemJ code snippet]{
     \scalebox{0.7}{\usebox{\eone}}
     \label{fig:7a}
@@ -850,13 +864,18 @@ The need for these two types of analysis can be explained using the
 simple example in Figure~\ref{fig:7a}. The SystemJ code snippet declares
 a valued signal \texttt{S}, and an integer variable \texttt{a}. This
 variable is incremented and emitted via signal \texttt{S}. After
-emission the variable is incremented again. For this SystemJ program,
-two methods are produced in the back-end Java code for execution on
-JOP. The first method \texttt{MethodCall1\_0} initializes the
-\texttt{a}, increments it and then sets the value of the signal
-\texttt{S} as the object \texttt{a}. The second method call
-\texttt{MethodCall2\_0} increments the variable \texttt{a} and changes
-the object reference of signal \texttt{S}.
+emission, the tick expires as indicated by the \texttt{pause}
+statement. In the second clock-domain transition, \texttt{a} is
+initialized again, since in SystemJ the only values that are persistent
+over ticks are signal values. Variable \texttt{a} is first initialized
+to the value held in signal \texttt{S} (from the previous tick) and then
+incremented. The result of this increment is emitted via signal
+\texttt{S}. Two methods are produced in the back-end Java code for
+execution on JOP. The first method \texttt{MethodCall1\_0} initializes
+\texttt{a} and then increments it. Finally, it sets the value of the
+signal \texttt{S} as the \textit{object} \texttt{a}. The second method
+call \texttt{MethodCall2\_0} increments the variable \texttt{a} and
+changes the object reference of signal \texttt{S}.
 
 Our objective is to find out all the \textit{program-points} that
 allocate a new object, whose returned reference is set as a signal value
@@ -877,8 +896,8 @@ program point. Consider the SystemJ program in Figure~\ref{fig:7a}, we
 know for sure that program point at line~\ref{l3} \textit{must} be
 executed before program point at line~\ref{l5}. But, in the generated
 Java program (Figure~\ref{fig:7b}), the sequential control-flow of the
-\textit{SystemJ program} has been turned into a branching
-control-flow. Just looking at the Java program one can only state with
+\textit{SystemJ program} has been turned into branching
+control-flow. Just looking at the Java program, one can only state with
 certainty that method \texttt{MethodCall1\_0} \textit{may} be called
 before method \texttt{MethodCall2\_0}. More disconcertingly, just
 looking at the Java program, one can even say that method
@@ -888,18 +907,18 @@ generated Java program. The AGRC analysis step produces the may and must
 method callers for any callee in the generated Java code. Note that we
 cannot produce a single Java method call coalescing the two Java
 methods: \texttt{MethodCall1\_0} and \texttt{MethodCall2\_0}, because
-there is a control node \texttt{pause} that needs to be executed on
-ReCOP. We describe these AGRC and the data-flow analysis steps in the
-next sections.
+there is an intertwined control construct, \texttt{pause}, which needs
+to be executed on ReCOP. We describe these AGRC and the data-flow
+analysis steps in the next sections.
 
-\input{agrc}
+% \input{agrc}
 
 \subsection{Data-flow analysis}
 \label{sec:data-flow-analysis}
 
 \begin{figure}[t!]
   \centering
-  \subfloat[Points-to from permanent heap to transient heap]{
+  \subfloat[Pointers from permanent heap to transient heap]{
     \includegraphics[scale=0.45]{ptp1}
     \label{fig:9a}
   }
@@ -1194,11 +1213,15 @@ areturn
         \tcc*[h]{Get all callers, including from AGRC analysis}\\
         \Let $Callers \leftarrow$ \GetCallers($C$)\;
         \lIf {$Callers = \emptyset$} \texttt{raise Not\_init $f$}\;
+        \Let $defs \leftarrow \emptyset$\;  
+        \Let $sizes \leftarrow \emptyset$\;  
         \ForEach {$caller \in Callers$} {
-          \Let $defs \leftarrow$ \StepSix(program,\GetCallerPPC($C$),$f$,$caller$)\;
-          \tcc*[h]{Same as Figure~\ref{fig:8d} lines~\ref{step4:s}-\ref{step4:e}}
-          \Return ($size$,$defs$)\;
+          \Let $defs \leftarrow defs\ \cup$ \StepSix(program,\GetCallerPPC($C$),$f$,$caller$)\;
+          \tcc*[h]{Similar to Figure~\ref{fig:8d}
+            lines~\ref{step4:s}-\ref{step4:e}, to fill in the sizes set.}
         }
+        \Let $size \leftarrow  max(sizes)$\;
+        \Return ($size$,$defs$)\;
       }\label{algsix:l4}
     \end{algo}
   \end{minipage}
@@ -1217,32 +1240,32 @@ areturn
   }
   \qquad
   \subfloat[Step3: For every affected field/variable get the object
-  initialization program points]{
+  allocation program points]{
     \scalebox{0.7}{\usebox{\algthree}}
     \label{fig:8c}
   }
   \qquad
-  \subfloat[Step4: Get object initialization for affected field]{
+  \subfloat[Step4: Get object allocation program points for affected field]{
     \scalebox{0.7}{\usebox{\algfour}}
     \label{fig:8d}
   }
-  \caption{Data-flow analysis algorithm}
+  \caption{Data-flow analysis pseudo-algorithm}
   \label{fig:8}
 \end{figure}
 
 \begin{figure}
   \centering
   \ContinuedFloat
-  \subfloat[Step5: Get object initialization for affected variables]{
+  \subfloat[Step5: Get object allocation program points for affected variables]{
     \scalebox{0.7}{\usebox{\algfive}}
     \label{fig:8e}
   }
   \qquad
-  \subfloat[Step6: Search object initialization for affected field]{
+  \subfloat[Step6: Search object allocation program points for affected field]{
     \scalebox{0.7}{\usebox{\algsix}}
     \label{fig:8f}
   }
-  \caption{Data-flow analysis algorithm}
+  \caption{Data-flow analysis pseudo-algorithm}
   \label{fig:8}
 \end{figure}
 
@@ -1319,7 +1342,7 @@ public boolean MethodCall0_4() {
   int c1 = C.getc1();
   int c2 = C.getc2();
   t = new c(c1,c2);/*Making deep copies*/\label[exone:l2]
-  ((c)t).mm = new Integer(999);\label[exone:l3]
+  ((c)t).mm = new Integer(999);\label[exone:l33]
  }
  /* Emit t via S */
  S.setValue(t);\label[exone:s2l1]
@@ -1360,7 +1383,7 @@ public boolean MethodCall0_0(){
 \begin{figure}[t!]
   \ContinuedFloat
   \centering
-  \subfloat[Step7: Search object initialization point for method local affected
+  \subfloat[Step7: Search object allocation point(s) for method local affected
   variable]{
     \scalebox{0.7}{\usebox{\algseven}}
     \label{fig:8g}
@@ -1371,8 +1394,8 @@ public boolean MethodCall0_0(){
     \label{fig:8h}
   }
   
-  \subfloat[UML class hierarchy for classes \texttt{A}, \texttt{B} and
-  \texttt{C} used in Figure~\ref{fig:8h} and~\ref{fig:8j}]{
+  \subfloat[UML class hierarchy for classes \texttt{a}, \texttt{b} and
+  \texttt{c} used in Figure~\ref{fig:8h} and~\ref{fig:8j}]{
     \includegraphics[scale=0.5]{umlex1}
     \label{fig:8i}
   }
@@ -1381,7 +1404,7 @@ public boolean MethodCall0_0(){
     \scalebox{0.7}{\usebox{\extwo}}
     \label{fig:8j}
   }
-  \caption{Data-flow analysis algorithm and related examples}
+  \caption{Data-flow analysis pseudo-algorithm and related examples}
   \label{fig:8}
 \end{figure}
 
@@ -1397,31 +1420,30 @@ which initializes objects \texttt{B} and \texttt{C}, whose types
 \texttt{b} and \texttt{c} are inherited from a single parent class
 \texttt{a} as shown in Figure~\ref{fig:8i}. Object \texttt{t} of type
 \texttt{a} is initialized to either type \texttt{b} or \texttt{c}
-(line~\ref{exone:l1}, line~\ref{exone:l2}) if the Boolean
-\texttt{a\_thread\_2} is \texttt{true} or not. Finally, \texttt{t} is
-emitted via signal \texttt{S} and this emitted signal value is printed
-again within a conditional branching construct
-(lines~\ref{exone:l3}-\ref{exone:l4}).
+(line~\ref{exone:l1}, line~\ref{exone:l2}) depending upon the Boolean
+\texttt{a\_thread\_2}. Finally, \texttt{t} is emitted via signal
+\texttt{S} and this emitted signal value is printed within a conditional
+branching construct (lines~\ref{exone:l3}-\ref{exone:l4}).
 
 \begin{compactitem}[$\bigstar$]
-\item Step1 of the data-flow analysis algorithm (Figure~\ref{fig:8a})
-  starts by scanning the Java program for program points initializing
-  signals (e.g., method \texttt{init} in Figure~\ref{fig:8h}). A
-  globally accessible multi-set $pp$ (Figure~\ref{fig:8a},
-  line~\ref{algone:l1}) is defined that will hold all the program points
-  initializing the objects that will be placed in the permanent
-  heap. Step1 scans all reachable methods from the starting program
-  point (usually the \texttt{main} method) for signal initialization and
-  places these program points into the multi-set $pp$. Each individual
-  set within the multi-set $pp$ consists of a one or more program points
-  that initialize objects. After the scan phase, the set $pp$ holds
-  $\{\{\mathtt{(5,init:\ref{exone:siginit}})\}\}$ for the example in
-  Figure~\ref{fig:8h}. The first element of the tuple gives the
-  \textit{instance} size of the \texttt{Signal} class, the second
-  element is the initialization program point~\footnote{The
+\item \underline{Step1} (Figure~\ref{fig:8a}) of the data-flow analysis
+  algorithm starts by scanning the Java program for program points
+  initializing signals (e.g., method \texttt{init} in
+  Figure~\ref{fig:8h}). A globally accessible multi-set $pp$
+  (Figure~\ref{fig:8a}, line~\ref{algone:l1}) is defined that will hold
+  all the program points initializing the objects that will be placed in
+  the permanent heap. Step1 scans all reachable methods from the
+  starting program point (usually the \texttt{main} method) for signal
+  initialization and places these program points into the multi-set
+  $pp$. Each individual set within the multi-set $pp$ consists of a one
+  or more program points that initialize objects. After the scan phase,
+  the set $pp$ holds $\{(5,\{\mathtt{init:\ref{exone:siginit}}\})\}$ for
+  the example in Figure~\ref{fig:8h}. The first element of the tuple
+  gives the \textit{instance} size of the \texttt{Signal} class, the
+  second element is the initialization program point~\footnote{The
     initialization program point is actually at the bytecode level, but
-    in this paper we keep the initialization points at the Java source
-    code level for ease of understanding.} for the example in
+    in this paper we keep the program points at the Java source code
+    level for ease of understanding.} for the example in
   Figure~\ref{fig:8h}. If more than one signal is initialized, all these
   initializations are placed in separate sets within the multi-set
   $pp$. The reason for having a set rather than a multi-set for $pp$
@@ -1430,72 +1452,77 @@ again within a conditional branching construct
   will be used for identifying objects that need to be placed in the
   permanent heap.
   
-\item Step2 is a recursive procedure that scans all reachable methods
-  for the \texttt{setValue} virtual method call on the signal objects
-  (Figure~\ref{fig:8b}, lines~\ref{algtwo:l1}-\ref{algtwo:l2}). These
-  program points are placed in the set $PPC$ for each reachable method
-  individually. For the example in Figure~\ref{fig:8h}, the means
-  scanning method \texttt{MethodCall0\_4} and placing the program point
+\item \underline{Step2} (Figure~\ref{fig:8b}) is a recursive procedure
+  that scans all reachable methods for the \texttt{setValue} virtual
+  method call on the signal objects
+  (lines~\ref{algtwo:l1}-\ref{algtwo:l2}). These program points are
+  placed in the set $PPC$ for each reachable method individually. For
+  the example in Figure~\ref{fig:8h}, the means scanning method
+  \texttt{MethodCall0\_4} and placing the program point
   line~\ref{exone:s2l1} in set $PPC$. Finally, Step3 of the algorithm is
   called.
   
-\item Step3 analyzes the emission expression for every program point in
-  set $PPC$. A emitting expression can \textit{only} ever emit a method
-  local variable (as in the case of Figure~\ref{fig:8h}) or a field (as
-  in the case of our soon to come example in Figure~\ref{fig:8j}). For
-  our current example, a variable is being emitted (or affected) and
-  hence, Step5 is called.
+\item \underline{Step3} (Figure~\ref{fig:8c}) analyzes the emission
+  expression for every program point in set $PPC$. A emitting expression
+  can \textit{only} ever emit a method local variable (as in the case of
+  Figure~\ref{fig:8h}) or a field (as in the case of our soon to come
+  example in Figure~\ref{fig:8j}). For our current example, a variable
+  is being emitted (or affected) and hence, Step5 is called.
   
-\item Step5 analyzes the variable from the expression and calls Step7
-  for analysis. Step7 is the main part of the algorithm that performs
-  the reachability analysis to identify the program points initializing
-  the objects to be placed in permanent heap. Before proceeding to
-  Step7, let us assume that we have already obtained the correct program
-  points from Step7 in set $defs$. For our current example, given that
-  the emitting program point is~\ref{exone:s2l1},
-  $defs = \{\ref{exone:l1},\ref{exone:l2}\}$. Looking at
-  Figure~\ref{fig:8h}, it is clear that \texttt{t} can be initialized at
-  either~\ref{exone:l1} or~\ref{exone:l2}, depending upon the value of
-  variable \texttt{a\_thread\_2} during program execution. For each of
-  these program points, Step5 guarantees that the object instance
-  (equally the reference) does not \textit{escape} the
+\item \underline{Step5} (Figure~\ref{fig:8e}) extracts the variable from
+  the affected expression and calls Step7 for analysis. Step7 is the
+  core of the whole data-flow procedure that performs the reachability
+  analysis to identify the program points initializing the objects to be
+  placed in the permanent heap. Before proceeding to Step7, let us
+  assume that we have already obtained the correct program points from
+  Step7 in set $defs$. For our current example, given that the emitting
+  program point is~\ref{exone:s2l1},
+  $defs =
+  \{\mathtt{MethodCall0\_4}:\ref{exone:l1},\mathtt{MethodCall0\_4}:\ref{exone:l2}\}$.
+  Looking at Figure~\ref{fig:8h}, it is clear that \texttt{t} can be
+  initialized at either~\ref{exone:l1} or~\ref{exone:l2}, depending upon
+  the value of variable \texttt{a\_thread\_2} during program
+  execution. For each of these program points, Step5 guarantees that the
+  object instance (equally the reference) does not \textit{escape} the
   method~\cite{choi1999escape}.~\footnote{Let $O$ be an object instance
     and $M$ be a method invocation. $O$ is said to escape $M$, if the
     lifetime of $O$ may exceed the lifetime of $M$.} If the object
   instance does not escape the method lifetime, then the algorithm
-  checks if their are any reference fields, if so, Step3 is invoked for
-  migrating these object allocations initializing these reference fields
-  into permanent heap. Consider, the program point~\ref{exone:l2},
-  object \texttt{t} is initialized as class \texttt{c} (for program
-  point~\ref{exone:l1}, \texttt{t} is initialized and analyzed as class
-  \texttt{b}), which has three fields: two (\texttt{c1} and \texttt{c2})
-  are primitive fields, but the third: \texttt{mm} is a reference field
-  (of type \texttt{Integer}). The \texttt{mm} reference field is
-  initialized to an \texttt{Integer} object at program
-  point~\ref{exone:l3}. Figure~\ref{fig:9a} shows the reference held by
-  \texttt{mm} if Step3 is not carried out. Field \texttt{mm} points to
-  an object in transient heap space, which violates the second
-  requirement in Section~\ref{sec:new-memory-model}. Calling Step3,
-  guarantees that all potential \textit{pointed-to} objects from the
-  permanent heap are also migrated to the permanent-heap. Note that
-  Step3 and Step5 are mutually recursive and hence perform a chained
-  permanent heap migration as shown in Figure~\ref{fig:9b}.
+  checks if their are any reference fields within this object, if so,
+  Step3 is invoked for migrating these object allocations initializing
+  the reference fields into permanent heap. Consider, the program
+  point~\ref{exone:l2}, object \texttt{t} is initialized as class
+  \texttt{c} (for program point~\ref{exone:l1}, \texttt{t} is
+  initialized and analyzed as class \texttt{b}), which has three fields:
+  two (\texttt{c1} and \texttt{c2}) are primitive fields, but the third:
+  \texttt{mm} is a reference field (of type \texttt{Integer}). The
+  \texttt{mm} reference field is initialized to an \texttt{Integer}
+  object at program point~\ref{exone:l33}. Figure~\ref{fig:9a} shows the
+  reference held by \texttt{mm} if Step3 is not carried out. Field
+  \texttt{mm} points to an object in transient heap space, which
+  violates the first requirement in
+  Section~\ref{sec:new-memory-model}. Calling Step3, guarantees that all
+  potential \textit{pointed-to} objects from the permanent heap are also
+  migrated to the permanent-heap. Note that Step3 and Step5 are mutually
+  recursive and hence perform a chained permanent heap migration. For
+  the running example, the result of applying the final procedure in
+  Step5 is shown in Figure~\ref{fig:9b}.
   
   The final computation that Step5 performs is computing the size, which
   will be reserved in the permanent heap, of object \texttt{t}, given
   that $defs$ may have multiple (two in our current example)
-  elements. The primary idea is to reserve maximum size amongst all
+  elements. The primary idea is to reserve the maximum size amongst all
   different types being initialized. For the running example,
-  \texttt{t}, can be of type \texttt{b} or \texttt{c} at program
-  execution time. We compute the \textit{instance} size of both these
-  types, 3 and 4, respectively~\footnote{By Java semantics, all fields
-    of a parent class are inherited by the children classes and hence,
-    the sizes for \texttt{b} and \texttt{c} is 3 and 4 words.} and
-  reserve 4 words (plus object header) in permanent heap space. Step7
-  returns multiple program points in set $defs$ \textrm{iff} these
-  program points are mutually unreachable. This, guarantees that the
-  reserved permanent heap space can be reused at runtime by both:
-  program points in $defs$.
+  \texttt{t}, can be of type \texttt{b} or \texttt{c} during program
+  execution due to polymorphism. We compute the \textit{instance} size
+  of both these types as 3 and 4 words, respectively~\footnote{According
+    to Java semantics, all fields of a parent class are inherited by the
+    children classes and hence, the sizes for \texttt{b} and \texttt{c}
+    are 3 and 4 words, respectively.} and reserve 4 words (plus object
+  header size) in permanent heap space. Step7 returns multiple program
+  points in set $defs$ \textrm{iff} these program points are mutually
+  unreachable. This, guarantees that the reserved permanent heap space
+  can be \textit{reused} at runtime by all program points in set $defs$.
   \newline
   \begin{compactitem}[$\boxplus$]
   \item \textbf{Design decision}: We have consciously decided to not
@@ -1515,56 +1542,55 @@ again within a conditional branching construct
     method, avoids both these problems.
   \end{compactitem}
   
-\item Step7, given a program point that affects a variable (also termed
-  the \textit{use} program point) gives one or more program points
-  initializing that variable (also called the defining program
-  point). Step7 first builds the standard \textit{use-def}
-  chains~\cite{steven1997advanced} to obtain the program points defining
-  the variable, line~\ref{algseven:l1}, Figure~\ref{fig:8g}. If the
-  defining program points are \texttt{new} or \texttt{newarray}
-  bytecodes~\cite{meyer1997java}, then these program points are simply
-  unioned into the set of program points that will be returned by this
-  function (line~\ref{algseven:l2}). If the defining program points are
-  themselves affecting variables, the Step7 is called recursively to
-  follow the so called deferred program edges~\cite{burke1995flow} to
-  find the program points that finally reach a program point that
-  initializes the object or if the variable is unitialized then gives a
-  compile time not initialized error (line~\ref{algseven:l3}). If the
-  defining program point affects a field, then Step5 is called, which
-  calls Step7 via Step6, we describe Step5 and Step6 next. If the
-  defining program point is anything by any of the aforementioned
-  statements, then an error is raised, stating that the variable might
-  be initialized outside the current method
-  (lines~\ref{algseven:l4}-\ref{algseven:l5}). Finally, Step7 makes sure
-  that the program points to return are not reachable from each other,
-  which is utilized in Step5/Step6 to reuse space for during object
-  initialization.
+\item \underline{Step7} (Figure~\ref{fig:8g}), given a program point
+  that affects a variable (also termed the \textit{use} program point)
+  gives one or more program points initializing that variable (also
+  called the defining program point). Step7 first builds the standard
+  \textit{use-def} chains~\cite{steven1997advanced} to obtain the
+  program points defining the variable, line~\ref{algseven:l1},
+  Figure~\ref{fig:8g}. If the defining program points are \texttt{new}
+  or \texttt{newarray} bytecodes~\cite{meyer1997java}, then these
+  program points are simply unioned into the set of program points that
+  will be returned by this function (line~\ref{algseven:l2}). If the
+  defining program points are themselves affecting variables, the Step7
+  is called recursively to follow the so called deferred program
+  edges~\cite{burke1995flow} to finally reach one or more program points
+  that allocates the object or if the variable is not initialized then
+  gives a compile time \texttt{not initialized} error
+  (line~\ref{algseven:l3}). If the defining program point affects a
+  field, then Step4 is called, which calls Step7 via Step6, we describe
+  Step4 and Step6 next. If the defining program point is anything but
+  any of the aforementioned statements, then an error is raised, stating
+  that the variable might be initialized outside the method being
+  analyzed (lines~\ref{algseven:l4}-\ref{algseven:l5}). Finally, Step7
+  makes sure that the program points to return are not reachable from
+  each other.\newline
   \begin{compactitem}[$\boxplus$]
   \item \textbf{Design decision}: We have consciously decided to not
-    allow object initialization outside the method that uses the
-    variable in Step7. The objective of our data-flow algorithm is to
-    identify all the program points that initialize objects whose
-    returned references are emitted as signal values. We are performing
-    compile time memory allocation, which as we will see later requires
-    us to replace the \texttt{new}/\texttt{newarray} bytecodes with a
-    new set of bytecodes (c.f. Section~\ref{sec:prod-back-code}). We
-    cannot blindly replace these bytecodes in methods other than the
-    ones being analyzed, because, consequently \textit{any} other
-    program point, related or unrelated to signals, using the same
-    object initialization point would overwrite the object value as it
-    inadvertently shares the same object. A simple example elucidating
-    the situation is shown in Figure~\ref{fig:10}.
+    allow object allocation outside the method that uses the variable in
+    Step7. The objective of our data-flow algorithm is to identify all
+    the program points that allocate objects whose returned references
+    are emitted as signal values. We are performing compile time memory
+    allocation, which as we will see later requires us to replace the
+    \texttt{new}/\texttt{newarray} bytecodes with a new set of bytecodes
+    (c.f. Section~\ref{sec:prod-back-code}). We cannot blindly replace
+    these bytecodes in methods other than the ones being analyzed,
+    because, consequently \textit{any} other program point, related or
+    unrelated to signals, using the same object initialization point
+    would overwrite the object value as it inadvertently shares the same
+    object. A simple example elucidating the situation is shown in
+    Figure~\ref{fig:10}.
     
-    In Figure~\ref{fig:10a} we initialize two \texttt{Integer} type
+    In Figure~\ref{fig:10a}, we initialize two \texttt{Integer} type
     variables; \texttt{A} and \texttt{B} to constant \texttt{int}
     values. Then we emit \texttt{A} via signal \texttt{S}. The bytecode
-    compiled produced from this Java program is shown in
+    produced from this Java program is shown in
     Figure~\ref{fig:10b}. First, the constant 0 is loaded onto the stack
     and the method \texttt{valueOf} in the \texttt{Integer} class, from
     the jdk standard library, is invoked, which allocates memory and
     sets the memory to 0, the returned reference is stored in a local
     variable on the stack (lines~\ref{exinvt:l0}-\ref{exinvt:l2}), same
-    is done for the object \texttt{B} from
+    is done for the object \texttt{B} in
     lines~\ref{exinvt:l3}-\ref{exinvt:l5}. The actual object
     initialization is carried out inside the \texttt{valueOf} method
     Figure~\ref{fig:10c}, line~\ref{exinvtt:l1}. If we were to replace
@@ -1580,57 +1606,60 @@ again within a conditional branching construct
     because the method might be too large to fit in the method cache, or
     more than one such methods might need to be in-lined (in case a
     method itself calls another method, which does the actual object
-    allocation). Thus, we have decided to disallow, object allocation
-    outside of the method being analyzed.  As a consequence of this
-    design decision, the SystemJ programmer now needs to make explicit
-    deep copies as shown in Figure~\ref{fig:8h} line~\ref{exone:l1}.
+    allocation and so on and so forth). Thus, we have decided to
+    disallow, object allocation outside of the method being analyzed.
+    As a consequence of this design decision, the SystemJ programmer now
+    needs to make explicit deep copies as shown in Figure~\ref{fig:8h}
+    line~\ref{exone:l1}.
   \end{compactitem}
   
-\item Step4 (Figure~\ref{fig:8d}) is the dual of Step5
+\item \underline{Step4} (Figure~\ref{fig:8d}) is the dual of Step5
   (Figure~\ref{fig:8e}). It works on Java fields rather than method
   local variables like Step5. The other difference between the two is
   that Step5 calls Step7 via Step6, which performs inter-procedural
   analysis.
   
-\item Step6 (Figure~\ref{fig:8f}) can be conceptually partitioned into
-  two parts. Part-1 (lines~\ref{algsix:l1}-\ref{algsix:l2}) returns the
-  program points initializing objects within the same method that the
-  field is being used. The more interesting part is part-2
+\item \underline{Step6} (Figure~\ref{fig:8f}) can be conceptually
+  partitioned into two parts. Part-1
+  (lines~\ref{algsix:l1}-\ref{algsix:l2}) returns the program points
+  initializing objects within the same method that the field is being
+  used. The more interesting part is part-2
   (lines~\ref{algsix:l3}-\ref{algsix:l4}), which carries out
   \textit{inter-procedural} analysis if the affected field being
   analyzed is not allocated in the same method. Let us consider the
   simple example in Figure~\ref{fig:8j} to explain the inter-procedural
   analysis. The \texttt{main} method initializes two objects: object
   \texttt{A} of type \texttt{a} (c.f. Figure~\ref{fig:8i}) and its
-  \texttt{Integer} type field \texttt{b} and finally called method
+  \texttt{Integer} type field \texttt{b} and finally calls method
   \texttt{MethodCall0\_0}. Field \texttt{A} is emitted via signal
   \texttt{S} (line~\ref{extwo:l1}). Our data-flow analysis algorithm
-  needs to locate the program points lines~\ref{extwo:l2}
+  needs to locate the program points at lines~\ref{extwo:l2}
   and~\ref{extwo:l3}, so that these object allocations can be moved to
   permanent heap space.
 
   Part-1 of Step6 calls Step7 (line~\ref{algsix:s7c}) passing it method
   \texttt{MethodCall0\_0} to find out the object \texttt{A} and its
-  field's allocation program points. Step7 being a
+  field's allocation program points. Step7 being an
   \textit{intra-procedural} analysis step returns back an empty list
-  ($ppc$). In such a case, Step6 looks up the call-graph tree to find
-  out the caller methods for the current callee, this lookup procedure
-  also includes looking up all the potential callers indicated by the
-  AGRC-analysis (c.f. Section~\ref{sec:agrc-analysis}). Once the caller
-  method is identified in the call-graph, Step6 recursively calls
-  itself. This procedure is continued until the program point allocating
-  the affected field is identified or the analysis reaches the top of
-  the call graph, in the latter case a \texttt{Not initialized field}
-  error is thrown by the compiler. In case of Figure~\ref{fig:8j}, there
-  is a single caller: the \texttt{main} method in the call-graph for
-  callee \texttt{MethodCall0\_0}, which is analyzed to find the program
-  point allocating field \texttt{A}, this program point
-  (line~\ref{extwo:l1}) is returned by Step6. Note that multiple callers
-  might call the same callee, due to \textit{may} AGRC-analysis. In such
-  cases all the callers need to be analyzed in order to identify the
-  program points allocating the affected field object, and to make sure
-  that such allocations exist in all paths, else, the field would be
-  uninitialized in some run of the SystemJ program.
+  ($ppc = \emptyset$). In such a case, Step6 looks up the call-graph
+  tree to find out the caller methods for the current callee, this
+  lookup procedure also includes looking up all the potential callers
+  indicated by the AGRC-analysis
+  (c.f. Section~\ref{sec:agrc-analysis}). Once the caller method is
+  identified in the call-graph, Step6 recursively calls itself. This
+  procedure is continued until the program point allocating the affected
+  field is identified or the analysis reaches the top of the call graph,
+  in the latter case a \texttt{Not initialized field} error is thrown by
+  the compiler. In case of Figure~\ref{fig:8j}, there is a single
+  caller: the \texttt{main} method in the call-graph for callee
+  \texttt{MethodCall0\_0}, which is analyzed to find the program point
+  allocating field \texttt{A}, this program point (line~\ref{extwo:l1})
+  is returned by Step6. Note that multiple callers might call the same
+  callee, due to \textit{may} happen before results produced by
+  AGRC-analysis. In such cases, all the callers need to be analyzed in
+  order to identify the program points allocating the affected field and
+  to make sure that such allocations exist in all paths, else, the field
+  would be uninitialized in some run of the SystemJ program.
 \end{compactitem}
 
 This finishes the treatment of the data-flow analysis algorithm to
@@ -1729,7 +1758,7 @@ object allocation bytecodes as specified in the \textit{Java Virtual
   Machine} (JVM) specification~\cite{meyer1997java}: the \texttt{new}
 and \texttt{newarray} bytecodes. Moreover, the \texttt{newarray}
 bytecode itself is of two varieties dependent upon the type of array
-being allocated: (1) The \texttt{newarray} bytecode that allocates space
+being allocated: (1) the \texttt{newarray} bytecode that allocates space
 for arrays holding primitive values and (2) the \texttt{newarray}
 bytecode that allocates space for arrays holding object references. This
 distinction is important since the number of bytes used to represent
@@ -1748,32 +1777,33 @@ pretty much do the same thing, except that some padding (represented as
 \texttt{nop} bytecodes) is needed in case of the two variants of the
 \texttt{newarray} bytecodes. This padding is needed to correctly update
 the conditional instruction's targets after replacement
-(line~\ref{batwo:l4}) -- all conditional instruction's following the
-object allocation bytecodes need to be shifted by 22 bytes after
-replacement.
+(line~\ref{batwo:l4}). 
 
-This 22 byte shift is made obvious by Figures~\ref{fig:11c}
-and~\ref{fig:11d}, which show the java bytecode snippets for the example
-program in Figure~\ref{fig:8j} before and after \texttt{new} bytecode
-replacement, respectively~\footnote{In both these figures, the line
-  numbers are shown on the right of the program. The numbers adjacent to
-  the bytecodes are the starting bytes for each of the bytecodes as
-  obtained by the \texttt{javap -c -v} command}. Figure~\ref{fig:11c}
-shows the bytecode produced by the Java compiler for the \texttt{A}
-object allocation in the \texttt{main} method. The very first bytecode,
-\texttt{new}, takes as argument an index (\texttt{2}) to the constant
-pool that holds the type (class) of object to allocate. The returned
-object reference is then duplicated (\texttt{dup} instruction). Next,
-the constructor of the class \texttt{a} is invoked to initialize the
-returned reference and finally, the returned reference is put into a
-static class field of the class containing the \texttt{main} method. The
-\texttt{new} bytecode is timing \textit{unpredictable}, because it might
-invoke the GC, which has an unbounded collection cycle. It might also
-generate a runtime out of memory exception, thereby violating safety
-criticality. We replace this \texttt{new} bytecode with timing
-predictable bytecodes as shown in Figure~\ref{fig:11d}.
+All conditional instruction's following the object allocation bytecodes
+need to be incremented by 22 bytes after replacement. This 22 byte shift
+is made obvious by Figures~\ref{fig:11c} and~\ref{fig:11d}, which show
+the java bytecode snippets for the example program in
+Figure~\ref{fig:8j} before and after \texttt{new} bytecode replacement,
+respectively~\footnote{In both these figures, the line numbers are shown
+  on the right of the program. The numbers adjacent to the bytecodes are
+  the starting bytes for each of the bytecodes as obtained by the
+  \texttt{javap -c -v} command}. Figure~\ref{fig:11c} shows the bytecode
+produced by the Java compiler for the \texttt{A} object allocation in
+the \texttt{main} method. The very first bytecode, \texttt{new}, takes
+as argument an index (\texttt{2}) into the constant pool that holds the
+type (class) of object to allocate. The returned object reference is
+then duplicated (\texttt{dup} instruction). Next, the constructor of the
+class \texttt{a} is invoked to initialize the returned reference and
+finally, the returned reference is put into a static (class) field of
+the class containing the \texttt{main} method. The \texttt{new} bytecode
+is timing \textit{unpredictable}, because it might invoke the GC, which
+has an unbounded collection cycle. It might also generate a runtime out
+of memory exception, thereby violating safety criticality. We replace
+this \texttt{new} bytecode with timing predictable bytecodes as shown in
+Figure~\ref{fig:11d}.
 
-A single \texttt{new} bytecode (consuming 3 bytes in the class file) is
+A single \texttt{new} bytecode (consuming 3 bytes in the class file,
+hence the 22 byte increment for targets of conditional bytecodes) is
 replaced with a list of bytecodes lines~\ref{btwo:l1}-\ref{btwo:l2}
 (consuming 25 bytes in the class file). The core idea is very simple;
 since we have already allocated memory for the object
@@ -1863,8 +1893,7 @@ heap accesses.
     \scalebox{0.7}{\usebox{\batwo}}
     \label{fig:11b}
   }
-  \caption{The back-end code generation pseudo-algorithm and related
-    explanation}
+  \caption{The back-end code generation pseudo-algorithm}
   \label{fig:11}
 \end{figure}
 
@@ -1892,8 +1921,8 @@ heap accesses.
     \includegraphics[scale=0.5]{aalloc}
     \label{fig:11f}
   }
-  \caption{The back-end code generation pseudo-algorithm and related
-    explanation}
+  \caption{The back-end generated code and compacted object
+    representation in heap}
   \label{fig:11}
 \end{figure}
 
@@ -1903,15 +1932,16 @@ heap accesses.
 We have carried out two sets of experiments: micro-benchmarks and wcrt
 analysis on well established real-time benchmarks to study the efficacy
 of the proposed memory model compared to two different real-time garbage
-collection implementations~\cite{msch05,ipat13}. The RTGC proposed
-in~\cite{msch05}, is a concurrent version of Cheney's copy collector
-developed by Baker~\cite{baker1978list} in the rest of the section we
-call it JOP-GC. The second one proposed in~\cite{ipat13} is a variation
-of the implementation of the allocation and collector described
-in~\cite{pizlo2010schism}, in the rest of the section we term it
-AGC. All our micro-benchmark experiments are run in ModelSim simulating
-the real-time hardware implemented JVM called JOP running at 100 MHz,
-256KB of main memory, 1KB of method cache, and 4KB of stack cache.
+collector (RTGC) implementations~\cite{msch05,ipat13}. The first is the
+RTGC proposed in~\cite{msch05}, which is a concurrent version of
+Cheney's copy collector developed by Baker~\cite{baker1978list}. In the
+rest of the section we call it JOP-GC. The second one is proposed
+in~\cite{ipat13} is a variation of the implementation of the allocation
+and collector described in~\cite{pizlo2010schism}, in the rest of the
+section we term it AGC. All our micro-benchmark experiments are run in
+ModelSim simulating the real-time hardware implemented JVM called JOP
+running at 100 MHz, with 256KB of main memory, 1KB of method cache, and
+4KB of stack cache.
 
 \subsection{Micro benchmarks}
 \label{sec:micro-benchmarks}
@@ -1922,7 +1952,7 @@ objects with 1 word field each. (2) Simple array allocation, where we
 allocate, in a tight loop, on a single thread, 2 objects; an object with
 an array type reference field, which is itself initialized to a 20 word
 1D array of primitive \texttt{int} type, in each iteration of the
-loop. (3) Complex object allocation, in this case we use a nested 2D
+loop. (3) Complex object allocation: in this case, we use a nested 2D
 loop. In every outer loop iteration, a \texttt{reference} type 1D array
 of dimension 20 is allocated. In every iteration of the inner loop, 2
 objects are allocated and the second object's reference is set as the
@@ -1962,34 +1992,36 @@ array value, the example benchmarks are available from~\cite{ipat13}.
 
 The runtime comparison between the three approaches for each of the
 micro-benchmarks is shown in Figure~\ref{fig:12}. Figure~\ref{fig:12}
-gives runtime in two cases: (1) when the GC is not invoked, i.e., there
-is enough memory available to allocate the request space and (2) when
-the GC is invoked to collect the garbage when enough memory is not
-available upon a memory allocation from the mutator. All the runtimes
-are computed with a stop the world GC configuration. The proposed
-approach is approximately 3$\times$ faster compared to the compared RTGC
-based approaches~\footnote{JOP-GC could not perform garbage collection
+gives time for completion of a memory allocation request in two cases:
+(1) when the GC is not invoked, i.e., there is enough memory available
+to allocate the requested space and (2) when the GC is invoked to
+collect the garbage when enough memory is not available upon a memory
+allocation request from the mutator. All the runtimes are computed with
+a stop the world GC configuration. The proposed approach is
+approximately 3$\times$ faster compared to the compared RTGC based
+approaches~\footnote{JOP-GC could not perform garbage collection
   correctly, when it ran out of space and hence, we have only compared
   with AGC in such cases.}. There is a greater speedup in case of array
 allocations compared to simple object allocations. The runtime memory
 allocation time difference is significant in the case of GC invocation
-when compared to the case of no GC invocation. There are multiple
-reasons for the obtained speedups. In case of memory allocation time
-when no GC is invoked, there are two major reasons for the speedup: (1)
-there are no read/write barriers (\texttt{synchrnonized} method calls in
-Java terms) when allocating memory, which are needed by both: JOP-GC and
-AGC, since RTGCs are pre-emptable. (2) The current \texttt{new} and
-\texttt{newarray} bytecodes are implemented in software, which means, on
-every invocation (loop iteration) a method needs to be loaded into the
-method cache, which results in increased program latency. These runtime
-numbers are important, because they influence the WCET/WCRT as we will
-see in the next section. (3) In case of \texttt{newarray} bytecode
-execution, array spines need to be initialized for
-AGC~\cite{pizlo2008study,ipat13}, which leads to further slow down in
-memory allocation times.
+when compared to the case of no GC invocation. In case of memory
+allocation time when no GC is invoked, there are two major reasons for
+the speedup: (1) there are no read/write barriers
+(\texttt{synchrnonized} method calls in Java terms) when allocating
+memory, which are needed by both: JOP-GC and AGC, since RTGCs are
+pre-emptable. (2) The current \texttt{new} and \texttt{newarray}
+bytecodes are implemented in software, which means, on every invocation
+(loop iteration) a method needs to be loaded into the method cache,
+which results in increased program latency. These runtime numbers are
+important, because they influence the WCRT as we will see in the next
+section. (3) In case of \texttt{newarray} bytecode execution, array
+spines need to be initialized for AGC~\cite{pizlo2008study,ipat13},
+which leads to further slow down in memory allocation times.
 
 \begin{table}[t!]
   \centering
+  \begin{scriptsize}
+    
   \begin{tabular}{|c|c|c|c|}
     \hline 
     \# of loop iterations & No-GC (Words) & JOP-GC (Words) & AGC (Words)\\
@@ -2009,6 +2041,7 @@ memory allocation times.
     4000 & 28 & 85800 & 111800 \\
     \hline
   \end{tabular}
+  \end{scriptsize}
   \caption{Comparison of memory words allocated for the complex object
     allocation. Each word = 4 bytes}
   \label{tab:1}
@@ -2017,27 +2050,27 @@ memory allocation times.
 Table~\ref{tab:1} gives the number of words allocated for the complex
 object allocation benchmark for all the three approaches. In the
 proposed approach, every iteration of the loop reuses the space
-allocated on the permanent heap space (same allocation would be achieved
-if the program was recursive rather than iterative). The GC approches on
-the other hand, allocate memory on each \texttt{new}/\texttt{newarray}
-bytecode execution. Another important point to note is that AGC although
-faster when it comes to memory allocation runtime compared to JOP-GC,
-allocates more words, because AGC uses block based GC allocation,
-whereas JOP-GC uses fragmented object allocation strategy with
-semi-space~\footnote{In the numbers in Table~\ref{tab:1}, we have not
-  included the semi-space reserved by JOP-GC.}.
+allocated on the permanent heap space (same allocation figures would be
+achieved if the program was recursive rather than iterative). The GC
+approches on the other hand, allocate memory on each
+\texttt{new}/\texttt{newarray} bytecode execution. Another important
+point to note is that AGC although faster when it comes to memory
+allocation runtime compared to JOP-GC, allocates more words, because AGC
+uses block based allocation, whereas JOP-GC object replication strategy
+with semi-space~\footnote{In the numbers in Table~\ref{tab:1}, we have
+  not included the semi-space reserved by JOP-GC.}.
 
 \subsection{WCRT comparisons}
 \label{sec:wcrt-estimation}
 
-In this section we compare the static WCRT/WCET obtained by applying the
+In this section we compare the static WCRT obtained by applying the
 technique described in Section~\ref{sec:static-wcrt-analysis} on a set
 of real-time benchmarks. To keep ourselves honest, we chose the
 benchmarks whose memory allocation requests fit within the allocated
 heap space without GC invocation. This was a necessary step, because one
 cannot \textit{practically} bound the GC cycle time for purpose of
 static analysis. We chose 5 real-time synchronous programs for
-bench-marking. \texttt{Cruise control}\cite{charles1996representation}
+bench-marking. \texttt{Cruise control}~\cite{charles1996representation}
 is the cruise speed controller found in
 cars. \texttt{Hrtcs}~\cite{DBLP:conf/rtcsa/HJpark2014} is a human
 response time gathering system. \texttt{Conveyor controller} is the
@@ -2048,26 +2081,27 @@ control system for a robot. Finally,
 control arrhythmia. These benchmarks are compiled to the TP-JOP
 architecture for execution and their WCRT values are analyzed. The
 results are shown in Figure~\ref{fig:13a}. Ignoring the \texttt{Motor}
-example, on average the proposed, No-GC approaches WCRT is around 23\%
+example, on average, the proposed, No-GC approach's WCRT is around 23\%
 shorter. The \texttt{Motor} example is an outlier, with a 4000\%
 improvement in WCRT, because a number of object allocations are
 performed when emitting events to control the motor coils. In other
-examples, object allocations are used to in computations on the
-transient heap space, with relatively fewer object allocations on the
-permanent heap. This requires, deep copying objects from the transient
-to the permanent heap space, which balances out the WCRT times between
-the No-GC and the AGC approaches. Note that, the method cache load times
-and synchornized heap access overheads are still present in the AGC
-approach to real-time system design.
+examples, object allocations are used in computations on the transient
+heap space, with relatively fewer object allocations on the permanent
+heap. This requires, deep copying objects from the transient to the
+permanent heap space, which balances out the WCRT times between the
+No-GC and the AGC approaches. Note that, the method cache load times and
+synchronized heap access overheads are still present in the AGC
+approach.
+
 
 Finally, Figure~\ref{fig:13b} gives the average method size comparisons
-for the generated Java program. Since we replace a single object
+for the compiled SystemJ programs. Since we replace a single object
 allocation bytecode \texttt{new}/\texttt{newarray} with a list of other
-bytecodes, which increases the method size. This consequently also has a
-penalty on the WCRT analysis as the method cache load time increases,
-but it is not as significant as loading the methods implementing the
-object allocation for every \texttt{new}/\texttt{newarray} bytecode
-executions in the AGC approach.
+bytecodes, the proposed approach increases the method size.
+Consequently this also has a penalty on the computed WCRT value, as the
+method cache load time increases, but it is not as significant as
+loading the methods implementing the object allocation for every
+\texttt{new}/\texttt{newarray} bytecode execution in the AGC approach.
 
 \begin{figure}[t!]
   \centering
@@ -2103,29 +2137,31 @@ exceptions. Furthermore, we are able to replace object allocation
 bytecodes, with real-time analyzable alternatives, which makes our
 approach amenable to worst case execution (reaction) time analysis 
 
-It is impossible to bound the garbage collection cycle times to bounds
-that are of practical use, and hence, preemptive scheduling approaches
-have been the only solution to programming real-time systems with
-managed runtime environments to date. Preemptive scheduling generally
-leads to explosion in the number of states that need to be checked by
-automated formal verification tools, and hence, makes building safety
-critical systems hard, if not impossible -- our proposal provides a
-solution to this problem. All the aforementioned improvements are
-further accompanied by improvements in the program throughput
-(approximately $3\times$ faster memory allocation times) and worst case
-times, as synchronization barriers necessary in real-time garbage
-collection approaches become unnecessary in the proposed approach. Not
-to mention the improvements in the number and size and improved layout
-of allocated Java objects and arrays.
+It is impossible to bound the garbage collection cycle times to values
+that are of practical use -- primarily due to the linked list traversal
+needed in different phases of the GC, and hence, preemptive and
+incremental scheduling approaches have been the only solution to
+programming real-time systems with managed runtime environments to
+date. Preemptive scheduling generally leads to explosion in the number
+of states that need to be checked by automated formal verification
+tools, and hence, makes building safety critical systems hard, if not
+impossible. This proposal provides a solution to this problem. All the
+aforementioned improvements are further accompanied by improvements in
+the program throughput (approximately $3\times$ faster memory allocation
+times) and worst case times, as synchronization barriers necessary in
+real-time garbage collection approaches become unnecessary in the
+proposed approach. Not to mention the improvements in the number, size
+and improved layout of allocated Java objects and arrays.
 
 But, the proposed approach is not a penance. The proposed memory model,
 does indeed require the programmer to carefully design their real-time
-applications as deep object copies need to be made explicitly by the
+applications, as deep object copies need to be made explicitly by the
 programmer. Furthermore, we see many opportunities for future
 optimization, especially getting rid of the object escapement
 restrictions currently enforced by the proposed data-flow analysis. We
-also see an opportunity to reuse permanent memory heap allocations
-across ticks, which we plan to address in the future.
+also see an opportunity to \textit{reuse} permanent memory heap
+allocations across tick boundaries, which we plan to address in the
+future.
 
 % Bibliography
 \bibliographystyle{ACM-Reference-Format-Journals}
