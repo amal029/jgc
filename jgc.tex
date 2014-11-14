@@ -2149,7 +2149,7 @@ across ticks, which we plan to address in the future.
 % \section{Appendix section head}
 
 
-\section{Appendix}
+ \section{The AGRC analysis algorithm} \label{ap:1}
 
 \begin{algorithm}[t!]
 	\DontPrintSemicolon
@@ -2246,20 +2246,20 @@ three parts:
 
 \begin{enumerate}
 
-	\item If the current node type is an \texttt{Action} node (line 15)
+	\item If the current node type is an \texttt{JDN} node (line 15)
 		and
 
 		\begin{enumerate}
 
-			\item the number of element in $E_i$ is 1, then the only parent node
-				$v_i$ \textit{Must} be called before $v_j$. Then a new node type
-				of $mNode$ is created with its field $Must$ initialized to the
-				result of recursive call of \texttt{create\_note}.
+			\item the number of element in $E_i$ is 1, then the only parent
+				node $v_i$ \textit{must} be called before $v_j$. Then a new node
+				of type $mNode$ is created with its field $Must$ initialized to
+				the result of recursive call of \texttt{create\_note}.
 
-			\item th number of element in $E_i$ is greater than 1, then any
-				parent nodes $v_i \in E_i$ \textit{May} be called before $v_j$.
-				A set of $mList$, consists of return results of
-				\texttt{create\_node} from each parent node $v_i \in E_i$, is
+			\item the number of element in $E_i$ is greater than 1, then any
+				parent nodes $v_i \in E_i$ \textit{may} be called before $v_j$.
+				A set of $mList$, consisting return results of
+				\texttt{create\_node} of each parent node $v_i \in E_i$, is
 				assigned to the field $May$ of a newly created $mNode$. 
 
 			\item the number of element in $E_i$ is 0, then a new $mNode$ is
@@ -2268,16 +2268,16 @@ three parts:
 
 		\end{enumerate}
 
-	\item If the current node type is \texttt{Join} node, this means that
-		there are two or more parallel reactions forked at the \texttt{Fork}
-		node, which \textit{Must} be found in one of the recursive parents
-		of the current node. Hence, the algorithm must continue the backward
+	\item If the current node type is \texttt{Join}, this means that there
+		are two or more parallel reactions forked at the \texttt{Fork} node,
+		which \textit{must} be found in one of the recursive parents of the
+		current node. Hence, the algorithm must continue the backward
 		traversal from this \texttt{Fork} node. During compilation, the
 		compiler has already constructed a Hashtable which maps each
 		\texttt{Join} node to its corresponding \texttt{Fork} node as shown
 		in line 28. 
 
-	\item If the current node type is other than \texttt{Action} node (line
+	\item If the current node type is other than \texttt{JDN} (line
 		31) and
 
 		\begin{enumerate}
@@ -2292,11 +2292,6 @@ three parts:
 
 \end{enumerate}
 
-It should be noted that if the current node is other than
-\texttt{Action} node, only \texttt{Join} node can have more than one
-parent. Therefore, there is no need for the algorithm to consider the
-case $|E_i| > 1$ (lines 32-25) when the node type is neither
-\texttt{Action} nor \texttt{Join} node.
 
 
 \end{document}
