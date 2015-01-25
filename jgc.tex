@@ -57,6 +57,8 @@
   morekeywords={input,output,signal,channel,immediate,weak,sustain,send,receive,abort,await,emit,present,trap,pause,exit,wait_inbetween,wait_exact,wait_atleast,suspend},
   tabsize=2 }
 
+\linespread{0.99}
+
 % Document starts
 \begin{document}
 
@@ -378,7 +380,7 @@ SystemJ programs on the TP-JOP architecture~\cite{LiMS14}.
 
 \begin{figure}[t!]
   \centering
-  \includegraphics[scale=0.7]{tpjop}
+  \includegraphics[scale=0.9]{tpjop}
   \caption{Overview of the TP-JOP architecture}
   \label{fig:3}
 \end{figure}
@@ -920,19 +922,11 @@ analysis steps in the next sections.
 \subsection{Data-flow analysis}
 \label{sec:data-flow-analysis}
 
-\begin{figure}[t!]
+\begin{figure}[h!]
   \centering
-  \subfloat[Pointers from permanent heap to transient heap]{
-    \includegraphics[scale=0.45]{ptp1}
-    \label{fig:9a}
-  }
-  \qquad
-  \subfloat[Points-to only in permanent heap]{
-    \includegraphics[scale=0.45]{ptp2}
-    \label{fig:9b}
-  }
-  \caption{The points-to problem}
-  \label{fig:9}
+  \includegraphics[scale=0.55]{analysis}
+  \caption{The flow-chart for the data-flow analysis algorithm}
+  \label{fig:fanalysis}
 \end{figure}
 
 As stated previously, we have an intra and inter-procedural
@@ -948,377 +942,6 @@ bytecode into a register-transfer level (RTL) intermediate format. For
 this work, we have used the OCaml~\cite{leroy1998ocaml} based Java
 static analysis framework; Sawja's~\cite{hubert2011sawja} intermediate
 RTL format called \textit{Bytecode Intermediate Representation} (BIR).
-
-\newsavebox{\exinv}
-\begin{lrbox}{\exinv}
-  \begin{minipage}[b]{0.7\linewidth}
-    \begin{Verbatim}[numbers=left,commandchars=\\\[\]]
-private static Signal S;
-public static void main(String args[]){
- Integer A = 0;\label[exinv:l1]
- Integer B = 1;\label[exinv:l2]
- S.setValue(A);\label[exinv:l3]
-}
-    \end{Verbatim}
-  \end{minipage}
-\end{lrbox}
-
-\newsavebox{\exinvt}
-\begin{lrbox}{\exinvt}
-  \begin{minipage}[b]{0.7\linewidth}
-    \begin{Verbatim}[numbers=left,commandchars=\\\[\]]
-iconst_0 \label[exinvt:l0]
-invokestatic  #2// valueOf:(I)Ljava/lang/Integer;\label[exinvt:l1]
-astore_1 \label[exinvt:l2]     
-iconst_1 \label[exinvt:l3]
-invokestatic  #2// valueOf:(I)Ljava/lang/Integer;\label[exinvt:l4]
-astore_2\label[exinvt:l5]
-return        
-    \end{Verbatim}
-  \end{minipage}
-\end{lrbox}
-
-\newsavebox{\exinvtt}
-\begin{lrbox}{\exinvtt}
-  \begin{minipage}[b]{0.7\linewidth}
-    \begin{Verbatim}[numbers=left,commandchars=\\\[\]]
-new #3 // class java/lang/Integer\label[exinvtt:l1]
-dup
-iload_0
-invokespecial #10 // Method "<init>":(I)V
-areturn
-    \end{Verbatim}
-  \end{minipage}
-\end{lrbox}
-\begin{figure}[t!]
-  \centering
-  \subfloat[Example Java code snippet]{
-    \scalebox{0.6}{\usebox{\exinv}}
-    \label{fig:10a}
-  }
-  \qquad
-  \subfloat[Produced Java bytecode]{
-    \scalebox{0.6}{\usebox{\exinvt}}
-    \label{fig:10b}
-  }
-  \qquad
-  \subfloat[The bytecode for method \texttt{valueOf} in Integer class]{
-    \scalebox{0.6}{\usebox{\exinvtt}}
-    \label{fig:10c}
-  }
-  \caption{Inadvertent object sharing problem}
-  \label{fig:10}
-\end{figure}
-\newsavebox{\algone}
-\begin{lrbox}{\algone}
-  \begin{minipage}[b]{0.5\linewidth}
-    \begin{algo}
-      \SetKwData{Let}{let}
-      \SetKwFunction{Steptwo}{Step2}
-      \SetKwFunction{Reachable}{ReachableMethods}
-      \SetKwFunction{Size}{sizeof}
-      \KwIn{program: Program in RTL format} 
-      \BlankLine
-      \tcc*[h]{$pp$ is the multi-set of program points}\\
-      \Let \textbf{global} $pp \leftarrow \emptyset$\;\label{algone:l1}
-      \Let $M \leftarrow$ \texttt{main}\;
-      \Let $M \leftarrow$ \Reachable(\texttt{main}) $\cup$ $\{M\}$\;
-      \Let $size \leftarrow$ \Size(signal class)\;
-      \ForEach{$m \in M$} {
-        \Let pp $\leftarrow$ ($size$, get in $m$, program points initializing signals)\;
-      }
-      \Steptwo(program,pp,\texttt{main})\;
-    \end{algo}
-  \end{minipage}
-\end{lrbox}
-
-\newsavebox{\algtwo}
-\begin{lrbox}{\algtwo}
-  \begin{minipage}[b]{0.5\linewidth}
-    \begin{algo}
-      \SetKwData{Let}{let}
-      \SetKwFunction{Code}{code}
-      \SetKwFunction{Signalset}{signalSet}
-      \SetKwFunction{Emits}{emits}
-      \SetKwFunction{InvokesMethod}{invokesMethod}
-      \SetKwFunction{Steptwo}{Step2}
-      \SetKwFunction{GetMethod}{getInvoked}
-      \SetKwFunction{Stepthree}{Step3}
-      \KwIn{program: Program in RTL format} 
-      \KwIn{pp: Set of program points} 
-      \KwIn{\texttt{method}: Method to scan for signal emissions} 
-      \BlankLine
-      \Let $S \leftarrow$ \Signalset(pp)\;
-      \Let $C \leftarrow$ \Code(\texttt{method})\;
-      \Let $PPC \leftarrow \emptyset$\;
-      \ForEach{$c \in C$}{\label{algtwo:l1}
-        \If{\Emits($c$,$S$)}{
-          $PPC \leftarrow PPC\ \cup \{c\}$\;
-        }
-      }\label{algtwo:l2}
-      \Stepthree(program,$PPC$,$C$)\;
-      \ForEach{$c \in C$}{
-        \If{\InvokesMethod($c$)}{
-          \Steptwo(program,$c$,\GetMethod($c$))\;
-        }
-      }
-    \end{algo}
-  \end{minipage}
-\end{lrbox}
-
-\newsavebox{\algthree}
-\begin{lrbox}{\algthree}
-  \begin{minipage}[b]{0.5\linewidth}
-    \begin{algo}
-      \SetKwData{Let}{let}
-      \SetKwFunction{Code}{code}
-      \SetKwFunction{Signalset}{signalSet}
-      \SetKwFunction{Emits}{emits}
-      \SetKwFunction{GetExpr}{getExpr}
-      \SetKwFunction{AffectsFields}{affectsFields}
-      \SetKwFunction{AffectsVars}{affectsVars}
-      \SetKwFunction{StepFour}{Step4}
-      \SetKwFunction{StepFive}{Step5}
-      \KwIn{program: Program in RTL format} 
-      % \KwIn{pp: Set of program points} 
-      \KwIn{$PPC$: Set of program points affected} 
-      \KwIn{$C$: code of the method containing $PPC$}
-      \BlankLine
-      \ForEach{$ppc \in PPC$}{
-        \uIf{\AffectsFields(\GetExpr($ppc$))}{
-          \Let $pp \leftarrow pp\ \cup$ \StepFour(program,$ppc$,\GetExpr($ppc$),$C$)\;
-        }
-        \uElseIf{\AffectsVars(\GetExpr($ppc$))}{
-          \Let $pp \leftarrow pp\ \cup$ \{\StepFive(program,$ppc$,\GetExpr($ppc$),$C$)\}\;
-        }
-        \lElse{\texttt{raise error}}
-      }
-    \end{algo}
-  \end{minipage}
-\end{lrbox}
-
-\newsavebox{\algfour}
-\begin{lrbox}{\algfour}
-  \begin{minipage}[b]{0.5\linewidth}
-    \begin{algo}
-      \SetKwData{Let}{let}
-      \SetKwFunction{Code}{code}
-      \SetKwFunction{GetFields}{getFields}
-      \SetKwFunction{Escape}{escape}
-      \SetKwFunction{StepSix}{Step6}
-      \SetKwFunction{FieldOf}{fieldOf}
-      \SetKwFunction{HasRefFields}{hasRefFields}
-      \SetKwFunction{GetAffectedFeilds}{getAffectedFields}
-      \SetKwFunction{StepThree}{Step3}
-      \SetKwFunction{Max}{max}
-      \SetKwFunction{SizeOf}{sizeof}
-      \KwIn{program: Program in RTL format} 
-      \KwIn{$ppc$: Affected program point} 
-      \KwIn{$pexpr$: Expression affecting field} 
-      \KwIn{$C$: code of the method containing $ppc$} 
-      \BlankLine
-      \Let $f \leftarrow$ \FieldOf($pexr$)\;
-      \Let ($size$,$defs$) $\leftarrow$ \StepSix(program,$ppc$,$f$,$C$)\;
-      \lIf {$size \neq 0$} {\Return ($size$,$defs$)}\;
-      \ForEach {$d \in defs$} { \label{step4:s}
-        \uIf{!\Escape(program,$C$,$d$)} {
-          \If {\HasRefFields($f$)} {
-            % start2
-            \Let $PPC \leftarrow$ \GetAffectedFeilds(\GetFields($f$))\;
-            \StepThree(program,$PPC$,$C$)\;
-          }
-        }
-        \lElse {
-          \texttt{raise error}\;
-        }
-      }
-      \Let $size \leftarrow$ \Max(\SizeOf($defs$))\; \label{step4:e}
-      \Return ($size$,$defs$)\;
-    \end{algo}
-  \end{minipage}
-\end{lrbox}
-
-\newsavebox{\algfive}
-\begin{lrbox}{\algfive}
-  \begin{minipage}[b]{0.5\linewidth}
-    \begin{algo}
-      \SetKwData{Let}{let}
-      \SetKwFunction{Code}{code}
-      \SetKwFunction{GetFields}{getFields}
-      \SetKwFunction{Escape}{escape}
-      \SetKwFunction{StepSeven}{Step7}
-      \SetKwFunction{VarOf}{varOf}
-      \SetKwFunction{HasRefFields}{hasRefFields}
-      \SetKwFunction{GetAffectedFields}{getAffectedFields}
-      \SetKwFunction{StepThree}{Step3}
-      \SetKwFunction{Max}{max}
-      \SetKwFunction{SizeOf}{sizeof}
-      \KwIn{program: Program in RTL format} 
-      \KwIn{$ppc$: Affected program point} 
-      \KwIn{$pexpr$: Expression affecting field} 
-      \KwIn{$C$: code of the method containing $ppc$} 
-      \BlankLine
-      \Let $v \leftarrow$ \VarOf($pexr$)\;
-      \Let $defs \leftarrow$ \StepSeven(program,$ppc$,$v$,$C$)\;
-      \ForEach {$d \in defs$} {
-        \uIf{!\Escape(program,$C$,$d$)} {
-          \If {\HasRefFields($v$)} {\label{algfive:l1}
-            % start2
-            \Let $PPC \leftarrow$ \GetAffectedFields(\GetFields($v$))\;
-            \StepThree(program,$PPC$,$C$)\;
-          }\label{algfive:l2}
-        }
-        \lElse {
-          \texttt{raise error}\;
-        }
-      }
-      \Let $size \leftarrow$ \Max(\SizeOf($defs$))\;
-      \Return ($size$,$defs$)\;
-    \end{algo}
-  \end{minipage}
-\end{lrbox}
-
-\newsavebox{\algsix}
-\begin{lrbox}{\algsix}
-  \begin{minipage}[b]{0.5\linewidth}
-    \begin{algo}
-      \SetKwData{Let}{let}
-      \SetKwFunction{Escape}{escape}
-      \SetKwFunction{ReachDef}{reachDef}
-      \SetKwFunction{GetAllFields}{getAllFields}
-      \SetKwFunction{GetCallers}{getCallers}
-      \SetKwFunction{GetCallerPPC}{getCallerPPC}
-      \SetKwFunction{GetVarSetting}{getVarSetting}
-      \SetKwFunction{StepSeven}{Step7}
-      \KwIn{program: Program in RTL format} 
-      \KwIn{$ppc$: Affected program point} 
-      \KwIn{$f$: Field affected} 
-      \KwIn{$C$: code of the method containing $ppc$} 
-      \BlankLine
-      \Let $ofields \leftarrow$ \GetAllFields($C$) $\backslash$ \{$f$\} \;\label{algsix:l1}
-      \Let $pcs \leftarrow$ \ReachDef($ppc$,$f$)\;
-      \uIf {$pcs \neq \emptyset$} {
-        \Let $defs \leftarrow \emptyset$\;
-        \ForEach {$pc \in pcs$} {
-          \Let $vf \leftarrow$ \GetVarSetting($f$,$pc$)\;
-          \Let $tt \leftarrow$ \StepSeven(program,$pc$,$vf$,$C$)\;\label{algsix:s7c}
-          \uIf {all other $field \in ofields$ have same $tt$} {
-            \tcc*[h]{Concat in set $defs$}\\
-            $defs \leftarrow defs\ \cup tt$\;
-          }\lElse {
-            \tcc*[h]{Append a new set in $defs$}\\
-            $defs \leftarrow defs\ \cup \{tt\}$\;
-          }
-        }
-        \Return (0,$defs$)\;
-      }\label{algsix:l2}
-      \Else {\label{algsix:l3}
-        \tcc*[h]{Inter-procedural analysis}\\
-        \tcc*[h]{Get all callers, including from AGRC analysis}\\
-        \Let $Callers \leftarrow$ \GetCallers($C$)\;
-        \lIf {$Callers = \emptyset$} \texttt{raise Not\_init $f$}\;
-        \Let $defs \leftarrow \emptyset$\;  
-        \Let $sizes \leftarrow \emptyset$\;  
-        \ForEach {$caller \in Callers$} {
-          \Let $defs \leftarrow defs\ \cup$ \StepSix(program,\GetCallerPPC($C$),$f$,$caller$)\;
-          \tcc*[h]{Similar to Figure~\ref{fig:8d}
-            lines~\ref{step4:s}-\ref{step4:e}, to fill in the sizes set.}
-        }
-        \Let $size \leftarrow  max(sizes)$\;
-        \Return ($size$,$defs$)\;
-      }\label{algsix:l4}
-    \end{algo}
-  \end{minipage}
-\end{lrbox}
-
-\begin{figure}[h!]
-  \centering
-  \subfloat[Step1:Scan signal initialization]{
-    \scalebox{0.7}{\usebox{\algone}}
-    \label{fig:8a}
-  }
-  \qquad
-  \subfloat[Step2: Scan \texttt{setValue} method calls]{
-    \scalebox{0.7}{\usebox{\algtwo}}
-    \label{fig:8b}
-  }
-  \qquad
-  \subfloat[Step3: For every affected field/variable get the object
-  allocation program points]{
-    \scalebox{0.7}{\usebox{\algthree}}
-    \label{fig:8c}
-  }
-  \qquad
-  \subfloat[Step4: Get object allocation program points for affected field]{
-    \scalebox{0.7}{\usebox{\algfour}}
-    \label{fig:8d}
-  }
-  \caption{Data-flow analysis pseudo-algorithm}
-  \label{fig:8}
-\end{figure}
-
-\begin{figure}
-  \centering
-  \ContinuedFloat
-  \subfloat[Step5: Get object allocation program points for affected variables]{
-    \scalebox{0.7}{\usebox{\algfive}}
-    \label{fig:8e}
-  }
-  \qquad
-  \subfloat[Step6: Search object allocation program points for affected field]{
-    \scalebox{0.7}{\usebox{\algsix}}
-    \label{fig:8f}
-  }
-  \caption{Data-flow analysis pseudo-algorithm}
-  \label{fig:8}
-\end{figure}
-
-\newsavebox{\algseven}
-\begin{lrbox}{\algseven}
-  \begin{minipage}[b]{0.5\linewidth}
-    \begin{algo}
-      \SetKwData{Let}{let}
-      \SetKwFunction{Escape}{escape}
-      \SetKwFunction{ReachDef}{reachDef}
-      \SetKwFunction{NotReachable}{notReachable}
-      \SetKwFunction{GetAllFields}{getAllFields}
-      \SetKwFunction{GetExpr}{getExpr}
-      \SetKwFunction{VarOf}{varOf}
-      \SetKwFunction{GetVarSetting}{getVarSetting}
-      \SetKwFunction{StepFour}{Step4}
-      \KwIn{program: Program in RTL format} 
-      \KwIn{$ppc$: Affected program point} 
-      \KwIn{$v$: Variable affected} 
-      \KwIn{$C$: code of the method containing $ppc$} 
-      \BlankLine
-      \Let $pcs \leftarrow$ \ReachDef($ppc$,$v$)\;\label{algseven:l1}
-      \lIf{$pcs = \emptyset$} {\texttt{raise Not\_init}}\;\label{algseven:l3}
-      \Let $defs \leftarrow \emptyset$\;
-      \ForEach {$pc \in pcs$} {
-        \uIf {\GetExpr($pc$) is \texttt{New} \textbf{or} \GetExpr($pc$) is \texttt{NewArray}} {
-          $defs \leftarrow defs\ \cup \{pc\}$\;\label{algseven:l2} 
-        }
-        \uElseIf {\GetExpr($pc$) is \texttt{AffectField}} {
-          \Let $expr \leftarrow$ \GetExpr($pc$)\;
-          \Let (\_,$defs$) $\leftarrow$ \StepFour(program,$pc$,$expr$,$C$)\;
-        }
-        \uElseIf {\GetExpr($pc$) is \texttt{AffectVar}}{
-          \Let $v \leftarrow$ \VarOf(\GetExpr($pc$))\;
-          \Let (\_,$defs$) $\leftarrow$ \StepSeven(program,$pc$,$v$,$C$)\;\label{algseven:rec}
-        }
-        \Else {\label{algseven:l4}
-          \tcc*[h]{Cannot handle new outside current method allocation}\\
-          \texttt{raise Not\_handled}
-        }\label{algseven:l5}
-      }
-      \tcc*[h]{Make sure that definitions are not reachable from each other}\\
-      \If {$|defs| > 1$} {
-        \textbf{assert}(\NotReachable($defs$))\;
-      }
-      \Return($defs$)\;
-    \end{algo}
-  \end{minipage}
-\end{lrbox}
 
 \newsavebox{\exone}
 \begin{lrbox}{\exone}
@@ -1383,32 +1006,104 @@ public boolean MethodCall0_0(){
 \end{lrbox}
 
 \begin{figure}[t!]
-  \ContinuedFloat
-  \centering
-  \subfloat[Step7: Search object allocation point(s) for method local affected
-  variable]{
-    \scalebox{0.7}{\usebox{\algseven}}
-    \label{fig:8g}
-  }
-  \qquad
+  % \centering
   \subfloat[Example 1: variables and intra-procedural analysis]{
     \scalebox{0.7}{\usebox{\exone}}
     \label{fig:8h}
-  }
-  
-  \subfloat[UML class hierarchy for classes \texttt{a}, \texttt{b} and
-  \texttt{c} used in Figure~\ref{fig:8h} and~\ref{fig:8j}]{
-    \includegraphics[scale=0.5]{umlex1}
-    \label{fig:8i}
   }
   \qquad
   \subfloat[Example 2: Fields and inter-procedural analysis]{
     \scalebox{0.7}{\usebox{\extwo}}
     \label{fig:8j}
   }
+
+  \subfloat[UML class hierarchy for classes \texttt{a}, \texttt{b} and
+  \texttt{c} used in Figure~\ref{fig:8h} and~\ref{fig:8j}]{
+    \includegraphics[scale=0.5]{umlex1}
+    \label{fig:8i}
+  }
+
   \caption{Data-flow analysis pseudo-algorithm and related examples}
   \label{fig:8}
 \end{figure}
+
+\begin{figure}[t!]
+  \centering
+  \subfloat[Pointers from permanent heap to transient heap]{
+    \includegraphics[scale=0.45]{ptp1}
+    \label{fig:9a}
+  }
+  \qquad
+  \subfloat[Points-to only in permanent heap]{
+    \includegraphics[scale=0.45]{ptp2}
+    \label{fig:9b}
+  }
+  \caption{The points-to problem}
+  \label{fig:9}
+\end{figure}
+
+
+\newsavebox{\exinv}
+\begin{lrbox}{\exinv}
+  \begin{minipage}[b]{0.7\linewidth}
+    \begin{Verbatim}[numbers=left,commandchars=\\\[\]]
+private static Signal S;
+public static void main(String args[]){
+ Integer A = 0;\label[exinv:l1]
+ Integer B = 1;\label[exinv:l2]
+ S.setValue(A);\label[exinv:l3]
+}
+    \end{Verbatim}
+  \end{minipage}
+\end{lrbox}
+
+\newsavebox{\exinvt}
+\begin{lrbox}{\exinvt}
+  \begin{minipage}[b]{0.7\linewidth}
+    \begin{Verbatim}[numbers=left,commandchars=\\\[\]]
+iconst_0 \label[exinvt:l0]
+invokestatic  #2// valueOf:(I)Ljava/lang/Integer;\label[exinvt:l1]
+astore_1 \label[exinvt:l2]     
+iconst_1 \label[exinvt:l3]
+invokestatic  #2// valueOf:(I)Ljava/lang/Integer;\label[exinvt:l4]
+astore_2\label[exinvt:l5]
+return        
+    \end{Verbatim}
+  \end{minipage}
+\end{lrbox}
+
+\newsavebox{\exinvtt}
+\begin{lrbox}{\exinvtt}
+  \begin{minipage}[b]{0.7\linewidth}
+    \begin{Verbatim}[numbers=left,commandchars=\\\[\]]
+new #3 // class java/lang/Integer\label[exinvtt:l1]
+dup
+iload_0
+invokespecial #10 // Method "<init>":(I)V
+areturn
+    \end{Verbatim}
+  \end{minipage}
+\end{lrbox}
+\begin{figure}[t!]
+  \centering
+  \subfloat[Example Java code snippet]{
+    \scalebox{0.6}{\usebox{\exinv}}
+    \label{fig:10a}
+  }
+  \qquad
+  \subfloat[Produced Java bytecode]{
+    \scalebox{0.6}{\usebox{\exinvt}}
+    \label{fig:10b}
+  }
+  \qquad
+  \subfloat[The bytecode for method \texttt{valueOf} in Integer class]{
+    \scalebox{0.6}{\usebox{\exinvtt}}
+    \label{fig:10c}
+  }
+  \caption{Inadvertent object sharing problem}
+  \label{fig:10}
+\end{figure}
+
 
 Given the class file(s) in the RTL format, the data-flow analysis
 carried out is shown in Figure~\ref{fig:8}. Being a relatively complex
@@ -1491,7 +1186,7 @@ branching construct (lines~\ref{exone:l3}-\ref{exone:l4}).
     and $M$ be a method invocation. $O$ is said to escape $M$, if the
     lifetime of $O$ may exceed the lifetime of $M$.} If the object
   instance does not escape the method lifetime, then the algorithm
-  checks if their are any reference fields within this object, if so,
+  checks if there are any reference fields within this object, if so,
   Step3 is invoked for migrating all object allocations whose returned
   reference is held in the fields into permanent heap. Consider, the
   program point~\ref{exone:l2}, object \texttt{t} is initialized as
@@ -1575,7 +1270,7 @@ branching construct (lines~\ref{exone:l3}-\ref{exone:l4}).
     Step7. The objective of our data-flow algorithm is to identify all
     the program points that allocate objects whose returned references
     are emitted as signal values. We are performing compile time memory
-    allocation, which as we will see later requires us to replace the
+    allocation, which, as we will see later, requires us to replace the
     \texttt{new}/\texttt{newarray} bytecodes with a different set of
     bytecodes (c.f. Section~\ref{sec:prod-back-code}). We cannot blindly
     replace these bytecodes in methods other than the ones being
@@ -1626,7 +1321,7 @@ branching construct (lines~\ref{exone:l3}-\ref{exone:l4}).
 \item \underline{Step6} (Figure~\ref{fig:8f}) can be conceptually
   partitioned into two parts. Part-1
   (lines~\ref{algsix:l1}-\ref{algsix:l2}) returns the program points
-  initializing objects within the same method that the field is being
+  allocating objects within the same method that the field is being
   used. The more interesting part is part-2
   (lines~\ref{algsix:l3}-\ref{algsix:l4}), which carries out
   \textit{inter-procedural} analysis if the affected field being
@@ -1907,13 +1602,13 @@ heap accesses.
   \ContinuedFloat
   \subfloat[Java bytecode snippet and class constant-pool for example in
   Figure~\ref{fig:8j}]{
-    \scalebox{0.55}{\usebox{\bone}}
+    \scalebox{0.65}{\usebox{\bone}}
     \label{fig:11c}
   }
   \qquad
   \subfloat[Java bytecode snippet and class constant-pool for example in
   Figure~\ref{fig:8j} after \texttt{new} bytecode replacement]{
-    \scalebox{0.55}{\usebox{\btwo}}
+    \scalebox{0.65}{\usebox{\btwo}}
     \label{fig:11d}
   }
 
@@ -2011,7 +1706,7 @@ approaches~\footnote{JOP-GC could not perform garbage collection
 allocations compared to simple object allocations. The runtime memory
 allocation time difference is significant in the case of GC invocation
 when compared to the case of no GC invocation. In case of memory
-allocation time when no GC is invoked, there are two major reasons for
+allocation time when no GC is invoked, there are multiple reasons for
 the speedup: (1) there are no read/write barriers
 (\texttt{synchrnonized} method calls in Java terms) when allocating
 memory, which are needed by both: JOP-GC and AGC, since RTGCs are
@@ -2064,8 +1759,9 @@ approches on the other hand, allocate memory on each
 point to note is that AGC although faster when it comes to memory
 allocation runtime compared to JOP-GC, allocates more words, because AGC
 uses block based allocation, whereas JOP-GC uses object replication
-strategy with semi-space~\footnote{In the numbers in Table~\ref{tab:1},
-  we have not included the semi-space reserved by JOP-GC.}.
+strategy with semi-space partitioning~\footnote{In the numbers in
+  Table~\ref{tab:1}, we have not included the semi-space reserved by
+  JOP-GC.}.
 
 \subsection{WCRT comparisons}
 \label{sec:wcrt-estimation}
@@ -2148,8 +1844,8 @@ approach amenable to worst case execution (reaction) time analysis
 It is impossible to bound the garbage collection cycle times to values
 that are of practical use -- primarily due to the linked list traversal
 needed in different phases of the garbage collection, and hence,
-preemptive and incremental scheduling approaches have been the only
-solution to programming real-time systems with managed runtime
+preemptive and incremental garbage collection approaches have been the
+only solution to programming real-time systems with managed runtime
 environments to date. Preemptive scheduling generally leads to explosion
 in the number of states that need to be checked by automated formal
 verification tools, and hence, makes building safety critical systems
@@ -2190,7 +1886,324 @@ future.
 
 % \section{This is an example of Appendix section head}
 
-% \section{Appendix section head}
+\section{Data-flow analysis pseudo-algorithms}
+
+\newsavebox{\algone}
+\begin{lrbox}{\algone}
+  \begin{minipage}[b]{0.5\linewidth}
+    \begin{algo}
+      \SetKwData{Let}{let}
+      \SetKwFunction{Steptwo}{Step2}
+      \SetKwFunction{Reachable}{ReachableMethods}
+      \SetKwFunction{Size}{sizeof}
+      \KwIn{program: Program in RTL format} 
+      \BlankLine
+      \tcc*[h]{$pp$ is the multi-set of program points}\\
+      \Let \textbf{global} $pp \leftarrow \emptyset$\;\label{algone:l1}
+      \Let $M \leftarrow$ \texttt{main}\;
+      \Let $M \leftarrow$ \Reachable(\texttt{main}) $\cup$ $\{M\}$\;
+      \Let $size \leftarrow$ \Size(signal class)\;
+      \ForEach{$m \in M$} {
+        \Let pp $\leftarrow$ ($size$, get in $m$, program points initializing signals)\;
+      }
+      \Steptwo(program,pp,\texttt{main})\;
+    \end{algo}
+  \end{minipage}
+\end{lrbox}
+
+\newsavebox{\algtwo}
+\begin{lrbox}{\algtwo}
+  \begin{minipage}[b]{0.5\linewidth}
+    \begin{algo}
+      \SetKwData{Let}{let}
+      \SetKwFunction{Code}{code}
+      \SetKwFunction{Signalset}{signalSet}
+      \SetKwFunction{Emits}{emits}
+      \SetKwFunction{InvokesMethod}{invokesMethod}
+      \SetKwFunction{Steptwo}{Step2}
+      \SetKwFunction{GetMethod}{getInvoked}
+      \SetKwFunction{Stepthree}{Step3}
+      \KwIn{program: Program in RTL format} 
+      \KwIn{pp: Set of program points} 
+      \KwIn{\texttt{method}: Method to scan for signal emissions} 
+      \BlankLine
+      \Let $S \leftarrow$ \Signalset(pp)\;
+      \Let $C \leftarrow$ \Code(\texttt{method})\;
+      \Let $PPC \leftarrow \emptyset$\;
+      \ForEach{$c \in C$}{\label{algtwo:l1}
+        \If{\Emits($c$,$S$)}{
+          $PPC \leftarrow PPC\ \cup \{c\}$\;
+        }
+      }\label{algtwo:l2}
+      \Stepthree(program,$PPC$,$C$)\;
+      \ForEach{$c \in C$}{
+        \If{\InvokesMethod($c$)}{
+          \Steptwo(program,$c$,\GetMethod($c$))\;
+        }
+      }
+    \end{algo}
+  \end{minipage}
+\end{lrbox}
+
+\newsavebox{\algthree}
+\begin{lrbox}{\algthree}
+  \begin{minipage}[b]{0.5\linewidth}
+    \begin{algo}
+      \SetKwData{Let}{let}
+      \SetKwFunction{Code}{code}
+      \SetKwFunction{Signalset}{signalSet}
+      \SetKwFunction{Emits}{emits}
+      \SetKwFunction{GetExpr}{getExpr}
+      \SetKwFunction{AffectsFields}{affectsFields}
+      \SetKwFunction{AffectsVars}{affectsVars}
+      \SetKwFunction{StepFour}{Step4}
+      \SetKwFunction{StepFive}{Step5}
+      \KwIn{program: Program in RTL format} 
+      % \KwIn{pp: Set of program points} 
+      \KwIn{$PPC$: Set of program points affected} 
+      \KwIn{$C$: code of the method containing $PPC$}
+      \BlankLine
+      \ForEach{$ppc \in PPC$}{
+        \uIf{\AffectsFields(\GetExpr($ppc$))}{
+          \Let $pp \leftarrow pp\ \cup$ \StepFour(program,$ppc$,\GetExpr($ppc$),$C$)\;
+        }
+        \uElseIf{\AffectsVars(\GetExpr($ppc$))}{
+          \Let $pp \leftarrow pp\ \cup$ \{\StepFive(program,$ppc$,\GetExpr($ppc$),$C$)\}\;
+        }
+        \lElse{\texttt{raise error}}
+      }
+    \end{algo}
+  \end{minipage}
+\end{lrbox}
+
+\newsavebox{\algfour}
+\begin{lrbox}{\algfour}
+  \begin{minipage}[b]{0.5\linewidth}
+    \begin{algo}
+      \SetKwData{Let}{let}
+      \SetKwFunction{Code}{code}
+      \SetKwFunction{GetFields}{getFields}
+      \SetKwFunction{Escape}{escape}
+      \SetKwFunction{StepSix}{Step6}
+      \SetKwFunction{FieldOf}{fieldOf}
+      \SetKwFunction{HasRefFields}{hasRefFields}
+      \SetKwFunction{GetAffectedFeilds}{getAffectedFields}
+      \SetKwFunction{StepThree}{Step3}
+      \SetKwFunction{Max}{max}
+      \SetKwFunction{SizeOf}{sizeof}
+      \KwIn{program: Program in RTL format} 
+      \KwIn{$ppc$: Affected program point} 
+      \KwIn{$pexpr$: Expression affecting field} 
+      \KwIn{$C$: code of the method containing $ppc$} 
+      \BlankLine
+      \Let $f \leftarrow$ \FieldOf($pexr$)\;
+      \Let ($size$,$defs$) $\leftarrow$ \StepSix(program,$ppc$,$f$,$C$)\;
+      \lIf {$size \neq 0$} {\Return ($size$,$defs$)}\;
+      \ForEach {$d \in defs$} { \label{step4:s}
+        \uIf{!\Escape(program,$C$,$d$)} {
+          \If {\HasRefFields($f$)} {
+            % start2
+            \Let $PPC \leftarrow$ \GetAffectedFeilds(\GetFields($f$))\;
+            \StepThree(program,$PPC$,$C$)\;
+          }
+        }
+        \lElse {
+          \texttt{raise error}\;
+        }
+      }
+      \Let $size \leftarrow$ \Max(\SizeOf($defs$))\; \label{step4:e}
+      \Return ($size$,$defs$)\;
+    \end{algo}
+  \end{minipage}
+\end{lrbox}
+
+\newsavebox{\algfive}
+\begin{lrbox}{\algfive}
+  \begin{minipage}[b]{0.5\linewidth}
+    \begin{algo}
+      \SetKwData{Let}{let}
+      \SetKwFunction{Code}{code}
+      \SetKwFunction{GetFields}{getFields}
+      \SetKwFunction{Escape}{escape}
+      \SetKwFunction{StepSeven}{Step7}
+      \SetKwFunction{VarOf}{varOf}
+      \SetKwFunction{HasRefFields}{hasRefFields}
+      \SetKwFunction{GetAffectedFields}{getAffectedFields}
+      \SetKwFunction{StepThree}{Step3}
+      \SetKwFunction{Max}{max}
+      \SetKwFunction{SizeOf}{sizeof}
+      \KwIn{program: Program in RTL format} 
+      \KwIn{$ppc$: Affected program point} 
+      \KwIn{$pexpr$: Expression affecting field} 
+      \KwIn{$C$: code of the method containing $ppc$} 
+      \BlankLine
+      \Let $v \leftarrow$ \VarOf($pexr$)\;
+      \Let $defs \leftarrow$ \StepSeven(program,$ppc$,$v$,$C$)\;
+      \ForEach {$d \in defs$} {
+        \uIf{!\Escape(program,$C$,$d$)} {
+          \If {\HasRefFields($v$)} {\label{algfive:l1}
+            % start2
+            \Let $PPC \leftarrow$ \GetAffectedFields(\GetFields($v$))\;
+            \StepThree(program,$PPC$,$C$)\;
+          }\label{algfive:l2}
+        }
+        \lElse {
+          \texttt{raise error}\;
+        }
+      }
+      \Let $size \leftarrow$ \Max(\SizeOf($defs$))\;
+      \Return ($size$,$defs$)\;
+    \end{algo}
+  \end{minipage}
+\end{lrbox}
+
+\newsavebox{\algsix}
+\begin{lrbox}{\algsix}
+  \begin{minipage}[b]{0.5\linewidth}
+    \begin{algo}
+      \SetKwData{Let}{let}
+      \SetKwFunction{Escape}{escape}
+      \SetKwFunction{ReachDef}{reachDef}
+      \SetKwFunction{GetAllFields}{getAllFields}
+      \SetKwFunction{GetCallers}{getCallers}
+      \SetKwFunction{GetCallerPPC}{getCallerPPC}
+      \SetKwFunction{GetVarSetting}{getVarSetting}
+      \SetKwFunction{StepSeven}{Step7}
+      \KwIn{program: Program in RTL format} 
+      \KwIn{$ppc$: Affected program point} 
+      \KwIn{$f$: Field affected} 
+      \KwIn{$C$: code of the method containing $ppc$} 
+      \BlankLine
+      \Let $ofields \leftarrow$ \GetAllFields($C$) $\backslash$ \{$f$\} \;\label{algsix:l1}
+      \Let $pcs \leftarrow$ \ReachDef($ppc$,$f$)\;
+      \uIf {$pcs \neq \emptyset$} {
+        \Let $defs \leftarrow \emptyset$\;
+        \ForEach {$pc \in pcs$} {
+          \Let $vf \leftarrow$ \GetVarSetting($f$,$pc$)\;
+          \Let $tt \leftarrow$ \StepSeven(program,$pc$,$vf$,$C$)\;\label{algsix:s7c}
+          \uIf {all other $field \in ofields$ have same $tt$} {
+            \tcc*[h]{Concat in set $defs$}\\
+            $defs \leftarrow defs\ \cup tt$\;
+          }\lElse {
+            \tcc*[h]{Append a new set in $defs$}\\
+            $defs \leftarrow defs\ \cup \{tt\}$\;
+          }
+        }
+        \Return (0,$defs$)\;
+      }\label{algsix:l2}
+      \Else {\label{algsix:l3}
+        \tcc*[h]{Inter-procedural analysis}\\
+        \tcc*[h]{Get all callers, including from AGRC analysis}\\
+        \Let $Callers \leftarrow$ \GetCallers($C$)\;
+        \lIf {$Callers = \emptyset$} \texttt{raise Not\_init $f$}\;
+        \Let $defs \leftarrow \emptyset$\;  
+        \Let $sizes \leftarrow \emptyset$\;  
+        \ForEach {$caller \in Callers$} {
+          \Let $defs \leftarrow defs\ \cup$ \StepSix(program,\GetCallerPPC($C$),$f$,$caller$)\;
+          \tcc*[h]{Similar to Figure~\ref{fig:8d}
+            lines~\ref{step4:s}-\ref{step4:e}, to fill in the sizes set.}
+        }
+        \Let $size \leftarrow  max(sizes)$\;
+        \Return ($size$,$defs$)\;
+      }\label{algsix:l4}
+    \end{algo}
+  \end{minipage}
+\end{lrbox}
+
+\newsavebox{\algseven}
+\begin{lrbox}{\algseven}
+  \begin{minipage}[b]{0.5\linewidth}
+    \begin{algo}
+      \SetKwData{Let}{let}
+      \SetKwFunction{Escape}{escape}
+      \SetKwFunction{ReachDef}{reachDef}
+      \SetKwFunction{NotReachable}{notReachable}
+      \SetKwFunction{GetAllFields}{getAllFields}
+      \SetKwFunction{GetExpr}{getExpr}
+      \SetKwFunction{VarOf}{varOf}
+      \SetKwFunction{GetVarSetting}{getVarSetting}
+      \SetKwFunction{StepFour}{Step4}
+      \KwIn{program: Program in RTL format} 
+      \KwIn{$ppc$: Affected program point} 
+      \KwIn{$v$: Variable affected} 
+      \KwIn{$C$: code of the method containing $ppc$} 
+      \BlankLine
+      \Let $pcs \leftarrow$ \ReachDef($ppc$,$v$)\;\label{algseven:l1}
+      \lIf{$pcs = \emptyset$} {\texttt{raise Not\_init}}\;\label{algseven:l3}
+      \Let $defs \leftarrow \emptyset$\;
+      \ForEach {$pc \in pcs$} {
+        \uIf {\GetExpr($pc$) is \texttt{New} \textbf{or} \GetExpr($pc$) is \texttt{NewArray}} {
+          $defs \leftarrow defs\ \cup \{pc\}$\;\label{algseven:l2} 
+        }
+        \uElseIf {\GetExpr($pc$) is \texttt{AffectField}} {
+          \Let $expr \leftarrow$ \GetExpr($pc$)\;
+          \Let (\_,$defs$) $\leftarrow$ \StepFour(program,$pc$,$expr$,$C$)\;
+        }
+        \uElseIf {\GetExpr($pc$) is \texttt{AffectVar}}{
+          \Let $v \leftarrow$ \VarOf(\GetExpr($pc$))\;
+          \Let (\_,$defs$) $\leftarrow$ \StepSeven(program,$pc$,$v$,$C$)\;\label{algseven:rec}
+        }
+        \Else {\label{algseven:l4}
+          \tcc*[h]{Cannot handle new outside current method allocation}\\
+          \texttt{raise Not\_handled}
+        }\label{algseven:l5}
+      }
+      \tcc*[h]{Make sure that definitions are not reachable from each other}\\
+      \If {$|defs| > 1$} {
+        \textbf{assert}(\NotReachable($defs$))\;
+      }
+      \Return($defs$)\;
+    \end{algo}
+  \end{minipage}
+\end{lrbox}
+
+\begin{figure}[h!]
+  \centering
+  \subfloat[Step1:Scan signal initialization]{
+    \scalebox{0.7}{\usebox{\algone}}
+    \label{fig:8a}
+  }
+  \qquad
+  \subfloat[Step2: Scan \texttt{setValue} method calls]{
+    \scalebox{0.7}{\usebox{\algtwo}}
+    \label{fig:8b}
+  }
+  \qquad
+  \subfloat[Step3: For every affected field/variable get the object
+  allocation program points]{
+    \scalebox{0.7}{\usebox{\algthree}}
+    \label{fig:8c}
+  }
+  \qquad
+  \subfloat[Step4: Get object allocation program points for affected field]{
+    \scalebox{0.7}{\usebox{\algfour}}
+    \label{fig:8d}
+  }
+  \caption{Data-flow analysis pseudo-algorithm}
+  \label{fig:8}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \ContinuedFloat
+  \subfloat[Step5: Get object allocation program points for affected variables]{
+    \scalebox{0.7}{\usebox{\algfive}}
+    \label{fig:8e}
+  }
+  \qquad
+  \subfloat[Step6: Search object allocation program points for affected field]{
+    \scalebox{0.7}{\usebox{\algsix}}
+    \label{fig:8f}
+  }
+  \subfloat[Step7: Search object allocation point(s) for method local affected
+  variable]{
+    \scalebox{0.7}{\usebox{\algseven}}
+    \label{fig:8g}
+  }
+  \qquad
+  \caption{Data-flow analysis pseudo-algorithm}
+  \label{fig:8}
+\end{figure}
 
 
  \section{The AGRC analysis algorithm} \label{ap:1}
