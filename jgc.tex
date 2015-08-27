@@ -85,8 +85,8 @@
 \begin{abstract}
 
   Arguably the major hurdle in adoption of memory managed languages,
-  such as Java, in the hard real-time community is the incorporation of
-  garbage collection (GC) within the real-time application. It has
+  such as Java, in the real-time systems community is the incorporation
+  of garbage collection (GC) within the real-time application. It has
   recently been shown that the statically estimated worst case execution
   time (WCET) value of tasks invoking GC is pessimistic to such a great
   extent that incorporating them within the hard real-time scheduling
@@ -99,10 +99,10 @@
   allocation. The new memory reclaim procedure is a simple pointer
   reset, which is guaranteed to complete within a bounded number of
   clock-cycles, thereby alleviating need for large pessimistic WCET
-  bounds obtained due to unpredictable GC cycle times. Other than being
-  amenable to formal verification and tight WCET analysis, results show
-  that our proposed approach to memory management is approximately
-  $3\times$ faster compared to standard RTGC approaches.
+  bounds obtained due to GC cycle times. Other than being amenable to
+  formal verification and tight WCET analysis, results show that our
+  proposed approach to memory management is approximately $3\times$
+  faster compared to standard real-time GC approaches.
 
 
 \end{abstract}
@@ -827,9 +827,9 @@ using Uppaal:
   sequential execution of the synchronous parallel reactions. An integer
   type variable $wcrt$, is added to the TA. No additions are needed for
   the test nodes, since the model-checker implicitly backtracks and
-  explores all branches of test nodes. The $wcrt$ variable is
+  explores all branches of the test nodes. The $wcrt$ variable is
   incremented by the WCET of individual nodes in the TA at every edge.
-  Finally, to emulate execution of multiple ticks, and consequently
+  Finally, to emulate the execution of multiple ticks, and consequently
   explore all branches of the switch nodes, a back-edge is also added
   from a dummy sink node back to the source node. The $wcrt$ and fork
   values are reset upon execution of this back-edge.
@@ -1381,7 +1381,7 @@ signal \texttt{S} (BB4, line~1).
   signals.
   
 \item \underline{Step3} analyzes the emission expression for every
-  program point in set $PPC$. A emitting expression can \textit{only}
+  program point in set $PPC$. An emitting expression can \textit{only}
   emit a method local variable or a field. In our current example a
   local variable (\texttt{t}) in Figure~\ref{fig:8h}, BB4, line~1, is
   being emitted (or formally called being affected) and hence, Step5 is
@@ -1444,10 +1444,9 @@ signal \texttt{S} (BB4, line~1).
   can be \textit{reused} at runtime by all program points in set
   $alloc\_pps$.  \newline
   \begin{compactitem}[$\boxplus$]
-  \item \textbf{Design decision}: We have consciously decided to not
-    allow method local object references from escaping because, it leads
-    to trade-off between space utilization and functional
-    correctness. If we allow, for example \texttt{t} in
+  \item \textbf{Design decision}: We have disallowed method local object
+    references from escaping as a trade-off between space utilization
+    and functional correctness. If we allow, for example \texttt{t} in
     Figure~\ref{fig:8h}, to escape method \texttt{MCall}, then any of
     the reference fields of \texttt{t} (e.g., \texttt{mm}) might be
     reinitialized at some other program point. This program point would
@@ -1740,7 +1739,7 @@ for arrays holding primitive values and (2) the \texttt{newarray}
 bytecode that allocates space for arrays holding object references --
 called \texttt{anewarray}. This distinction is important since the
 number of bytes used to represent each of these bytecode varies. The
-\texttt{new} and \texttt{anewrray} bytecodes are encoded in the class
+\texttt{new} and \texttt{anewarray} bytecodes are encoded in the class
 file with three bytes, whereas the \texttt{newarray} bytecode only uses
 two bytes in the class file representation.
 
@@ -1886,7 +1885,7 @@ regular objects, respectively, we also structure our arrays
 differently. We have decided to place arrays in a row major order and
 contiguously irrespective of the array dimensions (as in `C') rather
 than using linked lists for array traversal in order to allow $O(1)$
-heap accesses.
+array accesses.
 
 \section{Experimental results}
 \label{sec:experimental-results}
@@ -2112,8 +2111,8 @@ in the AGC approach.
 \section{Related Work and discussion}
 \label{sec:related-work}
 
-Real-time garbage collectors (RTGCs) such
-as~\cite{gestegard2003time,kalibera2009scheduling} and the ones
+Real-time garbage collectors (RTGCs) such as the ones proposed
+in~\cite{gestegard2003time,kalibera2009scheduling} and the ones
 presented in~\cite{pizlo2008study}, aim to achieve good garbage
 collection throughput while providing analytic solutions to the worst
 case execution times of a \textit{single} GC cycle. The major drawback
@@ -2121,7 +2120,7 @@ of these approaches is that the equations capturing the GC cycle times
 depend upon the memory allocation characteristic of the
 application. Application specific memory allocation patterns can only be
 gauged via profiling and are \textit{not} exhaustive. In the general
-case assuming the worst case memory allocation patterns results in a
+case, assuming the worst case memory allocation patterns results in a
 very pessimistic GC worst case bound as shown
 in~\cite{puffitsch2013design}. In this paper we are trying to remedy
 this problem by removing GC altogether.
@@ -2135,9 +2134,10 @@ paper. SCJ and Ravenscar-Java both; divide the backing store into
 multiple parts. A memory region called scoped memory is allocated per
 real-time task (called a handler in SCJ terminology), which is
 automatically reclaimed, using pointer reset like us, once the task
-completes execution. There also exists a permanent memory area. Any
-object allocated on the permanent memory lives throughout the lifetime
-of the application. One major difference between the presented memory
+completes execution. There also exists a permanent memory area similar
+to the permanent heap advocated in this paper. Any object allocated in
+the permanent memory area lives throughout the lifetime of the
+application. One major difference between the presented memory
 partitioning approach and the memory partitioning in SCJ/Ravenscar-Java
 is that in the presented approach the same transient heap space (similar
 to scoped memory in SCJ) can be used by multiple synchronous parallel
@@ -2145,15 +2145,15 @@ reactions, whereas every single task gets allocated its own scoped
 memory in SCJ. This is because, SCJ allows preemption of tasks during
 program execution, whereas in SystemJ a clock-domain tick is atomic.
 Furthermore, in this paper we also provide a compile time memory
-allocation approach, whereas in SCJ programmer needs to explicitly and
-carefully allocate objects to the correct memory areas manually. We
-believe that our approach helps speed up development times. 
+allocation approach, whereas in the SCJ approach, the programmer needs
+to explicitly and carefully allocate objects to the correct memory areas
+manually. We believe that our approach helps speed up development times.
 
 The proposed algorithms also have a lot in common with a number of tools
 proposed for easing development of programs in SCJ.  The worst case
 memory analyzer tool~\cite{andersen2013worst} developed for SCJ is able
 to provide the maximum permanent memory and scoped memory sizes needed
-to each task automatically, like us. But, the programmer is still
+for each task automatically, like us. But, the programmer is still
 responsible for reserving the appropriate sized permanent memory and
 scoped memory areas in the backing store. Compiler driven memory
 allocation is a non-trivial task for SCJ applications, because SCJ
@@ -2163,8 +2163,8 @@ etc, which we restrict in the SystemJ MoC.
 
 Finally, we would like to mention that the memory organization presented
 in this paper is applicable to JVMs other than JOP. All one needs to
-provide is a array based backing store, which can be used to implement
-the memory hierarchy for SystemJ.
+provide is an array based backing store, which can be used to implement
+the memory organization for SystemJ as described in this paper.
 
 \section{Conclusion and future work}
 \label{sec:concl-future-work}
