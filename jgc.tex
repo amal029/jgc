@@ -4,8 +4,9 @@
 % Compilation using 'acmsmall.cls' - version 1.3 (March 2012), Aptara Inc.
 % (c) 2010 Association for Computing Machinery (ACM)
 %
-% Questions/Suggestions/Feedback should be addressed to => "acmtexsupport@aptaracorp.com".
-% Users can also go through the FAQs available on the journal's submission webpage.
+% Questions/Suggestions/Feedback should be addressed to =>
+% "acmtexsupport@aptaracorp.com".  Users can also go through the FAQs
+% available on the journal's submission webpage.
 %
 % Steps to compile: latex, bibtex, latex latex
 %
@@ -90,7 +91,7 @@
   recently been shown that the statically estimated worst case execution
   time (WCET) value of tasks invoking GC is pessimistic to such a great
   extent that incorporating them within the hard real-time scheduling
-  framework is infeasible. We develop a compiler assisted memory
+  framework is unfeasible. We develop a compiler assisted memory
   management technique for safety critical hard real-time applications
   developed in the synchronous subset of the formal globally
   asynchronous locally synchronous programming language called
@@ -1923,19 +1924,19 @@ The example benchmarks are available from~\cite{ipat13}.
   \centering
   \subfloat[Simple object memory allocation runtime without GC
   invocation.]{
-    \includegraphics[scale=0.25]{soruntime}
+    \includegraphics[scale=0.29]{soruntime.PNG}
     \label{fig:12a}
   }
   \qquad
   \subfloat[Simple array memory allocation runtime without GC
   invocation.]{
-    \includegraphics[scale=0.25]{aoruntime}
+    \includegraphics[scale=0.29]{aoruntime.PNG}
     \label{fig:12c}
   }
   \qquad
   \subfloat[Complex object memory allocation runtime without GC
   invocation.]{
-    \includegraphics[scale=0.25]{coruntime}
+    \includegraphics[scale=0.29]{coruntime.PNG}
     \label{fig:12e}
   }
   \caption{Runtime for micro-benchmarks without GC invocation.}
@@ -1944,21 +1945,21 @@ The example benchmarks are available from~\cite{ipat13}.
 
 \begin{figure}[t!]
   \centering
-  \subfloat[Simple object memory allocation runtime with
+  \subfloat[Simple object memory allocation runtime with possible
   GC. \textbf{N/P} stands for \texttt{NullPointer} exception]{
-    \includegraphics[scale=0.25]{sogruntime}
+    \includegraphics[scale=0.4]{sogruntime.PNG}
     \label{fig:12b}
   }
   \qquad
-  \subfloat[Simple array memory allocation runtime with GC. \textbf{N/P}
-  stands for \texttt{NullPointer} exception]{
-    \includegraphics[scale=0.25]{aogruntime}
+  \subfloat[Simple array memory allocation runtime with possible GC
+  invocation. \textbf{N/P} stands for \texttt{NullPointer} exception]{
+    \includegraphics[scale=0.4]{aogruntime.PNG}
     \label{fig:12d}
   }
   \qquad
-  \subfloat[Complex object memory allocation runtime with
-  GC. \textbf{N/P} stands for \texttt{NullPointer} exception]{
-    \includegraphics[scale=0.25]{cogruntime}
+  \subfloat[Complex object memory allocation runtime with possible GC
+  invocation. \textbf{N/P} stands for \texttt{NullPointer} exception]{
+    \includegraphics[scale=0.4]{cogruntime.PNG}
     \label{fig:12f}
   }
   \caption{Runtime for micro-benchmarks with GC invocation}
@@ -1998,23 +1999,23 @@ memory allocation times.
   \caption{Comparison of memory words allocated for the complex object
     allocation. Each word is 4 bytes}
   \begin{scriptsize}
-  \begin{tabular}{|c|c|c|c|}
+  \begin{tabular}{|c|c|c|c|c|}
     \hline 
-    \# of loop iterations & No-GC (Words) & JOP-GC (Words) & AGC (Words)\\
+    \# of loop iterations & No-GC (Words) & JOP-GC (Words) & AGC (Words) & SCJ (Words)\\
     \hline
-    100 & 28 & 2145 & 2995 \\
+    100 & 28 & 2145 & 2995 & 2145 \\
     \hline
-    200 & 28 & 4290 & 5590 \\
+    200 & 28 & 4290 & 5590 & 4290 \\
     \hline
-    400 & 28 & 8580 & 11180 \\
+    400 & 28 & 8580 & 11180& 8580 \\
     \hline
-    500 & 28 & 10725 & 13975 \\
+    500 & 28 & 10725 & 13975 & 10725  \\
     \hline
-    1000 & 28 & 21450 & 27950 \\
+    1000 & 28 & 21450 & 279050 & 2145 \\
     \hline
-    2000 & 28 & 42900 & 55900 \\
+    2000 & 28 & 42900 & 559 & 4290000 \\
     \hline
-    4000 & 28 & 85800 & 111800 \\
+    4000 & 28 & 85800 & 111800 & 85800\\
     \hline
   \end{tabular}
   \end{scriptsize}
@@ -2026,7 +2027,7 @@ object allocation benchmark for all the three approaches. In the
 proposed approach, every iteration of the loop reuses the space
 allocated on the permanent heap space (same allocation figures would be
 achieved if the program was recursive rather than iterative). The RTGC
-approches on the other hand, allocate memory on each \texttt{new},
+approaches on the other hand, allocate memory on each \texttt{new},
 \texttt{newarray}, and \texttt{anewarray} bytecode execution. Our
 compile time memory allocation approach simply replaces these memory
 allocation bytecodes as described in Section~\ref{sec:prod-back-code}
@@ -2650,49 +2651,51 @@ three parts:
 
 \begin{enumerate}
 
-	\item If the current node type is an \texttt{JDN} node (line 15)
-		and
+\item If the current node type is an \texttt{JDN} node (line 15) and
 
-		\begin{enumerate}
+  \begin{enumerate}
 
-			\item the number of element in $E_i$ is 1, then the only parent
-				node $v_i$ \textit{must} be called before $v_j$. Then a new node
-				of type $mNode$ is created with its field $Must$ initialized to
-				the result of recursive call of \texttt{create\_note}.
+  \item the number of element in $E_i$ is 1, then the only
+    parent node $v_i$ \textit{must} be called before
+    $v_j$. Then a new node of type $mNode$ is created with
+    its field $Must$ initialized to the result of
+    recursive call of \texttt{create\_note}.
 
-			\item the number of element in $E_i$ is greater than 1, then any
-				parent nodes $v_i \in E_i$ \textit{may} be called before $v_j$.
-				A set of $mList$, consisting return results of
-				\texttt{create\_node} of each parent node $v_i \in E_i$, is
-				assigned to the field $May$ of a newly created $mNode$. 
+  \item the number of element in $E_i$ is greater than 1,
+    then any parent nodes $v_i \in E_i$ \textit{may} be
+    called before $v_j$.  A set of $mList$, consisting
+    return results of \texttt{create\_node} of each parent
+    node $v_i \in E_i$, is assigned to the field $May$ of
+    a newly created $mNode$.
 
-			\item the number of element in $E_i$ is 0, then a new $mNode$ is
-				created with both its $Must$ and $May$ fields initialized to
-				$Null$.
+  \item the number of element in $E_i$ is 0, then a new
+    $mNode$ is created with both its $Must$ and $May$
+    fields initialized to $Null$.
 
-		\end{enumerate}
+  \end{enumerate}
 
-	\item If the current node type is \texttt{Join}, this means that there
-		are two or more parallel reactions forked at the \texttt{Fork} node,
-		which \textit{must} be found in one of the recursive parents of the
-		current node. Hence, the algorithm must continue the backward
-		traversal from this \texttt{Fork} node. During compilation, the
-		compiler has already constructed a Hashtable which maps each
-		\texttt{Join} node to its corresponding \texttt{Fork} node as shown
-		in line 28. 
+\item If the current node type is \texttt{Join}, this
+  means that there are two or more parallel reactions
+  forked at the \texttt{Fork} node, which \textit{must} be
+  found in one of the recursive parents of the current
+  node. Hence, the algorithm must continue the backward
+  traversal from this \texttt{Fork} node. During
+  compilation, the compiler has already constructed a
+  Hashtable which maps each \texttt{Join} node to its
+  corresponding \texttt{Fork} node as shown in line 28.
 
-	\item If the current node type is other than \texttt{JDN} (line
-		31) and
+\item If the current node type is other than \texttt{JDN}
+  (line 31) and
 
-		\begin{enumerate}
+  \begin{enumerate}
 
-			\item the number of parent node ($|E_i|$) is 0 , then \textit{Null}
-				is returned
+  \item the number of parent node ($|E_i|$) is 0 , then
+    \textit{Null} is returned
 
-			\item the number of parent node is 1, then a result of
-				\texttt{create\_node} is returned.
+  \item the number of parent node is 1, then a result of
+    \texttt{create\_node} is returned.
 
-		\end{enumerate}
+  \end{enumerate}
 
 \end{enumerate}
 
