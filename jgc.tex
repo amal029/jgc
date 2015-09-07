@@ -1733,16 +1733,16 @@ pointer, $allocPtr$, the program point to replace $pp$, and the method
 containing the program point: $M$. There are \textit{two} types of
 object allocation bytecodes as specified in the \textit{Java Virtual
   Machine} (JVM) specification~\cite{meyer1997java}: the \texttt{new}
-and \texttt{newarray} bytecodes. Moreover, the \texttt{newarray}
-bytecode itself is of two varieties, dependent upon the type of array
-being allocated: (1) the \texttt{newarray} bytecode that allocates space
-for arrays holding primitive values and (2) the \texttt{newarray}
-bytecode that allocates space for arrays holding object references --
-called \texttt{anewarray}. This distinction is important since the
-number of bytes used to represent each of these bytecode varies. The
-\texttt{new} and \texttt{anewarray} bytecodes are encoded in the class
-file with three bytes, whereas the \texttt{newarray} bytecode only uses
-two bytes in the class file representation.
+and \texttt{newarray} bytecodes. Moreover, there are two types of array
+allocation bytecodes, dependent upon the type of the array being
+allocated: (1) the \texttt{newarray} bytecode that allocates space for
+arrays holding primitive values and (2) the \texttt{anewarray} bytecode
+that allocates space for arrays holding object references. This
+distinction is important since the number of bytes used to represent
+each of these bytecode varies. The \texttt{new} and \texttt{anewarray}
+bytecodes are encoded in the class file with three bytes, whereas the
+\texttt{newarray} bytecode only uses two bytes in the class file
+representation.
 
 Different methods are called to replace each of these allocation
 variants: Figure~\ref{fig:11b}, line~\ref{batwo:l1} replacing
@@ -1891,20 +1891,22 @@ array accesses.
 \section{Experimental results}
 \label{sec:experimental-results}
 
-We have carried out two sets of experiments: micro-benchmarks and static
-WCRT analysis on well established real-time benchmarks to study the
-efficacy of the proposed memory management scheme compared to two
-different real-time garbage collector (RTGC)
-implementations~\cite{msch05,ipat13}. The first is the RTGC proposed
-in~\cite{msch05}, which is a concurrent version of Cheney's copy
-collector developed by Baker~\cite{baker1978list}. In the rest of the
-section we call it JOP-GC. The second one proposed in~\cite{ipat13} is a
-variation of the implementation of the allocation and real-time
-collector described in~\cite{pizlo2010schism}, in the rest of the
-section we term it AGC. All our micro-benchmark experiments are run in
-ModelSim, simulating the real-time hardware implemented JVM called JOP,
-running at 100 MHz, with 256KB of main memory, 1KB of method cache, and
-4KB of stack cache.
+We have carried out two sets of experiments: (a) micro-benchmarks and
+(b) static WCRT analysis on well established real-time benchmarks to
+study the efficacy of the proposed memory management scheme compared to:
+(1) two different real-time garbage collector (RTGC)
+implementations~\cite{msch05,ipat13} and (2) The \textit{Safety Critical
+  Java} (SCJ)~\cite{scj2013} implementation of Java on the JOP
+platform. The first RTGC framework is the one proposed in~\cite{msch05},
+which is a concurrent version of Cheney's copy collector developed by
+Baker~\cite{baker1978list}. In the rest of the section we call it
+JOP-GC. The second one proposed in~\cite{ipat13} is a variation of the
+implementation of the allocation and real-time collector described
+in~\cite{pizlo2010schism}, in the rest of the section we term it AGC. In
+case of SCJ, all the micro-benchmarks were implemented as single tasks.
+All our micro-benchmark experiments are run in ModelSim, simulating the
+real-time hardware implemented JVM called JOP, running at 100 MHz, with
+256KB of main memory, 1KB of method cache, and 4KB of stack cache.
 
 \subsection{Micro benchmarks}
 \label{sec:micro-benchmarks}
@@ -1913,7 +1915,7 @@ We carry out three micro-benchmarks: (1) simple object allocation, where
 we allocate, in a tight loop, 2 objects with 1 word primitive field
 each. (2) Simple array allocation, where we allocate, in a tight loop,
 an object with an array type reference field, which is itself
-initialized to a 20 word 1D array of primitive \texttt{int} type.  (3)
+initialized to a 20 word 1D array of primitive \texttt{int} type. (3)
 Complex object allocation: in this case, we use a nested 2D loop. In
 every outer loop iteration, a \textit{reference} type 1D array of size
 20 is allocated. In every iteration of the inner loop, 2 objects are
@@ -1962,11 +1964,12 @@ The example benchmarks are available from~\cite{ipat13}.
     \includegraphics[scale=0.4]{cogruntime.PNG}
     \label{fig:12f}
   }
-  \caption{Runtime for micro-benchmarks with GC invocation}
+  \caption{Runtime for micro-benchmarks with possibility of GC
+    invocation}
   \label{fig:16}
 \end{figure}
 
-The runtime comparison between the three approaches for each of the
+The runtime comparison between the four approaches for each of the
 micro-benchmarks is shown in Figures~\ref{fig:12}
 and~\ref{fig:16}. Figures~\ref{fig:12} and~\ref{fig:16} give the times
 for completion of a memory allocation request in two cases: (1) when the
@@ -1977,22 +1980,39 @@ request from the mutator, respectively. The proposed approach is, on
 average, approximately 3$\times$ faster compared to the RTGC based
 approaches. In many cases (see Figure~\ref{fig:16}) JOP-GC could not
 perform garbage collection correctly, as it ran out of handles resulting
-in null-pointer exceptions. There is a greater speedup in case of array
-allocations compared to simple object allocations. The runtime memory
-allocation time difference is significant in the case of GC invocation
-when compared to the case of no GC invocation. In case of memory
-allocation time when no GC is invoked, there are multiple reasons for
-the speedup: (1) there are no read/write barriers when allocating
-memory, which are needed by both: JOP-GC and AGC. (2) The current
-\texttt{new}, \texttt{newarray}, and \texttt{anewarray} bytecodes are
-implemented in software, which means, on \textit{every} execution of
-these bytecodes, a method may be loaded into the method cache, which
-results in increased program latency. These runtime numbers are
-important, because they influence the WCRT as we will see in the next
-section. (3) In case of the \texttt{newarray} and \texttt{anewarray}
-bytecode execution, array spines need to be initialized for
-AGC~\cite{pizlo2008study,ipat13}, which leads to further slow down in
-memory allocation times.
+in \texttt{NullPointer} exceptions. There is a greater speedup in case
+of array allocations compared to simple object allocations. The runtime
+memory allocation time difference is significant in the case of GC
+invocation when compared to the case of no GC invocation. 
+
+SCJ specification prohibits GC~\cite{scj2013} and divides the memory
+organization into regions such as immortal memory and scoped memory,
+similar to the permanent and transient heap spaces described in this
+paper. Given this similarity in the memory organization schemes, we
+expected to observe memory allocation times, for SCJ, similar to those
+obtained in the No-GC approach proposed in this paper. Yet, as we see
+from Figures~\ref{fig:12} and \ref{fig:16}, the SCJ memory allocation
+time is far larger than all the other memory allocation times. In
+particular, the SCJ memory allocation time in these experiments is
+$\approx 7.3 \times$ worse than the memory allocation time compared to
+the NO-GC approach.  Close analysis of the SCJ implementation on the JOP
+platform indicates that the memory allocation code consists of a number
+of branch statements, which cause this slowdown. We expect that a better
+memory allocation implementation would result in faster memory
+allocation times for SCJ.
+
+In case of memory allocation time when no GC is invoked, there are
+multiple reasons for the speedup in the No-GC case: (1) there are no
+read/write barriers when allocating memory, which are needed by both:
+JOP-GC and AGC. (2) The current \texttt{new}, \texttt{newarray}, and
+\texttt{anewarray} bytecodes are implemented in software, which means,
+on \textit{every} execution of these bytecodes, a method may be loaded
+into the method cache, which results in increased program latency. These
+runtime numbers are important, because they influence the WCRT as we
+will see in the next section. (3) In case of the \texttt{newarray} and
+\texttt{anewarray} bytecode execution, array spines need to be
+initialized for AGC~\cite{pizlo2008study,ipat13}, which leads to further
+slow down in memory allocation times.
 
 \begin{table}[t!]
   \centering
@@ -2023,38 +2043,56 @@ memory allocation times.
 \end{table}
 
 Table~\ref{tab:1} gives the number of words allocated for the complex
-object allocation benchmark for all the three approaches. In the
-proposed approach, every iteration of the loop reuses the space
-allocated on the permanent heap space (same allocation figures would be
-achieved if the program was recursive rather than iterative). The RTGC
-approaches on the other hand, allocate memory on each \texttt{new},
-\texttt{newarray}, and \texttt{anewarray} bytecode execution. Our
-compile time memory allocation approach simply replaces these memory
-allocation bytecodes as described in Section~\ref{sec:prod-back-code}
-and hence, we do not keep on allocating more words. On the other hand,
-the RTGC approaches, inherently allocate memory on every \texttt{new}
-call. Another important point to note is that AGC although faster when
-it comes to memory allocation runtime compared to JOP-GC, allocates more
-words, because AGC uses block based allocation, which leads to internal
-memory fragmentation. Whereas JOP-GC uses object replication strategy
-with semi-space partitioning~\footnote{In the numbers in
-  Table~\ref{tab:1}, we have not included the semi-space reserved by
-  JOP-GC.}.
+object allocation benchmark for all the four approaches. In the proposed
+approach, every iteration of the loop reuses the space allocated on the
+permanent heap space. The RTGC approaches on the other hand, allocate
+memory on each \texttt{new}, \texttt{newarray}, and \texttt{anewarray}
+bytecode execution. Our compile time memory allocation approach simply
+replaces these memory allocation bytecodes as described in
+Section~\ref{sec:prod-back-code} and hence, we do not keep on allocating
+more words. On the other hand, the RTGC approaches, inherently allocate
+memory on every \texttt{new} call. Another important point to note is
+that AGC although faster when it comes to memory allocation runtime
+compared to JOP-GC, allocates more words, because AGC uses block based
+allocation, which leads to internal memory fragmentation. Whereas JOP-GC
+uses object replication strategy with semi-space
+partitioning~\footnote{In the numbers in Table~\ref{tab:1}, we have not
+  included the semi-space reserved by JOP-GC.}.
+
+SCJ like the other GC approaches allocates memory for each \texttt{new}
+bytecode execution. SCJ, unlike the proposed No-GC approach, is unable
+to reuse memory space allocated in the scoped memory area during the
+loop iterations. The scoped memory area can only be reused when the
+task, using the scoped memory area, finishes execution. The No-GC
+approach greatly benefits from the static analysis proposed in this
+paper, even though the memory organization of the two approaches is
+similar.
 
 \subsection{WCRT comparisons}
 \label{sec:wcrt-estimation}
 
 In this section we compare the static WCRT obtained by applying the
 technique described in Section~\ref{sec:wcrt-estimation} on a set of
-real-time benchmarks. To keep ourselves honest, we chose the benchmarks
-whose memory allocation requests fit within the allocated heap space
-without GC invocation. Consequently, we also manually-deleted all code
-related to GC. This primarily included deleting the complete garbage
-collection method call itself. This was a necessary step, because one
-cannot \textit{practically} bound the GC cycle time for purpose of
-static analysis. Puffitsch et al.~\citeyear{puffitsch2013design} have
-already shown that GC cycle times are orders of magnitudes larger than
-the execution times of real-time tasks.
+real-time benchmarks. We chose the benchmarks whose memory allocation
+requests fit within the allocated heap space without GC
+invocation. Consequently, we also manually-deleted all code related to
+GC. This primarily included deleting the complete garbage collection
+method call itself. This was a necessary step, because one cannot
+\textit{practically} bound the GC cycle time for purpose of static
+analysis. Puffitsch et al.~\citeyear{puffitsch2013design} have already
+shown that GC cycle times are orders of magnitudes larger than the
+execution times of real-time tasks. Explicitly deleting all GC related
+code makes this a fair comparison. The JOP-GC WCRT results are not
+shown, because JOP-GC always results in \texttt{NullPointer} exceptions
+for all these examples. We also do not compare with SCJ, because: (1)
+the open source JOP based SCJ implementation is na{\"i}ve resulting in
+large slowdowns during memory allocations, as seen in
+Figures~\ref{fig:12} and \ref{fig:16}. (2) All the real-time benchmark
+programs are reactive, and run in an infinite loop allocating and
+releasing memory. SCJ specification does not allow reuse of memory
+words, in the scoped memory area, until the real-time task completes
+execution (as seen in Table~\ref{tab:1}) and hence, all our real-time
+benchmarks exhaust all memory when executed as SCJ tasks.
 
 We chose 5 real-time synchronous programs for
 bench-marking. \texttt{Cruise control}~\cite{charles1996representation}
@@ -2068,9 +2106,7 @@ stepper motor control system for a printer. Finally,
 \texttt{Pacemaker}~\cite{ParkMNS14}, is a real-time pacemaker used to
 control arrhythmia. These benchmarks are compiled to the TP-JOP
 architecture for execution and their WCRT values are analyzed. The
-results are shown in Figure~\ref{fig:13a}. The JOP-GC WCRT results are
-not shown, because JOP-GC always results in null pointer exceptions for
-all these examples.
+results are shown in Figure~\ref{fig:13a}.
 
 Ignoring the \texttt{Motor} example, on average, the proposed No-GC
 approach's WCRT is around 23\% shorter compared to AGC. The
