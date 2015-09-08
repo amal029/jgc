@@ -435,7 +435,7 @@ SystemJ programs on the TP-JOP architecture~\cite{LiMS14}.
   \label{fig:3}
 \end{figure}
 
-Figure~\ref{fig:3} gives an overview of the TP-JOP architecture. The
+Figure~\ref{fig:3b} gives an overview of the TP-JOP architecture. The
 architecture consists of two time predictable cores. The first core is
 termed \textit{Reactive Co-processor} (ReCOP) that executes the control
 flow instructions of a SystemJ program. The Java data computations are
@@ -695,7 +695,7 @@ contribution of this paper and hence, we only give a brief overview of
 the approach. The reader is referred to~\cite{LiMS14} for a more
 detailed description of the technique.
 
-Figure~\ref{fig:4} shows a pedagogical SystemJ synchronous program. This
+Figure~\ref{fig:4} shows a simple SystemJ synchronous program. The
 program declares 2 input signals (lines~\ref{ex1:l2} and~\ref{ex1:l3})
 that are used to capture events generated from the external environment
 and 1 output signal (line~\ref{ex1:l1o}) used to produce events back to
@@ -788,9 +788,12 @@ execution of the synchronous parallel reactions, the execution of
 different control branches depending upon the incoming input events from
 the external environment, and the state decoding within the switch
 nodes. We use the Uppaal~\cite{gbeh04} model-checker to perform an
-exhaustive state space exploration of the GRC, in the process emulating
+exhaustive state space exploration of the GRC, in the process, emulating
 the execution of the GRC on the TP-JOP architecture to find the WCRT of
-the SystemJ clock-domain.
+the SystemJ clock-domain. The exhaustive search space carried out by the
+Uppaal model-checker gives WCRT estimates, for SystemJ programs, that
+are on average $\approx 30\%$ tighter than those obtained by other
+approaches~\cite{LiMS14}.
 
 There are three steps involved in finding the WCRT of a clock-domain
 using Uppaal:
@@ -826,14 +829,17 @@ using Uppaal:
   value of the fork variable is not equal to the number of synchronous
   parallel reactions (2 in Figure~\ref{fig:2b}). Thereby, guaranteeing
   sequential execution of the synchronous parallel reactions. An integer
-  type variable $wcrt$, is added to the TA. No additions are needed for
-  the test nodes, since the model-checker implicitly backtracks and
-  explores all branches of the test nodes. The $wcrt$ variable is
-  incremented by the WCET of individual nodes in the TA at every edge.
-  Finally, to emulate the execution of multiple ticks, and consequently
-  explore all branches of the switch nodes, a back-edge is also added
-  from a dummy sink node back to the source node. The $wcrt$ and fork
-  values are reset upon execution of this back-edge.
+  type variable $wcrt$, is added to the TA~\footnote{We use an integer
+    variable instead of a clock variable in Uppaal, because we are
+    computing the worst case reaction time in terms of clock cycles of
+    the program, not in seconds.}. No additions are needed for the test
+  nodes, since the model-checker implicitly backtracks and explores all
+  branches of the test nodes. The $wcrt$ variable is incremented by the
+  WCET of individual nodes in the TA at every edge.  Finally, to emulate
+  the execution of multiple ticks, and consequently explore all branches
+  of the switch nodes, a back-edge is also added from a dummy sink node
+  back to the source node. The $wcrt$ and fork values are reset upon
+  execution of this back-edge.
 
 \item \textit{Using a \textit{Computational Tree Logic} (CTL) property
     to obtain the WCRT}: We model the WCRT estimation problem as
@@ -855,11 +861,11 @@ using Uppaal:
   tightest $WCRT_{est}$ value.
 \end{enumerate}
 
-% Once, annotated,
-% the GRC model is further translated into a labeled transition system
-% (LTS) for input into the Uppaal model-checker~\cite{gbeh04}. A
-% computational tree logic (CTL)~\cite{clarke-book00} property of the
-% form: \mbox{$A[] (wcrt < num)$}, which, put informally, asks the
+% Once, annotated, the GRC model is further translated into a labeled
+% transition system (LTS) for input into the Uppaal
+% model-checker~\cite{gbeh04}. A computational tree logic
+% (CTL)~\cite{clarke-book00} property of the form:
+% \mbox{$A[] (wcrt < num)$}, which, put informally, asks the
 % model-checker to \textit{verify} that there exists no path in the
 % program, from the \texttt{AforkNode} to the \texttt{AjoinNode}, with a
 % wcrt value greater than some number $num$. The integer value $wcrt$ is
@@ -887,8 +893,8 @@ phases. Puffitsch~\citeyear{puffitsch2013design} shows that a WCRT value
 can be obtained for programs, which invoke the GC, by pessimistically
 bounding the collection phase during static analysis. But, the resultant
 WCRT value is in seconds, orders of magnitude larger than real execution
-time (usually in micro-seconds), which makes garbage collection
-unsuitable for hard real-time applications.
+time (usually in micro-seconds), which makes incorporating GC difficult
+within the hard real-time application framework.
 
 % One needs to include the GC time within the WCRT analysis framework of
 % SystemJ clock-domain for the WCRT analysis to be of any practical
@@ -932,7 +938,7 @@ all transient objects within a \textit{transient heap}. The transient
 heap gets reclaimed at the end of every clock-domain tick transition, by
 simply resetting the allocation pointer to the start of the transient
 heap space. With this change, the proposed runtime Java memory
-organization is compared with the original RTGC based memory
+organization is compared with the original real-time GC based memory
 organization in Figure~\ref{fig:6}.
 
 \begin{figure}[t!]
@@ -969,10 +975,11 @@ memory organization two \underline{requirements} become very important:
 \item There should be no pointer pointing from the permanent heap to the
   transient heap, else an application might terminate at runtime with a
   \texttt{NullPointer} exception -- since the transient heap may be
-  reclaimed or overwritten at the end of the clock-domain transition. Or
-  in the much worse scenario, an incorrect value might be read, in which
-  case the application will be functionally incorrect. Both these
-  scenarios are unacceptable for safety-critical systems.
+  reclaimed or overwritten at the end of the clock-domain
+  transition. Moreover, in the much worse scenario, an incorrect value
+  might be read, in which case the application will be functionally
+  incorrect. Both these scenarios are unacceptable for safety-critical
+  systems.
 \item The permanent heap is never reclaimed and hence, permanent heap
   space should be judiciously allocated. In fact, we need to bound the
   permanent heap space at compile time.
@@ -984,7 +991,7 @@ accomplish the described memory management technique.
 \section{Static analysis for compile time memory allocation}
 \label{sec:comp-analys-stat}
 
-The complete compiler tool-chain flow in shown in
+The complete compiler tool-chain flow is shown in
 Figure~\ref{fig:6c}. The SystemJ clock-domain is first compiled into the
 intermediate GRC format. Next, the control nodes (CN) and the Java data
 nodes (JDN) are split and compiled separately into ReCOP native assembly
@@ -1318,11 +1325,10 @@ areturn
 \end{lrbox}
 
 Given the class file(s), the data-flow analysis carried out is shown in
-Figure~\ref{fig:fanalysis}. We use the flow-chart in
-Figure~\ref{fig:fanalysis} to describe the steps of our data-flow
-analysis procedure. The detailed algorithm for each step is provided in
-Appendix~\ref{ap:2}. Being a complex procedure we use simple code
-examples to describe the data-flow analysis procedure.
+the flow-chart in Figure~\ref{fig:fanalysis}. The detailed algorithm for
+each step is provided in Appendix~\ref{ap:2}. Being a complex procedure
+we use simple code examples to describe the data-flow analysis
+procedure.
 
 We divide the presentation of our data-flow analysis procedure into two
 sections. Section~\ref{sec:intra-proc-analys} presents the
@@ -1383,10 +1389,11 @@ signal \texttt{S} (BB4, line~1).
   
 \item \underline{Step3} analyzes the emission expression for every
   program point in set $PPC$. An emitting expression can \textit{only}
-  emit a method local variable or a field. In our current example a
-  local variable (\texttt{t}) in Figure~\ref{fig:8h}, BB4, line~1, is
-  being emitted (or formally called being affected) and hence, Step5 is
-  called.
+  emit a method local variable or a field. Either Step4 or Step5 are
+  called, depending on whether a field or a local variable is affected,
+  respectively. In our current example a local variable (\texttt{t}) in
+  Figure~\ref{fig:8h}, BB4, line~1, is being emitted (or formally called
+  being affected) and hence, Step5 is called.
   
 \item \underline{Step5} extracts the variable from the affected
   expression and calls Step7 for analysis. Step7 is the core of the
@@ -1730,19 +1737,15 @@ alternative bytecodes in the second step, shown in Figure~\ref{fig:11b}.
 The algorithm (Figure~\ref{fig:11b}) used to replace the object
 allocation bytecodes takes as input three arguments: the allocation
 pointer, $allocPtr$, the program point to replace $pp$, and the method
-containing the program point: $M$. There are \textit{two} types of
-object allocation bytecodes as specified in the \textit{Java Virtual
-  Machine} (JVM) specification~\cite{meyer1997java}: the \texttt{new}
-and \texttt{newarray} bytecodes. Moreover, there are two types of array
-allocation bytecodes, dependent upon the type of the array being
-allocated: (1) the \texttt{newarray} bytecode that allocates space for
-arrays holding primitive values and (2) the \texttt{anewarray} bytecode
-that allocates space for arrays holding object references. This
-distinction is important since the number of bytes used to represent
-each of these bytecode varies. The \texttt{new} and \texttt{anewarray}
-bytecodes are encoded in the class file with three bytes, whereas the
-\texttt{newarray} bytecode only uses two bytes in the class file
-representation.
+containing the program point: $M$. There are \textit{three} types of
+bytecodes in the JVM specification: (1) the \texttt{new} bytecode that
+allocates and object. (2) The \texttt{newarray} bytecode that allocates
+arrays holding primitives, and (3) \texttt{anewarray} bytecode that
+allocates arrays holding references. This distinction is important since
+the number of bytes used to represent each of these bytecode varies. The
+\texttt{new} and \texttt{anewarray} bytecodes are encoded in the class
+file with three bytes, whereas the \texttt{newarray} bytecode only uses
+two bytes in the class file representation.
 
 Different methods are called to replace each of these allocation
 variants: Figure~\ref{fig:11b}, line~\ref{batwo:l1} replacing
@@ -1774,7 +1777,7 @@ the returned reference is put into a static field of the class. The
 \texttt{new} bytecode is timing \textit{unpredictable}, because it might
 invoke the GC, which has an unbounded collection cycle. It might also
 generate a runtime out of memory exception, thereby violating safety
-criticality. We replace this \texttt{new} bytecode with safe timing
+criticality. We replace this \texttt{new} bytecode with safe and time
 predictable bytecodes as shown in Figure~\ref{fig:11d}.
 
 \newsavebox{\bone}
@@ -1855,7 +1858,7 @@ predictable bytecodes as shown in Figure~\ref{fig:11d}.
 \end{figure}
 
 A single \texttt{new} bytecode (consuming 3 bytes in the class file) is
-replaced with a list of bytecodes lines~\ref{btwo:l1}-\ref{btwo:l2}
+replaced with a list of bytecodes in lines~\ref{btwo:l1}-\ref{btwo:l2}
 (line numbers are given on the right) consuming 25 bytes in the class
 file, hence the 22 byte increment of target addresses of the conditional
 bytecodes. The core idea is very simple; since we have already allocated
@@ -1896,25 +1899,26 @@ We have carried out two sets of experiments: (a) micro-benchmarks and
 study the efficacy of the proposed memory management scheme compared to:
 (1) two different real-time garbage collector (RTGC)
 implementations~\cite{msch05,ipat13} and (2) The \textit{Safety Critical
-  Java} (SCJ)~\cite{scj2013} implementation of Java on the JOP
-platform. The first RTGC framework is the one proposed in~\cite{msch05},
-which is a concurrent version of Cheney's copy collector developed by
+  Java} (SCJ)~\cite{scj2013} implementation on the JOP platform. The
+first RTGC framework is the one proposed in~\cite{msch05}, which is a
+concurrent version of Cheney's copy collector developed by
 Baker~\cite{baker1978list}. In the rest of the section we call it
 JOP-GC. The second one proposed in~\cite{ipat13} is a variation of the
-implementation of the allocation and real-time collector described
-in~\cite{pizlo2010schism}, in the rest of the section we term it AGC. In
-case of SCJ, all the micro-benchmarks were implemented as single tasks.
-All our micro-benchmark experiments are run in ModelSim, simulating the
-real-time hardware implemented JVM called JOP, running at 100 MHz, with
-256KB of main memory, 1KB of method cache, and 4KB of stack cache.
+real-time collector described in~\cite{pizlo2010schism}, in the rest of
+the section we call it AGC. The SCJ framework on the other hand is a GC
+less Java specification, designed to build hard real-time safety
+critical applications. All our micro-benchmark experiments are run in
+ModelSim, simulating the real-time hardware implemented JVM called JOP,
+running at 100 MHz, with 256KB of main memory, 1KB of method cache, and
+4KB of stack cache.
 
 \subsection{Micro benchmarks}
 \label{sec:micro-benchmarks}
 
-We carry out three micro-benchmarks: (1) simple object allocation, where
-we allocate, in a tight loop, 2 objects with 1 word primitive field
-each. (2) Simple array allocation, where we allocate, in a tight loop,
-an object with an array type reference field, which is itself
+We experiment with three micro-benchmarks: (1) simple object allocation,
+where we allocate, in a tight loop, 2 objects with 1 word primitive
+field each. (2) Simple array allocation, where we allocate, in a tight
+loop, an object with an array type reference field, which is itself
 initialized to a 20 word 1D array of primitive \texttt{int} type. (3)
 Complex object allocation: in this case, we use a nested 2D loop. In
 every outer loop iteration, a \textit{reference} type 1D array of size
@@ -1971,19 +1975,19 @@ The example benchmarks are available from~\cite{ipat13}.
 
 The runtime comparison between the four approaches for each of the
 micro-benchmarks is shown in Figures~\ref{fig:12}
-and~\ref{fig:16}. Figures~\ref{fig:12} and~\ref{fig:16} give the times
-for completion of a memory allocation request in two cases: (1) when the
-GC is not invoked, i.e., there is enough memory available to allocate
-the requested space and (2) when the GC is invoked to collect the
-garbage when enough memory is not available upon a memory allocation
-request from the mutator, respectively. The proposed approach is, on
-average, approximately 3$\times$ faster compared to the RTGC based
-approaches. In many cases (see Figure~\ref{fig:16}) JOP-GC could not
-perform garbage collection correctly, as it ran out of handles resulting
-in \texttt{NullPointer} exceptions. There is a greater speedup in case
-of array allocations compared to simple object allocations. The runtime
-memory allocation time difference is significant in the case of GC
-invocation when compared to the case of no GC invocation. 
+and~\ref{fig:16}. Figures~\ref{fig:12} and~\ref{fig:16} give the
+execution times for completion of a memory allocation request in two
+cases: (1) when the GC is not invoked, i.e., there is enough memory
+available to allocate the requested space and (2) when the GC is invoked
+to collect the garbage when enough memory is not available upon a memory
+allocation request from the mutator, respectively. The proposed approach
+is, on average, approximately 3$\times$ faster compared to the RTGC
+based approaches. In many cases (see Figure~\ref{fig:16}) JOP-GC could
+not perform garbage collection correctly, as it ran out of handles
+resulting in \texttt{NullPointer} exceptions. There is a greater speedup
+in case of array allocations compared to simple object allocations. The
+runtime memory allocation time difference is significant in the case of
+GC invocation when compared to the case of no GC invocation.
 
 SCJ specification prohibits GC~\cite{scj2013} and divides the memory
 organization into regions such as immortal memory and scoped memory,
@@ -1992,27 +1996,25 @@ paper. Given this similarity in the memory organization schemes, we
 expected to observe memory allocation times, for SCJ, similar to those
 obtained in the No-GC approach proposed in this paper. Yet, as we see
 from Figures~\ref{fig:12} and \ref{fig:16}, the SCJ memory allocation
-time is far larger than all the other memory allocation times. In
-particular, the SCJ memory allocation time in these experiments is
-$\approx 7.3 \times$ worse than the memory allocation time compared to
-the NO-GC approach.  Close analysis of the SCJ implementation on the JOP
+times are far longer compared to all the other memory allocation
+approaches. In particular, SCJ's memory allocation implementation, in
+our experiments, is, on average, $\approx 7.3 \times$ slower than the
+proposed approach.  Close analysis of the SCJ implementation on the JOP
 platform indicates that the memory allocation code consists of a number
 of branch statements, which cause this slowdown. We expect that a better
 memory allocation implementation would result in faster memory
 allocation times for SCJ.
 
 In case of memory allocation time when no GC is invoked, there are
-multiple reasons for the speedup in the No-GC case: (1) there are no
-read/write barriers when allocating memory, which are needed by both:
-JOP-GC and AGC. (2) The current \texttt{new}, \texttt{newarray}, and
-\texttt{anewarray} bytecodes are implemented in software, which means,
-on \textit{every} execution of these bytecodes, a method may be loaded
-into the method cache, which results in increased program latency. These
-runtime numbers are important, because they influence the WCRT as we
-will see in the next section. (3) In case of the \texttt{newarray} and
-\texttt{anewarray} bytecode execution, array spines need to be
-initialized for AGC~\cite{pizlo2008study,ipat13}, which leads to further
-slow down in memory allocation times.
+multiple reasons for the speedup in the No-GC case, compared to other
+approaches: (1) there are no read/write barriers when allocating memory,
+which are needed by JOP-GC, AGC, and SCJ. (2) The memory allocations
+bytecodes are implemented in software, which means, on \textit{every}
+execution of these bytecodes, a method may be loaded into the method
+cache, which results in increased program latency. (3) In case of the
+\texttt{newarray} and \texttt{anewarray} bytecode execution, array
+spines need to be initialized for AGC~\cite{pizlo2008study,ipat13},
+which leads to further slow down in memory allocation times.
 
 \begin{table}[t!]
   \centering
@@ -2059,20 +2061,20 @@ uses object replication strategy with semi-space
 partitioning~\footnote{In the numbers in Table~\ref{tab:1}, we have not
   included the semi-space reserved by JOP-GC.}.
 
-SCJ like the other GC approaches allocates memory for each \texttt{new}
-bytecode execution. SCJ, unlike the proposed No-GC approach, is unable
-to reuse memory space allocated in the scoped memory area during the
-loop iterations. The scoped memory area can only be reused when the
+SCJ, like the RTGC approaches, allocates memory on each bytecode
+execution. SCJ, \underline{unlike} the proposed No-GC approach, is
+unable to reuse memory space allocated in the scoped memory area during
+the loop iterations. The scoped memory area can only be reused when the
 task, using the scoped memory area, finishes execution. The No-GC
-approach greatly benefits from the static analysis proposed in this
-paper, even though the memory organization of the two approaches is
-similar.
+approach greatly benefits from the memory reuse enabled by static
+analysis proposed in this paper, even though the memory organization of
+the two approaches is similar.
 
 \subsection{WCRT comparisons}
 \label{sec:wcrt-estimation}
 
 In this section we compare the static WCRT obtained by applying the
-technique described in Section~\ref{sec:wcrt-estimation} on a set of
+technique described in Section~\ref{sec:wcrt-estim-using} on a set of
 real-time benchmarks. We chose the benchmarks whose memory allocation
 requests fit within the allocated heap space without GC
 invocation. Consequently, we also manually-deleted all code related to
@@ -2082,7 +2084,7 @@ method call itself. This was a necessary step, because one cannot
 analysis. Puffitsch et al.~\citeyear{puffitsch2013design} have already
 shown that GC cycle times are orders of magnitudes larger than the
 execution times of real-time tasks. Explicitly deleting all GC related
-code makes this a fair comparison. The JOP-GC WCRT results are not
+code also makes it a fair comparison. The JOP-GC WCRT results are not
 shown, because JOP-GC always results in \texttt{NullPointer} exceptions
 for all these examples. We also do not compare with SCJ, because: (1)
 the open source JOP based SCJ implementation is na{\"i}ve resulting in
@@ -2114,7 +2116,7 @@ approach's WCRT is around 23\% shorter compared to AGC. The
 because a number of object allocations are performed when emitting
 events to control the motor coils. In other examples, object allocations
 are used in computations on the transient heap space, with relatively
-fewer object allocations on the permanent heap. This requires, deep
+fewer object allocations on the permanent heap. This requires deep
 copying objects from the transient to the permanent heap space, which
 balances out the WCRT times between the No-GC and the AGC
 approaches. Note that, the method cache load times and synchronized heap
@@ -2155,16 +2157,16 @@ collection throughput while providing analytic solutions to the worst
 case execution times of a \textit{single} GC cycle. The major drawback
 of these approaches is that the equations capturing the GC cycle times
 depend upon the memory allocation characteristic of the
-application. Application specific memory allocation patterns can only be
-gauged via profiling and are \textit{not} exhaustive. In the general
-case, assuming the worst case memory allocation patterns results in a
-very pessimistic GC worst case bound as shown
+application. % Application specific memory allocation patterns can only be
+% gauged via profiling and are \textit{not} exhaustive.
+In the general case, assuming the worst case memory allocation patterns
+results in a very pessimistic GC worst case bound as shown
 in~\cite{puffitsch2013design}. In this paper we are trying to remedy
-this problem by removing GC altogether.
+this problem by removing the GC altogether.
 
-We are not the first to advocate a GC-less development approach for hard
-real-time applications with managed languages, especially Java. There
-exist previous works like the Safety Critical Java (SCJ)~\cite{scj2013}
+We are not the first to advocate a GC-less approach for hard real-time
+applications with managed languages, especially Java. There exist
+previous works like the Safety Critical Java (SCJ)~\cite{scj2013}
 specification and Ravenscar-Java~\cite{kwon2005ravenscar} that present a
 memory organization approach similar to the one presented in this
 paper. SCJ and Ravenscar-Java both; divide the backing store into
@@ -2198,10 +2200,17 @@ allows free use of the Java language, consequently bringing all the
 disadvantages such as: pointer aliasing, shared memory communication,
 etc, which we restrict in the SystemJ MoC.
 
-Finally, we would like to mention that the memory organization presented
-in this paper is applicable to JVMs other than JOP. All one needs to
-provide is an array based backing store, which can be used to implement
-the memory organization for SystemJ as described in this paper.
+Finally, JVMs other than JOP can be used to execute SystemJ programs
+with the proposed memory organization, provided an array based backing
+store is available.
+
+% All one needs to provide is an array based backing store, which can be
+% used to implement the memory organization for SystemJ as described in
+% this paper. Finally, we would like to mention that the memory
+% organization presented in this paper is applicable to JVMs other than
+% JOP. All one needs to provide is an array based backing store, which
+% can be used to implement the memory organization for SystemJ as
+% described in this paper.
 
 \section{Conclusion and future work}
 \label{sec:concl-future-work}
@@ -2242,15 +2251,15 @@ Java objects and arrays.
 % critical systems hard, if not impossible. This proposal provides a
 % solution to this problem.
 
-However, the proposed approach is not a penance. The proposed memory
-management technique, does indeed require the programmer to carefully
-design their real-time applications, as deep object copies need to be
-made explicitly by the programmer. Furthermore, we see many
-opportunities for future optimization, especially relaxing the object
-escapement restrictions currently enforced by the proposed data-flow
-analysis. We also see an opportunity to \textit{reuse} permanent heap
-memory allocations across clock-domain tick boundaries, which we plan to
-address in the future.
+% However, the proposed approach is not a penance. The proposed memory
+% management technique, does indeed require the programmer to carefully
+% design their real-time applications, as deep object copies need to be
+% made explicitly by the programmer. Furthermore, 
+We see opportunities for future optimization. Especially, relaxing the
+object escapement restrictions currently enforced by the proposed
+data-flow analysis. We also see an opportunity to \textit{reuse}
+permanent heap memory allocations across clock-domain tick boundaries,
+which we plan to address in the future.
 
 % Bibliography
 \bibliographystyle{ACM-Reference-Format-Journals}

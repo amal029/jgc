@@ -7,26 +7,26 @@ they are based on formal mathematical semantics, which allows the
 compiler itself to act as a
 model-checker~\cite{jagadeesan1995safety}. The major benefit of the
 synchronous \textit{Model of Computation} (MoC) is that it is based on
-the concept of a \textit{Finite State Machine} (FSM). Especially,
-languages such as Esterel~\cite{berry92} and its derivation
-SystemJ~\cite{amal10} have been designed to reduce the state space
-explosion problem exhibited during formal verification, by adhering to a
-very strict programmer specified state demarcation approach. The
-programming model for these languages can be described as follows: a
-synchronous program is quiescent until one or more events occur from the
-environment. Upon detecting the event, the synchronous program
-\textit{reacts} \textit{instantaneously} in zero time to respond to
-these inputs and becomes quiescent until the next input events
-arrive. The start and the end of this reaction transition demarcate
-states of the program -- note that internal data updates do not lead to
-change in the program state thereby reducing the state space explosion
-problem. Furthermore, the reaction being logically in zero-time is by
-definition \textit{atomic} and always faster than the incoming input
-events, thereby guaranteeing that none of the incoming events are
-missed. In reality, the reaction does take time, one needs to find out
-the \textit{Worst Case Reaction Time} (WCRT) of any given synchronous
-program. This WCRT value determines the shortest inter-arrival time for
-input events from the environment.
+the concept of a \textit{Finite State Machine} (FSM). Languages such as
+Esterel~\cite{berry92} and its derivation SystemJ~\cite{amal10} have
+been designed to reduce the state space explosion problem exhibited
+during formal verification, by adhering to a very strict programmer
+specified state demarcation approach. The programming model for these
+languages can be described as follows: a synchronous program is
+quiescent until one or more events occur from the environment. Upon
+detecting the event, the synchronous program \textit{reacts}
+\textit{instantaneously} in zero time to respond to these inputs and
+becomes quiescent until the next input events arrive. The start and the
+end of this reaction transition demarcate states of the program -- note
+that internal data updates do not lead to change in the program state
+thereby reducing the state space explosion problem. Furthermore, the
+reaction being logically in zero-time is by definition \textit{atomic}
+and always faster than the incoming input events, thereby guaranteeing
+that none of the incoming events are missed. In reality, the reaction
+does take time, one needs to find out the \textit{Worst Case Reaction
+  Time} (WCRT) of any given synchronous program. This WCRT value
+determines the shortest inter-arrival time for input events from the
+environment.
 
 Many techniques exist for computing WCRT values for synchronous programs
 providing support for data-computation via a non-managed language
@@ -40,17 +40,21 @@ of synchronous programs that support data computation via
 managed-languages like Java, which provides a well defined operational
 semantics. The key hurdle to the adoption of managed languages in the
 safety critical hard real-time application domain is \textit{Garbage
-  Collection} (GC) for automatic memory management. On the one hand GC
-guarantees no memory leaks, thereby providing functional safety, but on
-the other hand, it has been shown~\cite{puffitsch2013design} that using
-even a state of the art real-time GC results in very pessimistic worst
-case execution time estimates for real-time tasks,~\footnote{The worst
-  case execution time was estimated to be in seconds due to the GC, but
-  the observed time was in milli-seconds.} compared to the observed task
-execution times, thereby rendering worst case execution/reaction time
-analysis unfeasible in the general case with a GC.
+  Collection} (GC) for automatic memory management, since worst case
+execution time estimates for real-time tasks with GC are very
+pessimistic~\cite{puffitsch2013design}.
 
-The main \textbf{contribution} of this paper is to present a new memory
+% On the one hand GC guarantees no memory leaks, thereby providing
+% functional safety, but on the other hand, it has been
+% shown~\cite{puffitsch2013design} that using even a state of the art
+% real-time GC results in very pessimistic worst case execution time
+% estimates for real-time tasks.,~\footnote{The worst case execution time
+%   was estimated to be in seconds due to the GC, but the observed time
+%   was in milli-seconds.} compared to the observed task execution times,
+% thereby rendering worst case execution/reaction time analysis unfeasible
+% in the general case with a GC.
+
+The main \textbf{contribution} presented in this paper is a new memory
 management approach that is amicable to static WCRT analysis of
 synchronous programs intertwined with managed runtime environments for
 data-computation. More concretely our contributions can be refined as
