@@ -2033,9 +2033,9 @@ which leads to further slow down in memory allocation times.
     \hline
     500 & 28 & 10725 & 13975 & 10725  \\
     \hline
-    1000 & 28 & 21450 & 279050 & 2145 \\
+    1000 & 28 & 21450 & 279050 & 21450 \\
     \hline
-    2000 & 28 & 42900 & 559 & 4290000 \\
+    2000 & 28 & 42900 & 559 & 42900 \\
     \hline
     4000 & 28 & 85800 & 111800 & 85800\\
     \hline
@@ -2136,11 +2136,11 @@ in the AGC approach.
 \begin{figure}[t!]
   \centering
   \subfloat[Statically analyzed WCRT values for benchmarks without GC invocation]{
-    \includegraphics[scale=0.25]{wcetb}
+    \includegraphics[scale=0.45]{wcetb.PNG}
     \label{fig:13a}
   }
   \subfloat[Statically analyzed method sizes for benchmarks]{
-    \includegraphics[scale=0.25]{msizeb}
+    \includegraphics[scale=0.45]{msizeb.PNG}
     \label{fig:13b}
   }
   \caption{WCRT and method size comparison: No-GC vs. AGC}
