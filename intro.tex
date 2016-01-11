@@ -4,8 +4,8 @@
 Synchronous programming languages~\cite{berry92} allow building correct
 by construction safety critical hard real-time applications, because
 they are based on formal mathematical semantics, which allows the
-compiler itself to act as a
-model-checker~\cite{jagadeesan1995safety}. The major benefit of the
+compiler itself to act as a model-checker~\cite{jagadeesan1995safety}
+verifying properties of the application. The major benefit of the
 synchronous \textit{Model of Computation} (MoC) is that it is based on
 the concept of a \textit{Finite State Machine} (FSM). Languages such as
 Esterel~\cite{berry92} and its derivation SystemJ~\cite{amal10} have
@@ -28,7 +28,7 @@ does take time, one needs to find out the \textit{Worst Case Reaction
 determines the shortest inter-arrival time for input events from the
 environment.
 
-Many techniques exist for computing WCRT values for synchronous programs
+Techniques exist for computing WCRT values for synchronous programs
 providing support for data-computation via a non-managed language
 (primarily `C')~\cite{boldt07,proop10}. These WCRT estimation approaches
 suffer from a fundamental problem; they cannot incorporate complex
@@ -55,10 +55,9 @@ pessimistic~\cite{puffitsch2013design}.
 % in the general case with a GC.
 
 The main \textbf{contribution} presented in this paper is a new memory
-management approach that is amicable to static WCRT analysis of
+management approach that is amenable to static WCRT analysis of
 synchronous programs intertwined with managed runtime environments for
-data-computation. More concretely our contributions can be refined as
-follows:
+data-computation. More concretely our contributions are as follows:
 
 \begin{itemize}
 \item \textit{Programming model inspired memory organization}: In this
@@ -78,11 +77,12 @@ We use the SystemJ~\cite{amal10} programming language, because it
 provides the synchronous MoC as a subset along with Java data-driven
 computation support. Furthermore, there exist efficient and real-time
 analyzable execution architectures~\cite{nadeem2011rjop} and WCRT
-analysis tools~\cite{LiMS14} that support subset of SystemJ programs;
+analysis tools~\cite{LiMS14} that support subset of SystemJ programs --
 those without GC invocation.
 
 
-% Local Variables:
-% mode: latex
-% TeX-master: "jgc"
-% End:
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "jgc_cc_pe"
+%%% End:
