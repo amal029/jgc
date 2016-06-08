@@ -2178,59 +2178,118 @@ allocation bytecode execution in the AGC approach.
 \section{Related Work and discussion}
 \label{sec:related-work}
 
+{\color{red}
+
+
+  \subsection{Comparison with SCJ and RTSJ memory organization}
+\label{sec:scj-rtsj}
+
+\newsavebox{\reuse}
+\begin{lrbox}{\reuse}
+  \begin{minipage}[b]{0.7\linewidth}
+    \begin{Verbatim}[numbers=right,commandchars=\\\[\]]
+A a = null; \label[reuse:l1]
+for (int i = 0; i< N; ++i) \label[reuse:l2]
+ a = new A(); \label[reuse:l3]
+emit S(a); \label[reuse:l4]
+    \end{Verbatim}
+  \end{minipage}
+\end{lrbox}
+
+We are not the first to advocate a GC-less approach for hard real-time
+applications with memory managed languages, especially Java. There exist
+previous works like the Safety Critical Java (SCJ)~\cite{scj2013}
+specification, Ravenscar-Java~\cite{kwon2005ravenscar} and Real Time
+Specification for Java (RTSJ)~\cite{bollella2000real} that present a
+memory organization approach similar to the one presented in this
+paper. SCJ, Ravenscar-Java and the RTSJ approaches divide the backing
+store into multiple parts. A memory region called scoped memory is
+allocated per real-time task (called a schedulable object in SCJ/RTSJ
+terminology), which is automatically reclaimed, using pointer reset like
+us, once the task completes execution. There also exists a permanent
+memory area, called the immortal memory, similar to the permanent heap
+advocated in this paper. Any object allocated in the immortal memory
+lives throughout the lifetime of the application. One major difference
+between the presented memory partitioning approach and the memory
+partitioning in SCJ/Ravenscar-Java and RTSJ approaches is that in the
+presented approach the same transient heap space (similar to scoped
+memory in SCJ) can be shared by multiple synchronous parallel reactions,
+whereas every single task gets allocated its own scoped memory (which
+might be nested in another tasks scoped memory) in SCJ. This is because,
+SCJ allows preemption of tasks during program execution, whereas in
+SystemJ a clock-domain tick is atomic. RTSJ does allow access of scoped
+memory by concurrent threads and only when the last thread exits the
+scoped memory is the memory reclaimed.  Another important point of
+differentiation is the reuse of memory words enabled by the proposed
+approach. Consider the SystemJ code snippet in
+Figure~\ref{fig:reuse}. An object \texttt{a}, of type \texttt{A} is
+initialized multiple time on lines~\ref{reuse:l2}-\ref{reuse:l3}. The
+proposed approach \textit{replaces} the \texttt{new} bytecode with
+simple load instructions, hence, the object does \underline{not} get
+allocated multiple times in the loop. In fact, the same memory location
+(address/words) are reused by the proposed approach. In the SCJ/RTSJ
+memory organization, every memory allocation bytecode (e.g.,
+\texttt{new}) allocates new memory words and hence, reuse is
+impossible. This is also the primary reason for the results shown in
+Table~\ref{tab:1}.
+
+\begin{figure}[h!]
+  \centering
+  \scalebox{0.7}{\usebox{\reuse}}
+  \caption{SystemJ code snippet to show resue of memory words}
+  \label{fig:reuse}
+\end{figure}
+
+Furthermore, in the proposed approach the compiler automatically decides
+where to place the allocated objects, whereas in the SCJ and RTSJ
+approaches, the programmer needs to explicitly and carefully allocate
+objects to the correct memory areas manually. We believe that our
+approach helps speed up development times.
+
+The proposed algorithms also have a lot in common with a number of tools
+proposed for easing development of programs in SCJ and RTSJ. The worst
+case memory analyzer tool~\cite{andersen2013worst} developed for SCJ is
+able to provide the maximum permanent memory and scoped memory sizes
+needed for each task automatically, like us. But, the programmer is
+still responsible for reserving the appropriate sized permanent memory
+and scoped memory areas in the backing store. Compiler driven memory
+allocation is a non-trivial task for SCJ and RTSJ applications, because
+SCJ and RTSJ allow free use of the Java language, consequently bringing
+all the disadvantages such as: pointer aliasing, shared memory
+communication, etc, which we restrict in the SystemJ MoC. Finally, JVMs
+other than JOP can be used to execute SystemJ programs with the proposed
+memory organization, provided an array based backing store is available.
+
+\subsection{Comparison with Real-time GC approaches}
+\label{sec:rtgc}
+
 Real-time garbage collectors (RTGCs) such as the ones proposed
 in~\cite{gestegard2003time,kalibera2009scheduling} and the ones
 presented in~\cite{pizlo2008study}, aim to achieve good garbage
 collection throughput while providing analytic solutions to the worst
-case execution times of a \textit{single} GC cycle. The major drawback
-of these approaches is that the equations capturing the GC cycle times
-depend upon the memory allocation characteristic of the
-application. % Application specific memory allocation patterns can only be
-% gauged via profiling and are \textit{not} exhaustive.
-In the general case, assuming the worst case memory allocation patterns
+case execution times of a \textit{single} GC cycle. Once the GC cycle
+times are obtained there is the need to schedule the GC work. The
+scheduling can be either \textit{work} based; where the GC work is
+performed at object allocation by the already present real-time tasks,
+or \textit{time} based; where the GC runs as its own task and needs to
+be scheduled with the other real-time tasks in the system. Both these
+approaches suffer from drawbacks, such as determining the priority of
+the GC task, etc~\cite{schoeberl2010scheduling}. The major drawback of
+these approaches is that the equations capturing the GC cycle times
+depend upon the memory allocation characteristic of the application. In
+the general case, assuming the worst case memory allocation patterns
 results in a very pessimistic GC worst case bound as shown
 in~\cite{puffitsch2013design}. In this paper we are trying to remedy
 this problem by removing the GC altogether.
 
-We are not the first to advocate a GC-less approach for hard real-time
-applications with managed languages, especially Java. There exist
-previous works like the Safety Critical Java (SCJ)~\cite{scj2013}
-specification and Ravenscar-Java~\cite{kwon2005ravenscar} that present a
-memory organization approach similar to the one presented in this
-paper. SCJ and Ravenscar-Java both; divide the backing store into
-multiple parts. A memory region called scoped memory is allocated per
-real-time task (called a handler in SCJ terminology), which is
-automatically reclaimed, using pointer reset like us, once the task
-completes execution. There also exists a permanent memory area similar
-to the permanent heap advocated in this paper. Any object allocated in
-the permanent memory area lives throughout the lifetime of the
-application. One major difference between the presented memory
-partitioning approach and the memory partitioning in SCJ/Ravenscar-Java
-is that in the presented approach the same transient heap space (similar
-to scoped memory in SCJ) can be used by multiple synchronous parallel
-reactions, whereas every single task gets allocated its own scoped
-memory in SCJ. This is because, SCJ allows preemption of tasks during
-program execution, whereas in SystemJ a clock-domain tick is atomic.
-Furthermore, in this paper we also provide a compile time memory
-allocation approach, whereas in the SCJ approach, the programmer needs
-to explicitly and carefully allocate objects to the correct memory areas
-manually. We believe that our approach helps speed up development times.
 
-The proposed algorithms also have a lot in common with a number of tools
-proposed for easing development of programs in SCJ.  The worst case
-memory analyzer tool~\cite{andersen2013worst} developed for SCJ is able
-to provide the maximum permanent memory and scoped memory sizes needed
-for each task automatically, like us. But, the programmer is still
-responsible for reserving the appropriate sized permanent memory and
-scoped memory areas in the backing store. Compiler driven memory
-allocation is a non-trivial task for SCJ applications, because SCJ
-allows free use of the Java language, consequently bringing all the
-disadvantages such as: pointer aliasing, shared memory communication,
-etc, which we restrict in the SystemJ MoC.
+\subsection{Limitations}
+\label{sec:limitations}
 
-Finally, JVMs other than JOP can be used to execute SystemJ programs
-with the proposed memory organization, provided an array based backing
-store is available.
+
+
+
+}
 
 % All one needs to provide is an array based backing store, which can be
 % used to implement the memory organization for SystemJ as described in
