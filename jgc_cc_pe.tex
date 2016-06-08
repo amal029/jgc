@@ -106,15 +106,19 @@
   management technique for safety critical hard real-time applications
   developed in the synchronous subset of the formal globally
   asynchronous locally synchronous programming language called
-  SystemJ. The SystemJ model of computation allows us to partition the
-  heap into two distinct areas and perform compile time memory
-  allocation. The new memory reclaim procedure is a simple pointer
-  reset, which is guaranteed to complete within a bounded number of
-  clock-cycles, thereby alleviating the need for large pessimistic WCET
-  bounds obtained due to GC cycle times. Other than being amenable to
-  formal verification and tight WCET analysis, results show that our
-  proposed approach to memory management is approximately $3\times$
-  faster compared to standard real-time GC approaches.
+  SystemJ. {\color{red} The SystemJ model of computation, clearly
+    demarcates the state boundaries of the program, which in turn allows
+    us to partition the heap, at compile time, into two distinct areas:
+    (1) the memory area to hold objects that are live across state
+    boundaries, called the permanent heap and (2) the memory area used
+    to hold all other object, called the transient heap.} The new memory
+  reclaim procedure is a simple pointer reset, which is guaranteed to
+  complete within a bounded number of clock-cycles, thereby alleviating
+  the need for large pessimistic WCET bounds obtained due to GC cycle
+  times. Other than being amenable to formal verification and tight WCET
+  analysis, results show that our proposed approach to memory management
+  is approximately $3\times$ faster compared to standard real-time GC
+  approaches.
 
 
 \end{abstract}
@@ -339,8 +343,13 @@ signals are presented to the environment at the end of the clock-domain
 tick. Inter-clock-domain communication is achieved by implementing CSP
 style rendezvous mechanism through point-to-point unidirectional
 channels. A complete list of SystemJ kernel statements is shown in
-Figure~\ref{fig:1}. In this work we are only interested in the
-synchronous subset of SystemJ, i.e., a single clock-domain.
+Figure~\ref{fig:1}. {\color{red} The compile time memory allocation
+  strategy described in this paper is applicable to each clock-domain
+  individually and hence, in the rest of the paper we concentrate only
+  on a single clock-domain.  }
+
+In this work we are only interested in the synchronous subset of
+SystemJ, i.e., a single clock-domain.
 
 \begin{figure}[t!]
   \centering
@@ -792,16 +801,20 @@ GRC. Finding this longest path is non-trivial, because of concurrent
 execution of the synchronous parallel reactions, the execution of
 different control branches depending upon the incoming input events from
 the external environment, and the state decoding within the switch
-nodes. We use the Uppaal~\cite{gbeh04} model-checker to perform an
-exhaustive state space exploration of the GRC, in the process, emulating
-the execution of the GRC on the TP-JOP architecture to find the WCRT of
-the SystemJ clock-domain. The exhaustive search space carried out by the
-Uppaal model-checker gives WCRT estimates, for SystemJ programs, that
-are on average $\approx 30\%$ tighter than those obtained by other
-approaches~\cite{LiMS14}.
-
-There are three steps involved in finding the WCRT of a clock-domain
-using Uppaal:
+nodes. {\color{red} There are a plethora of static WCRT estimation
+  techniques in the research
+  literature~\cite{proop10,bbec10,roop09,sand11,theiling2000fast}. In
+  this paper we describe one of the original techniques based on
+  model-checking. Any other static WCRT estimation technique can be used
+  in our compiler framework. We use the Uppaal~\cite{gbeh04}
+  model-checker to perform an exhaustive state space exploration of the
+  GRC, in the process, emulating the execution of the GRC on the TP-JOP
+  architecture to find the WCRT of the SystemJ clock-domain. The
+  exhaustive search space carried out by the Uppaal model-checker gives
+  WCRT estimates, for SystemJ programs, that are on average
+  $\approx 30\%$ tighter than those obtained by other
+  approaches~\cite{LiMS14}.  } There are three steps involved in finding
+the WCRT of a clock-domain using Uppaal:
 
 \begin{enumerate}
 \item \textit{Annotating the GRC nodes with \textit{Worst Case Execution
@@ -1361,7 +1374,7 @@ line~3) of type \texttt{a} is initialized to either type \texttt{b} or
 Boolean \texttt{a\_thread}. Finally, object \texttt{t} is emitted via
 signal \texttt{S} (BB4, line~1).
 
-\begin{compactitem}[$\bigstar$]
+\begin{compactitem}[-]
 
 \item \underline{Step1} of the data-flow analysis algorithm starts by
   scanning the Java program for program points allocating signals (e.g.,
@@ -1457,7 +1470,7 @@ signal \texttt{S} (BB4, line~1).
   unreachable. This, guarantees that the reserved permanent heap space
   can be \textit{reused} at runtime by all program points in set
   $alloc\_pps$.  \newline
-  \begin{compactitem}[$\boxplus$]
+  \begin{compactitem}[$\bullet$]
   \item \textbf{Design decision}: We have disallowed method local object
     references from escaping as a trade-off between space utilization
     and functional correctness. If we allow, for example \texttt{t} in
@@ -1495,7 +1508,7 @@ signal \texttt{S} (BB4, line~1).
   raised, stating that the variable might be initialized outside the
   method being analyzed. Finally, Step7 makes sure that the program
   points being returned are not reachable from each other.\newline
-  \begin{compactitem}[$\boxplus$]
+  \begin{compactitem}[$\bullet$]
   \item \textbf{Design decision}: We have consciously decided to not
     allow object allocation outside the method that uses that object in
     Step7. The objective of our data-flow algorithm is to identify all
@@ -1587,7 +1600,7 @@ describe Step4 and Step6 of our data-flow analysis.
   \label{fig:8j}
 \end{figure}
 
-\begin{compactitem}[$\bigstar$]
+\begin{compactitem}[-]
 
 \item \underline{Step4} is the dual of Step5. It works on Java fields
   rather than method local variables like Step5. The other difference
@@ -1667,7 +1680,7 @@ permanent heap space.
         \Let $allocPtr \leftarrow allocPtr - (size + header\_size)$\;\label{baone:l1}
         \lIf {$allocPtr < 0$} {\texttt{raise No\_mem}}\;\label{baone:l2}
         \ForEach {$d \in dd$} {
-          \ReplaceByteCode($allocPtr,d,M)$\;
+          \ReplaceByteCode($allocPtr,d,M,size)$\;
         }
       }
     \end{algo}
@@ -1681,6 +1694,7 @@ permanent heap space.
       \KwIn{$allocPtr$: allocation pointer}
       \KwIn{pp: program point to replace} 
       \KwIn{$M$: Method containing the program point} 
+      \KwIn{$size$: Size of the allocated object/array} 
       \SetKwData{Let}{let}
       \SetKwData{GetArg}{getArg}
       \SetKwData{ReplaceNew}{replaceNew}
@@ -1690,17 +1704,17 @@ permanent heap space.
       \BlankLine
       \uIf {$pp = \mathtt{new}$} {
         \Let $arg \leftarrow$ \GetArg($pp$)\;
-        \ReplaceNew($pp$,$M$,$arg$)\;\label{batwo:l1}
-        \AdjConditionals($M$,22)\;
+        \ReplaceNew($pp$,$M$,$arg$,$size$)\;\label{batwo:l1}
+        \AdjConditionals($M$,31)\;
       }
       \uElseIf {$pp = \mathtt{newarray}$} {
         \Let $arg \leftarrow$ \GetArg($pp$)\;
         \uIf {$arg = \mathtt{primitive}$} {
-          \ReplaceNewA($pp$,$M$,$arg$)\;\label{batwo:l2}
+          \ReplaceNewA($pp$,$M$,$arg$,$size$)\;\label{batwo:l2}
         }\lElse {
-          \ReplaceNewAA($pp$,$M$,$arg$)\;\label{batwo:l3}
+          \ReplaceNewAA($pp$,$M$,$arg$,$size$)\;\label{batwo:l3}
         }
-        \AdjConditionals($M$,22)\;\label{batwo:l4}
+        \AdjConditionals($M$,31)\;\label{batwo:l4}
       }
       \lElse {\texttt{raise error}}
     \end{algo}
@@ -1740,18 +1754,19 @@ alternative bytecodes in the second step, shown in Figure~\ref{fig:11b}.
 \end{figure}
 
 
-The algorithm (Figure~\ref{fig:11b}) used to replace the object
-allocation bytecodes takes as input three arguments: the allocation
-pointer, $allocPtr$, the program point to replace $pp$, and the method
-containing the program point: $M$. There are \textit{three} types of
-bytecodes in the JVM specification: (1) the \texttt{new} bytecode that
-allocates an object. (2) The \texttt{newarray} bytecode that allocates
-arrays holding primitives, and (3) \texttt{anewarray} bytecode that
-allocates arrays holding references. This distinction is important since
-the number of bytes used to represent each of these bytecode differ. The
-\texttt{new} and \texttt{anewarray} bytecodes are encoded in the class
-file with three bytes, whereas the \texttt{newarray} bytecode only uses
-two bytes in the class file representation.
+{\color{red} The algorithm (Figure~\ref{fig:11b}) used to replace the
+  object allocation bytecodes takes as input four arguments: the
+  allocation pointer, $allocPtr$, the program point to replace $pp$, and
+  the method containing the program point: $M$ and the size to
+  allocate. }There are \textit{three} types of bytecodes in the JVM
+specification: (1) the \texttt{new} bytecode that allocates an
+object. (2) The \texttt{newarray} bytecode that allocates arrays holding
+primitives, and (3) \texttt{anewarray} bytecode that allocates arrays
+holding references. This distinction is important since the number of
+bytes used to represent each of these bytecodes differ. The \texttt{new}
+and \texttt{anewarray} bytecodes are encoded in the class file with
+three bytes, whereas the \texttt{newarray} bytecode only uses two bytes
+in the class file representation.
 
 Different methods are called to replace each of these allocation
 variants: Figure~\ref{fig:11b}, line~\ref{batwo:l1} replacing
@@ -1764,14 +1779,14 @@ needed to correctly update the conditional instruction's target address
 after replacement (line~\ref{batwo:l4}).
 
 All conditional instruction's, following the object allocation
-bytecodes, target addresses need to be incremented by 22 bytes after
-replacement. This 22 byte increment is made obvious by
-Figures~\ref{fig:11c} and~\ref{fig:11d}, which show the Java bytecode
-snippets for the example program in Figure~\ref{fig:8j} before and after
-\texttt{new} bytecode replacement, respectively\footnote{In both these
-  figures, the line numbers are shown on the right of the program. The
-  numbers adjacent to the bytecodes are the starting bytes for each of
-  the bytecodes as obtained by the \texttt{javap -c -v}
+bytecodes, target addresses need to be incremented by {\color{red} 31}
+bytes after replacement. This {\color{red} 31} byte increment is made
+obvious by Figures~\ref{fig:11c} and~\ref{fig:11d}, which show the Java
+bytecode snippets for the example program in Figure~\ref{fig:8j} before
+and after \texttt{new} bytecode replacement, respectively\footnote{In
+  both these figures, the line numbers are shown on the right of the
+  program. The numbers adjacent to the bytecodes are the starting bytes
+  for each of the bytecodes as obtained by the \texttt{javap -c -v}
   command}. Figure~\ref{fig:11c} shows the bytecode produced by the Java
 compiler for the \texttt{A} object allocation in the \texttt{main}
 method. The very first bytecode, \texttt{new}, takes as argument the
@@ -1828,9 +1843,12 @@ predictable bytecodes as shown in Figure~\ref{fig:11d}.
 20:iadd
 21:swap
 22:invokestatic  #151 // Method Native.wr:(II)V\label[btwo:l2]\label[btwo:l6]
-25:dup
-26:invokespecial #3   // Method a/a.''<init>'':()V
-29:putstatic     #4   // Field A:La/a;
+25:ldc_w         #155 // start of fields\label[btwo:l7]\label[btwo:l8]
+28:ldc_w         #156 // size of the object
+31:invokestatic  #150 // Method Native.wrl:(II)V\label[btwo:l9]\label[btwo:l10]
+34:dup
+35:invokespecial #3   // Method a/a.''<init>'':()V
+38:putstatic     #4   // Field A:La/a;
     \end{Verbatim}
   \end{minipage}
 \end{lrbox}
@@ -1865,23 +1883,28 @@ predictable bytecodes as shown in Figure~\ref{fig:11d}.
 
 A single \texttt{new} bytecode (consuming 3 bytes in the class file) is
 replaced with a list of bytecodes in lines~\ref{btwo:l1}-\ref{btwo:l2}
-(line numbers are given on the right) consuming 25 bytes in the class
-file, hence the 22 byte increment of target addresses of the conditional
-bytecodes. The core idea is very simple; since we have already allocated
-memory for the object (Figure~\ref{fig:11a}), we can simply replace the
-\texttt{new} bytecode with a bytecode that loads the allocation pointer
-($allocPtr$) onto the stack (line~\ref{btwo:l1}) as the object
-reference. The rest of the bytecodes setup the object header for the
-allocated object. Our object header is two words (the object structure
-for the running example is shown in Figure~\ref{fig:11e}), the first
-word contains the pointer to the start of data, in the current example
-it is the address 65485. The first word of the object header is
-initialized in lines~\ref{btwo:l3}-\ref{btwo:l4} in
-Figure~\ref{fig:11d}. The second word of the object header is the
-pointer to the start of the method structure of the class
-(c.f. Figure~\ref{fig:6b}). The second word of the object header is
-initialized in lines~\ref{btwo:l5}-\ref{btwo:l6} in
-Figure~\ref{fig:11d}.
+(line numbers are given on the right) consuming {\color{red} 34} bytes
+in the class file, hence the {\color{red} 31} byte increment of target
+addresses of the conditional bytecodes. The core idea is very simple;
+since we have already allocated memory for the object
+(Figure~\ref{fig:11a}), we can simply replace the \texttt{new} bytecode
+with a bytecode that loads the allocation pointer ($allocPtr$) onto the
+stack (line~\ref{btwo:l1}) as the object reference. The rest of the
+bytecodes setup the object header for the allocated object. Our object
+header is two words (the object structure for the running example is
+shown in Figure~\ref{fig:11e}), the first word contains the pointer to
+the start of data, in the current example it is the address 65485. The
+first word of the object header is initialized in
+lines~\ref{btwo:l3}-\ref{btwo:l4} in Figure~\ref{fig:11d}. The second
+word of the object header is the pointer to the start of the method
+structure of the class (c.f. Figure~\ref{fig:6b}). The second word of
+the object header is initialized in lines~\ref{btwo:l5}-\ref{btwo:l6} in
+Figure~\ref{fig:11d}. {Finally, the fields of the object are zeroed, on
+  lines~\ref{btwo:l7}-\ref{btwo:l9}. The method \texttt{Native.wrl}
+  takes as input the start address of the object's fields and the size
+  of the object as the arguments and writes zeros in these memory
+  words.}
+
 
 In case of \texttt{newarray} and \texttt{anewarray} bytecodes, the array
 layout (shown in Figure~\ref{fig:11f}) differs from standard real-time
@@ -2067,14 +2090,14 @@ uses object replication strategy with semi-space
 partitioning~\footnote{In the numbers in Table~\ref{tab:1}, we have not
   included the semi-space reserved by JOP-GC.}.
 
-SCJ, like the RTGC approaches, allocates memory on each memory
-allocation bytecode execution. SCJ, \underline{unlike} the proposed
-No-GC approach, is unable to reuse memory space allocated in the scoped
-memory area during the loop iterations. The scoped memory area can only
-be reused when the task, using the scoped memory area, finishes
-execution. The No-GC approach greatly benefits from the memory reuse
-enabled by static analysis proposed in this paper, even though the
-memory organization of the two approaches is similar.
+{\iffalse SCJ, like the RTGC approaches, allocates memory on each memory
+  allocation bytecode execution. SCJ, \underline{unlike} the proposed
+  No-GC approach, is unable to reuse memory space allocated in the
+  scoped memory area during the loop iterations. The scoped memory area
+  can only be reused when the task, using the scoped memory area,
+  finishes execution. The No-GC approach greatly benefits from the
+  memory reuse enabled by static analysis proposed in this paper, even
+  though the memory organization of the two approaches is similar.  \fi }
 
 \subsection{WCRT comparisons}
 \label{sec:wcrt-estimation}
