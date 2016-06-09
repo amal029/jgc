@@ -2274,20 +2274,70 @@ performed at object allocation by the already present real-time tasks,
 or \textit{time} based; where the GC runs as its own task and needs to
 be scheduled with the other real-time tasks in the system. Both these
 approaches suffer from drawbacks, such as determining the priority of
-the GC task, etc~\cite{schoeberl2010scheduling}. The major drawback of
-these approaches is that the equations capturing the GC cycle times
+the GC task. The major drawback of these approaches is that the
+equations capturing the GC cycle times~\cite{schoeberl2010scheduling}
 depend upon the memory allocation characteristic of the application. In
 the general case, assuming the worst case memory allocation patterns
 results in a very pessimistic GC worst case bound as shown
 in~\cite{puffitsch2013design}. In this paper we are trying to remedy
 this problem by removing the GC altogether.
 
-
-\subsection{Limitations}
+\subsection{Perceived limitation of the proposed approach}
 \label{sec:limitations}
 
+\newsavebox{\limitation}
+\begin{lrbox}{\limitation}
+  \begin{minipage}[b]{0.7\linewidth}
+    \begin{Verbatim}[numbers=right,commandchars=\\\[\]]
+List<Integer> list = new List<Integer>(); \label[li:l0]
+while (true) {
+ // I is a valued input signal 
+ // from the environment
+ present(I) {
+  list.add(new Integer(#I)); \label[li:l1]
+  // O is a valued output signal
+  emit(O(list)); \label[li:l2]
+  pause;
+  list = #O; \label[li:l3]
+}
+    \end{Verbatim}
+  \end{minipage}
+\end{lrbox}
 
+\begin{figure}[h!]
+  \centering
+  \scalebox{0.7}{\usebox{\limitation}}
+  \caption{Example SystemJ code snippet that cannot be compiled using
+    the proposed approach}
+  \label{fig:limitation}
+\end{figure}
 
+The primary limitation of the proposed approach is the fact that the
+compiler should be able to determine the size of the object to allocate
+statically. Consider the SystemJ code snippet in
+Figure~\ref{fig:limitation}; in this example, a \texttt{List} type
+object (\texttt{list}) is allocated with default size of $10$ on
+line~\ref{li:l0}. New \texttt{Integer} type objects are allocated and
+added to this \texttt{list} if and only if the valued signal \texttt{I}
+is present from the environment. Moreover, the value carried by the
+signal \texttt{I} is added into the \texttt{list}. In the first tick,
+the list object is emitted back to the environment via signal \texttt{O}
+(line~\ref{li:l2}). Finally, the \texttt{list} object has a lifetime
+greater than one tick, because it is reused in the second tick
+(line~\ref{li:l3}). Hence, the \texttt{list} object has to be allocated
+into the permanent heap space. We do not know how often signal
+\texttt{I} will be input from the environment and with what value. Thus,
+we cannot determine at compile time the worst case size of the
+\texttt{list} object. Therefore, in this example, the permanent heap
+size cannot be bounded at compile time. The proposed approach terminates
+compilation in such cases stating that the heap size is unbounded.
+
+In all safety critical and hard real-time application, including those
+developed in SCJ~\cite{andersen2013worst} one needs to statically
+determine the worst case memory consumption. This is important, because
+runtime out of memory exceptions can lead to catastrophic
+damages. Hence, the need of our approach to statically bound the memory
+consumption is actually a blessing in disguise.
 
 }
 
