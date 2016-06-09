@@ -414,11 +414,10 @@ parallel ($||$) operator~\footnote{Standard Java threading model is not
 communication between synchronous parallel reactions is not allowed in
 SystemJ. The shared memory communication model is replaced by the signal
 emission based communication mechanism. State boundaries are demarcated
-explicitly by programmers using the $\mathbf{pause}$ construct. Finally,
-there are two types of loops in SystemJ: temporal; consisting of a
-$\mathbf{pause}$ statement, loops that execute forever and bounded
-data-loops like in standard Java.
-
+explicitly by programmers using the $\mathbf{pause}$
+construct. {\color{red} Finally, there are two types of loops in
+  SystemJ: temporal loops; consisting of a $\mathbf{pause}$ statement,
+  that execute forever and bounded data-loops like in standard Java.  }
 \subsection{The real-time execution architecture}
 \label{sec:real-time-execution}
 
@@ -465,16 +464,16 @@ microcodes, which are the native instructions of the JOP processor. The
 JOP pipeline has been designed to execute each microcode in one clock
 cycle and is guaranteed to be stall free. Furthermore, to guarantee time
 predictability, a novel cache architecture is implemented in JOP. There
-are two caches in JOP. The first is the stack cache that acts as a
-replacement for the data cache found in general purpose processors. The
-second is the method cache that acts as a replacement for program
-cache. A complete Java method is loaded into the method cache before
-execution and hence, there are only two program points: the
-\textit{invoke} and the \textit{return} bytecodes that can lead to a
-method cache miss, which can be accounted for in the static WCRT
-analysis procedure with ease. Finally, the interface connecting the
-ReCOP and JOP has single clock cycle latency as described
-in~\cite{DBLP:journals/tecs/SalcicM13}.
+are two caches in JOP. The first is the stack cache~\cite{jop:stack}
+that acts as a replacement for the data cache found in general purpose
+processors. The second is the method cache~\cite{jop:jtres_cache} that
+acts as a replacement for program cache. A complete Java method is
+loaded into the method cache before execution and hence, there are only
+two program points: the \textit{invoke} and the \textit{return}
+bytecodes that can lead to a method cache miss, which can be accounted
+for in the static WCRT analysis procedure with ease. Finally, the
+interface connecting the ReCOP and JOP has single clock cycle latency as
+described in~\cite{DBLP:journals/tecs/SalcicM13}.
 
 The overall program execution on the TP-JOP architecture proceeds as
 follows: the ReCOP leads the program execution since it executes the
@@ -808,13 +807,12 @@ nodes. {\color{red} There are a plethora of static WCRT estimation
   model-checking. Any other static WCRT estimation technique can be used
   in our compiler framework. We use the Uppaal~\cite{gbeh04}
   model-checker to perform an exhaustive state space exploration of the
-  GRC, in the process, emulating the execution of the GRC on the TP-JOP
-  architecture to find the WCRT of the SystemJ clock-domain. The
-  exhaustive search space carried out by the Uppaal model-checker gives
-  WCRT estimates, for SystemJ programs, that are on average
-  $\approx 30\%$ tighter than those obtained by other
-  approaches~\cite{LiMS14}.  } There are three steps involved in finding
-the WCRT of a clock-domain using Uppaal:
+  GRC to find the WCRT of the SystemJ clock-domain. The exhaustive
+  search space carried out by the Uppaal model-checker gives WCRT
+  estimates, for SystemJ programs, that are on average $\approx 30\%$
+  tighter than those obtained by other approaches~\cite{LiMS14}.  }
+There are three steps involved in finding the WCRT of a clock-domain
+using Uppaal:
 
 \begin{enumerate}
 \item \textit{Annotating the GRC nodes with \textit{Worst Case Execution
@@ -825,9 +823,9 @@ the WCRT of a clock-domain using Uppaal:
   execute. The JDNs are dispatched, encapsulated within individual Java
   methods, for execution on JOP. One needs to compute the \textit{Worst
     Case Execution Time} (WCET) for each of these JDNs, using the JOP
-  provided worst case analysis tool (WCA)~\cite{msch05}. The computed
-  worst case execution times for both: CNs and JDNs are back annotated
-  onto the GRC. The numerical annotations on the nodes in
+  provided worst case analysis tool (WCA)~\cite{jop:wcet:jtres06}. The
+  computed worst case execution times for both: CNs and JDNs are back
+  annotated onto the GRC. The numerical annotations on the nodes in
   Figure~\ref{fig:2b} show these back annotated WCETs.
 
 \item \textit{Translating the GRC into an Uppaal timed automaton}:
@@ -905,8 +903,8 @@ execution time is unaccounted for in the aforementioned WCRT analysis
 framework. The main reason for this lack of GC incorporation is that the
 GC cycle time cannot be \textit{practically} bounded; as the number of
 heap allocations in a Java program depends upon the application and
-during garbage collection a linked list of allocated objects needs to be
-traversed as one of the collection
+during garbage collection a {\color{red} linked list of allocated
+  objects may need to to be traversed }as one of the collection
 phases. Puffitsch~\cite{puffitsch2013design} shows that a WCRT value can
 be obtained for programs, which invoke the GC, by pessimistically
 bounding the collection phase during static analysis. But, the resultant
@@ -1426,8 +1424,9 @@ signal \texttt{S} (BB4, line~1).
   Looking at Figure~\ref{fig:8h}, it is clear that object reference
   \texttt{t} can be initialized at either in BB2 line~2 or BB3 line~3,
   depending upon the value of variable \texttt{a\_thread} during program
-  execution. For each of these program points, Step5 guarantees that the
-  object reference does not \textit{escape} the lifetime of the
+  execution. For each of these program points, {\color{red} Step5 first
+    performs program analysis to guarantee that the object reference
+    does not \textit{escape} the lifetime of the}
   method~\cite{choi1999escape}.~\footnote{Let $O$ be an object reference
     and $M$ be a method invocation. $O$ is said to escape $M$, if the
     lifetime of $O$ may exceed the lifetime of $M$.} If the object
@@ -1541,21 +1540,21 @@ signal \texttt{S} (BB4, line~1).
     the permanent heap, then both; \texttt{A} and \texttt{B} will point
     to the same place in permanent heap. Consequently, first a constant
     0 will be written in the allocated memory (Figure~\ref{fig:10b},
-    line~\ref{exinvt:l2}) and then this value will be overwritten to 1
-    (Figure~\ref{fig:10b}, line~\ref{exinvt:l4}), resulting in
-    functionally incorrect code. The \textit{only} solution to this
-    problem is to \textit{inline} the called method, \texttt{valueOf} in
-    this case. But, extreme caution is required when in-lining methods,
-    because the method might be too large to fit in the method cache, or
-    more than one such methods might need to be in-lined (in case a
-    method itself calls another method, which does the actual object
-    allocation and so on and so forth). To put the cache size
-    restriction into perspective, all our benchmarks have a very limited
-    cache size of only 1KB. Thus, we have decided to disallow, object
-    allocation outside of the method being analyzed.  As a consequence
-    of this design decision, the SystemJ programmer now needs to make
-    explicit deep copies as shown in Figure~\ref{fig:8h} BB2 line~3 and
-    BB3 line~4.
+    lines~\ref{exinvt:l0}-\ref{exinvt:l2}) and then this value will be
+    overwritten to 1 (Figure~\ref{fig:10b}, line~\ref{exinvt:l4}),
+    resulting in functionally incorrect code. The \textit{only} solution
+    to this problem is to \textit{inline} the called method,
+    \texttt{valueOf} in this case. But, extreme caution is required when
+    in-lining methods, because the method might be too large to fit in
+    the method cache, or more than one such methods might need to be
+    in-lined (in case a method itself calls another method, which does
+    the actual object allocation and so on and so forth). To put the
+    cache size restriction into perspective, all our benchmarks have a
+    very limited cache size of only 1KB. Thus, we have decided to
+    disallow, object allocation outside of the method being analyzed.
+    As a consequence of this design decision, the SystemJ programmer now
+    needs to make explicit deep copies as shown in Figure~\ref{fig:8h}
+    BB2 line~3 and BB3 line~4.
   \end{compactitem}
 
 \begin{figure}[t!]
@@ -1700,6 +1699,7 @@ permanent heap space.
       \SetKwData{ReplaceNew}{replaceNew}
       \SetKwData{ReplaceNewA}{replaceNewArrayB}
       \SetKwData{ReplaceNewAA}{replaceNewArrayO}
+      \SetKwData{ReplaceMNewAA}{replaceMultiNewArrayO}
       \SetKwData{AdjConditionals}{adjustConditionals}
       \BlankLine
       \uIf {$pp = \mathtt{new}$} {
@@ -1711,10 +1711,14 @@ permanent heap space.
         \Let $arg \leftarrow$ \GetArg($pp$)\;
         \uIf {$arg = \mathtt{primitive}$} {
           \ReplaceNewA($pp$,$M$,$arg$,$size$)\;\label{batwo:l2}
-        }\lElse {
+          \AdjConditionals($M$,32)\;
+        }\uElseIf {$arg = \mathtt{single-dimension}$} {
           \ReplaceNewAA($pp$,$M$,$arg$,$size$)\;\label{batwo:l3}
+          \AdjConditionals($M$,31)\;
+        }\lElse {
+          \ReplaceMNewAA($pp$,$M$,$arg$,$size$)\;\label{batwo:l5}
+          \AdjConditionals($M$,30)\;
         }
-        \AdjConditionals($M$,31)\;\label{batwo:l4}
       }
       \lElse {\texttt{raise error}}
     \end{algo}
@@ -1745,8 +1749,9 @@ alternative bytecodes in the second step, shown in Figure~\ref{fig:11b}.
     \label{fig:11a}
   }
   \qquad
-  \subfloat[Replacing the \texttt{new}, \texttt{newarray}, and
-  \texttt{anewarray} bytecodes] { \scalebox{0.9}{\usebox{\batwo}}
+  \subfloat[Replacing the \texttt{new}, \texttt{newarray},
+  \texttt{anewarray} and \texttt{amultinewarray} bytecodes]
+  { \scalebox{0.9}{\usebox{\batwo}}
     \label{fig:11b}
   }
   \caption{The back-end code generation pseudo-algorithm}
@@ -1758,153 +1763,159 @@ alternative bytecodes in the second step, shown in Figure~\ref{fig:11b}.
   object allocation bytecodes takes as input four arguments: the
   allocation pointer, $allocPtr$, the program point to replace $pp$, and
   the method containing the program point: $M$ and the size to
-  allocate. }There are \textit{three} types of bytecodes in the JVM
-specification: (1) the \texttt{new} bytecode that allocates an
-object. (2) The \texttt{newarray} bytecode that allocates arrays holding
-primitives, and (3) \texttt{anewarray} bytecode that allocates arrays
-holding references. This distinction is important since the number of
-bytes used to represent each of these bytecodes differ. The \texttt{new}
-and \texttt{anewarray} bytecodes are encoded in the class file with
-three bytes, whereas the \texttt{newarray} bytecode only uses two bytes
-in the class file representation.
+  allocate. There are \textit{four} types of bytecodes in the JVM
+  specification: (1) the \texttt{new} bytecode that allocates an
+  object. (2) The \texttt{newarray} bytecode that allocates arrays
+  holding primitives, (3) \texttt{anewarray} bytecode that allocates
+  arrays holding references and (4) \texttt{amultinewarray} bytecode
+  that allocates multidimensional arrays of type identified from the
+  constant pool. This distinction is important since the number of bytes
+  used to represent each of these bytecodes differ. The
+  \texttt{amultinewarray} bytecode takes 4 bytes in the class file. The
+  \texttt{new} and \texttt{anewarray} bytecodes are encoded in the class
+  file with three bytes, whereas the \texttt{newarray} bytecode only
+  uses two bytes in the class file representation.  
 
-Different methods are called to replace each of these allocation
-variants: Figure~\ref{fig:11b}, line~\ref{batwo:l1} replacing
-\texttt{new}, line~\ref{batwo:l2} replacing \texttt{newarray}, and
-line~\ref{batwo:l3} replacing \texttt{anewarray} bytecodes,
-respectively. All methods have the same logic, except that some padding
-(represented as \texttt{nop} bytecodes) is needed in case of the
-\texttt{newarray} and \texttt{anewarray} bytecodes. This padding is
-needed to correctly update the conditional instruction's target address
-after replacement (line~\ref{batwo:l4}).
+  Different methods are called to replace each of these allocation
+  variants: Figure~\ref{fig:11b}, line~\ref{batwo:l1} replacing
+  \texttt{new}, line~\ref{batwo:l2} replacing \texttt{newarray}, and
+  lines~\ref{batwo:l3} and~\ref{batwo:l5} replacing the
+  \texttt{anewarray} and \texttt{amultinewarray} bytecodes,
+  respectively. All methods have the same logic, except that the target
+  addresses of jump bytecodes need to be correctly updated after
+  replacement. All conditional instruction's, following the object
+  allocation bytecodes, target addresses need to be incremented by
+  {\color{red} 31} bytes after replacement\footnote{In case of
+    \texttt{newarray} bytecode the following target addresses are
+    updated by an offset of 32 bytes. In case of \texttt{anewarray} the
+    update offset is 31 bytes, and in case of \texttt{amultinewarray} it
+    is 30 bytes, respectively}. This {\color{red} 31} byte increment is
+  made obvious by Figures~\ref{fig:11c} and~\ref{fig:11d}, which show
+  the Java bytecode snippets for the example program in
+  Figure~\ref{fig:8j} before and after \texttt{new} bytecode
+  replacement, respectively\footnote{In both these figures, the line
+    numbers are shown on the right of the program. The numbers adjacent
+    to the bytecodes are the starting bytes for each of the bytecodes as
+    obtained by the \texttt{javap -c -v} command}. Figure~\ref{fig:11c}
+  shows the bytecode produced by the Java compiler for the \texttt{A}
+  object allocation in the \texttt{main} method. The very first
+  bytecode, \texttt{new}, takes as argument the index, \texttt{2}, into
+  the constant pool that holds the type of object to allocate. The
+  returned object reference is then duplicated (\texttt{dup}
+  instruction). Next, the constructor of the class \texttt{a} is invoked
+  to initialize the returned reference and finally, the returned
+  reference is put into a static field of the class. The \texttt{new}
+  bytecode is timing \textit{unpredictable}, because it might invoke the
+  GC (e.g., in case of work based GCs~\cite{schoeberl2010scheduling}),
+  which has an unbounded collection cycle. It might also generate a
+  runtime out of memory exception, thereby violating safety
+  criticality. We replace this \texttt{new} bytecode with safe and time
+  predictable bytecodes as shown in Figure~\ref{fig:11d}.
+  \newsavebox{\bone}
+  \begin{lrbox}{\bone}
+    \begin{minipage}[b]{0.7\linewidth}
+      \begin{Verbatim}[numbers=right,commandchars=\\\[\]]
+        --- constant-pool snippet ----
+        #2 = Class     #79     //a/a
+        #3 = Methodref #2.#78  //a/a.''<init>'':()V
+        #4 = Fieldref  #12.#80 //test/test.A:La/a;
+        ---------- main method snippet --------
+        0:new #2           // class a/a
+        3:dup
+        4:invokespecial #3 // Method a/a.''<init>'':()V
+        7:putstatic     #4 // Field A:La/a;
+      \end{Verbatim}
+    \end{minipage}
+  \end{lrbox}
 
-All conditional instruction's, following the object allocation
-bytecodes, target addresses need to be incremented by {\color{red} 31}
-bytes after replacement. This {\color{red} 31} byte increment is made
-obvious by Figures~\ref{fig:11c} and~\ref{fig:11d}, which show the Java
-bytecode snippets for the example program in Figure~\ref{fig:8j} before
-and after \texttt{new} bytecode replacement, respectively\footnote{In
-  both these figures, the line numbers are shown on the right of the
-  program. The numbers adjacent to the bytecodes are the starting bytes
-  for each of the bytecodes as obtained by the \texttt{javap -c -v}
-  command}. Figure~\ref{fig:11c} shows the bytecode produced by the Java
-compiler for the \texttt{A} object allocation in the \texttt{main}
-method. The very first bytecode, \texttt{new}, takes as argument the
-index, \texttt{2}, into the constant pool that holds the type of object
-to allocate. The returned object reference is then duplicated
-(\texttt{dup} instruction). Next, the constructor of the class
-\texttt{a} is invoked to initialize the returned reference and finally,
-the returned reference is put into a static field of the class. The
-\texttt{new} bytecode is timing \textit{unpredictable}, because it might
-invoke the GC, which has an unbounded collection cycle. It might also
-generate a runtime out of memory exception, thereby violating safety
-criticality. We replace this \texttt{new} bytecode with safe and time
-predictable bytecodes as shown in Figure~\ref{fig:11d}.
+  \newsavebox{\btwo}
+  \begin{lrbox}{\btwo}
+    \begin{minipage}[b]{0.7\linewidth}
+      \begin{Verbatim}[numbers=right,commandchars=\\\[\]]
+        --- constant-pool snippet ----
+        #2 = Class     #79     //a/a
+        #3 = Methodref #2.#78  //a/a.''<init>'':()V
+        #4 = Fieldref  #12.#80 //test/test.A:La/a;
+        .... //other constants
+        #154 = Integer            65483
+        #155 = Integer            65485
+        ---------- main method snippet --------
+        0:ldc_w         #154 // int 65483\label[btwo:l1]
+        3:dup 
+        4:ldc_w         #155 // int 65485\label[btwo:l3]
+        7:swap
+        8:invokestatic  #151 // Method Native.wr:(II)V\label[btwo:l4]
+        11:dup\label[btwo:l5]
+        12:bipush        1
+        14:iadd
+        15:ldc_w         #2   // class a/a
+        18:bipush        5
+        20:iadd
+        21:swap
+        22:invokestatic  #151 // Method Native.wr:(II)V\label[btwo:l2]\label[btwo:l6]
+        25:ldc_w         #155 // start of fields\label[btwo:l7]\label[btwo:l8]
+        28:ldc_w         #156 // size of the object
+        31:invokestatic  #150 // Method Native.wrl:(II)V\label[btwo:l9]\label[btwo:l10]
+        34:dup
+        35:invokespecial #3   // Method a/a.''<init>'':()V
+        38:putstatic     #4   // Field A:La/a;
+      \end{Verbatim}
+    \end{minipage}
+  \end{lrbox}
 
-\newsavebox{\bone}
-\begin{lrbox}{\bone}
-  \begin{minipage}[b]{0.7\linewidth}
-    \begin{Verbatim}[numbers=right,commandchars=\\\[\]]
---- constant-pool snippet ----
-#2 = Class     #79     //a/a
-#3 = Methodref #2.#78  //a/a.''<init>'':()V
-#4 = Fieldref  #12.#80 //test/test.A:La/a;
----------- main method snippet --------
-0:new #2           // class a/a
-3:dup
-4:invokespecial #3 // Method a/a.''<init>'':()V
-7:putstatic     #4 // Field A:La/a;
-    \end{Verbatim}
-  \end{minipage}
-\end{lrbox}
+  \begin{figure}[t!]
+    \centering
+    \subfloat[Java bytecode snippet and class constant-pool for example in
+    Figure~\ref{fig:8j}]{
+      \scalebox{0.65}{\usebox{\bone}}
+      \label{fig:11c}
+    }
+    \qquad
+    \subfloat[Java bytecode snippet and class constant-pool for example in
+    Figure~\ref{fig:8j} after \texttt{new} bytecode replacement]{
+      \scalebox{0.65}{\usebox{\btwo}}
+      \label{fig:11d}
+    }
 
-\newsavebox{\btwo}
-\begin{lrbox}{\btwo}
-  \begin{minipage}[b]{0.7\linewidth}
-    \begin{Verbatim}[numbers=right,commandchars=\\\[\]]
---- constant-pool snippet ----
-#2 = Class     #79     //a/a
-#3 = Methodref #2.#78  //a/a.''<init>'':()V
-#4 = Fieldref  #12.#80 //test/test.A:La/a;
-.... //other constants
-#154 = Integer            65483
-#155 = Integer            65485
----------- main method snippet --------
- 0:ldc_w         #154 // int 65483\label[btwo:l1]
- 3:dup 
- 4:ldc_w         #155 // int 65485\label[btwo:l3]
- 7:swap
- 8:invokestatic  #151 // Method Native.wr:(II)V\label[btwo:l4]
-11:dup\label[btwo:l5]
-12:bipush        1
-14:iadd
-15:ldc_w         #2   // class a/a
-18:bipush        5
-20:iadd
-21:swap
-22:invokestatic  #151 // Method Native.wr:(II)V\label[btwo:l2]\label[btwo:l6]
-25:ldc_w         #155 // start of fields\label[btwo:l7]\label[btwo:l8]
-28:ldc_w         #156 // size of the object
-31:invokestatic  #150 // Method Native.wrl:(II)V\label[btwo:l9]\label[btwo:l10]
-34:dup
-35:invokespecial #3   // Method a/a.''<init>'':()V
-38:putstatic     #4   // Field A:La/a;
-    \end{Verbatim}
-  \end{minipage}
-\end{lrbox}
+    \subfloat[Java object allocation in permanent heap]{
+      \includegraphics[scale=0.5]{oalloc}
+      \label{fig:11e}
+    }
+    \qquad\qquad
+    \subfloat[Java (2x2x2) array allocation in permanent heap]{
+      \includegraphics[scale=0.5]{aalloc}
+      \label{fig:11f}
+    }
+    \caption{The back-end generated code and compacted object
+      representation in heap}
+    \label{fig:15}
+  \end{figure}
 
-\begin{figure}[t!]
-  \centering
-  \subfloat[Java bytecode snippet and class constant-pool for example in
-  Figure~\ref{fig:8j}]{
-    \scalebox{0.65}{\usebox{\bone}}
-    \label{fig:11c}
-  }
-  \qquad
-  \subfloat[Java bytecode snippet and class constant-pool for example in
-  Figure~\ref{fig:8j} after \texttt{new} bytecode replacement]{
-    \scalebox{0.65}{\usebox{\btwo}}
-    \label{fig:11d}
-  }
-
-  \subfloat[Java object allocation in permanent heap]{
-    \includegraphics[scale=0.5]{oalloc}
-    \label{fig:11e}
-  }
-  \qquad\qquad
-  \subfloat[Java (2x2x2) array allocation in permanent heap]{
-    \includegraphics[scale=0.5]{aalloc}
-    \label{fig:11f}
-  }
-  \caption{The back-end generated code and compacted object
-    representation in heap}
-  \label{fig:15}
-\end{figure}
-
-A single \texttt{new} bytecode (consuming 3 bytes in the class file) is
-replaced with a list of bytecodes in lines~\ref{btwo:l1}-\ref{btwo:l2}
-(line numbers are given on the right) consuming {\color{red} 34} bytes
-in the class file, hence the {\color{red} 31} byte increment of target
-addresses of the conditional bytecodes. The core idea is very simple;
-since we have already allocated memory for the object
-(Figure~\ref{fig:11a}), we can simply replace the \texttt{new} bytecode
-with a bytecode that loads the allocation pointer ($allocPtr$) onto the
-stack (line~\ref{btwo:l1}) as the object reference. The rest of the
-bytecodes setup the object header for the allocated object. Our object
-header is two words (the object structure for the running example is
-shown in Figure~\ref{fig:11e}), the first word contains the pointer to
-the start of data, in the current example it is the address 65485. The
-first word of the object header is initialized in
-lines~\ref{btwo:l3}-\ref{btwo:l4} in Figure~\ref{fig:11d}. The second
-word of the object header is the pointer to the start of the method
-structure of the class (c.f. Figure~\ref{fig:6b}). The second word of
-the object header is initialized in lines~\ref{btwo:l5}-\ref{btwo:l6} in
-Figure~\ref{fig:11d}. {Finally, the fields of the object are zeroed, on
-  lines~\ref{btwo:l7}-\ref{btwo:l9}. The method \texttt{Native.wrl}
+  A single \texttt{new} bytecode (consuming 3 bytes in the class file)
+  is replaced with a list of bytecodes in
+  lines~\ref{btwo:l1}-\ref{btwo:l2} (line numbers are given on the
+  right) consuming {\color{red} 34} bytes in the class file, hence the
+  {\color{red} 31} byte increment of target addresses of the conditional
+  bytecodes. The core idea is very simple; since we have already
+  allocated memory for the object (Figure~\ref{fig:11a}), we can simply
+  replace the \texttt{new} bytecode with a bytecode that loads the
+  allocation pointer ($allocPtr$) onto the stack (line~\ref{btwo:l1}) as
+  the object reference. The rest of the bytecodes setup the object
+  header for the allocated object. Our object header is two words (the
+  object structure for the running example is shown in
+  Figure~\ref{fig:11e}), the first word contains the pointer to the
+  start of data, in the current example it is the address 65485. The
+  first word of the object header is initialized in
+  lines~\ref{btwo:l3}-\ref{btwo:l4} in Figure~\ref{fig:11d}. The second
+  word of the object header is the pointer to the start of the method
+  structure of the class (c.f. Figure~\ref{fig:6b}). The second word of
+  the object header is initialized in lines~\ref{btwo:l5}-\ref{btwo:l6}
+  in Figure~\ref{fig:11d}. Finally, the fields of the object are zeroed,
+  on lines~\ref{btwo:l7}-\ref{btwo:l9}. The method \texttt{Native.wrl}
   takes as input the start address of the object's fields and the size
-  of the object as the arguments and writes zeros in these memory
-  words.}
+  of the object as the arguments and writes zeros in these memory words.
 
+}
 
 In case of \texttt{newarray} and \texttt{anewarray} bytecodes, the array
 layout (shown in Figure~\ref{fig:11f}) differs from standard real-time
@@ -1916,9 +1927,8 @@ real-time JVM object header size (usually 8 words), which uses
 spines~\cite{pizlo2010schism} or handles~\cite{msch05} for arrays and
 regular objects, respectively, we also structure our arrays
 differently. We have decided to place arrays in a row major order and
-contiguously irrespective of the array dimensions (as in `C') rather
-than using linked lists for array traversal in order to allow $O(1)$
-array accesses.
+contiguously irrespective of the array dimensions (as in `C') in order
+to allow $O(1)$ array accesses.
 
 \section{Experimental results}
 \label{sec:experimental-results}
@@ -2260,7 +2270,7 @@ communication, etc, which we restrict in the SystemJ MoC. Finally, JVMs
 other than JOP can be used to execute SystemJ programs with the proposed
 memory organization, provided an array based backing store is available.
 
-\subsection{Comparison with Real-time GC approaches}
+\subsection{Comparison with Real-time garbage collection approaches}
 \label{sec:rtgc}
 
 Real-time garbage collectors (RTGCs) such as the ones proposed
