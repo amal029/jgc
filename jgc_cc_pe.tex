@@ -79,7 +79,7 @@
 \title{Compiler assisted memory management for safety-critical hard-real time 
   applications}
 
-\author{Avinash~Malik~\corrauth,~HeeJong~Park,~Muhammad~Nadeem,~Zoran~Salcic}
+\author{Avinash~Malik~\corrauth,~Heejong~Park,~Muhammad~Nadeem,~Zoran~Salcic}
 
 \address{Department of Electrical and Computer Engineering, University
   of Auckland, New Zealand}
@@ -117,8 +117,8 @@
   the need for large pessimistic WCET bounds obtained due to GC cycle
   times. Other than being amenable to formal verification and tight WCET
   analysis, results show that our proposed approach to memory management
-  is approximately $3\times$ faster compared to standard real-time GC
-  approaches.
+  is approximately $3\times$ faster, in terms of memory allocation,
+  compared to standard real-time GC approaches.
 
 
 \end{abstract}
@@ -326,11 +326,11 @@ language with the asynchronous concurrency of \textit{Communicating
   Sequential Processes} (CSP)~\cite{choa78}. SystemJ is grounded on
 rigorous mathematical semantics and thus is amenable to formal
 verification. We will use the graphical representation of a SystemJ
-program in Figure~\ref{fig:3a} for explaining the SystemJ MoC. On the
-top level, a SystemJ program comprises a set of clock-domains (CD1, CD2,
-CD3) executing asynchronously. Each clock-domain is a composition of one
-or more synchronous parallel reactions (Reaction11, Reaction12, etc),
-which are executed in lock-step with the logical tick of the
+program in Figure~\ref{fig:sysjprog} for explaining the SystemJ MoC. On
+the top level, a SystemJ program comprises a set of clock-domains (CD1,
+CD2, CD3) executing asynchronously. Each clock-domain is a composition
+of one or more synchronous parallel reactions (Reaction11, Reaction12,
+etc), which are executed in lock-step with the logical tick of the
 clock-domain. Reactions within the same clock-domain exploit synchronous
 broadcast mechanism on objects called signals to communicate with each
 other. Reactions can themselves be composed of more synchronous parallel
@@ -348,8 +348,16 @@ Figure~\ref{fig:1}. {\color{red} The compile time memory allocation
   individually and hence, in the rest of the paper we concentrate only
   on a single clock-domain.  }
 
-In this work we are only interested in the synchronous subset of
-SystemJ, i.e., a single clock-domain.
+% In this work we are only interested in the synchronous subset of
+% SystemJ, i.e., a single clock-domain.
+
+\begin{figure}[t!]
+  \centering
+    \includegraphics[scale=0.7]{gsysj.jpg}
+  \caption{A graphical representation of a SystemJ program}
+  \label{fig:sysjprog}
+\end{figure}
+
 
 \begin{figure}[t!]
   \centering
@@ -435,20 +443,12 @@ SystemJ programs executing on the TP-JOP architecture~\cite{LiMS14}.
 
 \begin{figure}[t!]
   \centering
-  \subfloat[A graphical representation of a SystemJ program]{
-    \includegraphics[scale=0.7]{gsysj.jpg}
-    \label{fig:3a}
-  }
-  \qquad
-  \subfloat[Overview of the TP-JOP architecture]{
-    \includegraphics[scale=0.8]{tpjop}
-    \label{fig:3b}
-  }
-  \caption{A generic SystemJ program and its execution architecture}
+  \includegraphics[scale=0.8]{tpjop}
+  \caption{Overview of the TP-JOP architecture}
   \label{fig:3}
 \end{figure}
 
-Figure~\ref{fig:3b} gives an overview of the TP-JOP architecture. The
+Figure~\ref{fig:3} gives an overview of the TP-JOP architecture. The
 architecture consists of two time predictable cores. The first core is
 termed \textit{Reactive Co-processor} (ReCOP) that executes the control
 flow instructions of a SystemJ program. The Java data computations are
@@ -482,9 +482,10 @@ is encountered, a call is dispatched to the JOP core with a method
 ID. Upon dispatch, the ReCOP itself stops processing further
 instructions until a result is returned from JOP. The JOP core polls
 continuously for an incoming request from ReCOP. Once a request is
-received, JOP decodes the method ID and loads the method into the method
-cache. Once loaded, the requested method is executed and upon completion
-of execution, the result is returned back to ReCOP.
+received, the JOP decodes the method ID and loads the method into the
+method cache. Once loaded, the requested method is executed and upon
+completion of execution, the result (a single bit) is returned back to
+ReCOP.
 
 \section{Statically estimating WCRT of SystemJ clock-domains}
 \label{sec:motiv-example-curr}
@@ -717,13 +718,13 @@ to the external environment. Two concurrent reactions
 execute in lock-step parallel, composed using the synchronous parallel
 operator ($||$) on line~\ref{ex1:sc}. Reaction R1 checks for an incoming
 event on the input signal \texttt{INPUT\_A} (line~\ref{ex1:cA}). If an
-event is detected, a counter is incremented, else, it is
-decremented. This logic is carried out forever using an infinite loop
-(line~\ref{ex1:l1}). The pause construct (line~\ref{ex1:p1}) explicitly
-demarcates the end of program transition. Similarly, a counter
-\texttt{count\_b} is incremented upon reception of an event on signal
-\texttt{INPUT\_B} in reaction R2, else signal \texttt{OUTPUT} is emitted
-to the external environment.
+event is detected, and the value of the input signal is not zero, then a
+counter is incremented, else, it is decremented. This logic is carried
+out forever using an infinite loop (line~\ref{ex1:l1}). The pause
+construct (line~\ref{ex1:p1}) explicitly demarcates the end of program
+transition. Similarly, a counter \texttt{count\_b} is incremented upon
+reception of an event on signal \texttt{INPUT\_B} in reaction R2, else
+signal \texttt{OUTPUT} is emitted to the external environment.
 
 \subsection{GRC representation of the clock-domain}
 \label{sec:grc-repr-clock}
@@ -796,7 +797,7 @@ infinite loops are simply infinite executions of the GRC
 
 Finding the WCRT of a SystemJ clock-domain is equivalent to finding the
 longest execution path from source node to the sink node in the
-GRC. Finding this longest path is non-trivial, because of concurrent
+GRC. Finding this longest path is non-trivial due to concurrent
 execution of the synchronous parallel reactions, the execution of
 different control branches depending upon the incoming input events from
 the external environment, and the state decoding within the switch
@@ -807,8 +808,8 @@ nodes. {\color{red} There are a plethora of static WCRT estimation
   model-checking. Any other static WCRT estimation technique can be used
   in our compiler framework. We use the Uppaal~\cite{gbeh04}
   model-checker to perform an exhaustive state space exploration of the
-  GRC to find the WCRT of the SystemJ clock-domain. The exhaustive
-  search space carried out by the Uppaal model-checker gives WCRT
+  GRC to find the WCRT of the SystemJ clock-domain. The exhaustive state
+  space search carried out by the Uppaal model-checker gives WCRT
   estimates, for SystemJ programs, that are on average $\approx 30\%$
   tighter than those obtained by other approaches~\cite{LiMS14}.  }
 There are three steps involved in finding the WCRT of a clock-domain
@@ -866,15 +867,16 @@ using Uppaal:
   maximum tick execution time of every reaction in the
   clock-domain. Similarly, we calculate a lower-bound of WCRT, termed
   $WCRT_{lb}$, by summing up the minimum tick execution time of every
-  reaction in the clock-domain. After translating GRC to TA, we check
-  the validity of the WCRT estimate of the clock-domain, termed
+  reaction in the clock-domain. After translating the GRC to a TA, we
+  check the validity of the WCRT estimate of the clock-domain, termed
   $WCRT_{est}$, between $[WCRT_{lb}, WCRT_{ub}]$ by verifying a CTL
   property upon the TA using the Uppaal model checker. The CTL property
   is written as $A[](wcrt \leq WCRT_{est})$, meaning that the value of
   $wcrt$ variable in the TA is less or equal to the $WCRT_{est}$ for
-  every path in the TA starting from the initial location. Upon
-  violation of this property we are guaranteed that we have found the
-  tightest $WCRT_{est}$ value.
+  every path in the TA starting from the initial location. We keep on
+  reducing the value of $WCRT_{est}$ until the property does not hold on
+  the TA. Upon violation of this property we are guaranteed that we have
+  found the tightest $WCRT_{est}$ value.
 \end{enumerate}
 
 % Once, annotated, the GRC model is further translated into a labeled
@@ -983,10 +985,11 @@ proposed (Figure~\ref{fig:6b}) consists of a number of common elements
 required to execute every Java application such as, the constant pool,
 method structure table for instance method invocation, references to
 static objects, etc. The major point of difference is that the
-\textit{GC info} word does not exist in the proposed runtime memory
-organization and the \textit{heap} space is divided into two parts; the
-transient heap and the permanent heap. Looking at the proposed runtime
-memory organization two \underline{requirements} become very important:
+\textit{GC info} word, which describes characteristics of the collector
+itself, does not exist in the proposed runtime memory organization and
+the \textit{heap} space is divided into two parts; the transient heap
+and the permanent heap. Looking at the proposed runtime memory
+organization two \underline{requirements} become very important:
 
 \begin{enumerate}
 \item There should be no pointer pointing from the permanent heap to the
@@ -1118,8 +1121,8 @@ Java code for execution on JOP (Figure~\ref{fig:7b}). The first method
 \texttt{MethodCall1\_0} (lines~\ref{em1s}-\ref{em1e}) initializes
 \texttt{a} and then increments it. Finally, it sets the value of the
 signal \texttt{S} as the \textit{object} \texttt{a}. The second method
-call \texttt{MethodCall2\_0} (lines~\ref{em2s}-\ref{em2e}) increments
-the variable \texttt{a} and changes the object reference of signal
+\texttt{MethodCall2\_0} (lines~\ref{em2s}-\ref{em2e}) increments the
+variable \texttt{a} and changes the object reference of signal
 \texttt{S}.
 
 Our objective is to find out all the \textit{program-points} that
@@ -1603,7 +1606,7 @@ describe Step4 and Step6 of our data-flow analysis.
 
 \item \underline{Step4} is the dual of Step5. It works on Java fields
   rather than method local variables like Step5. The other difference
-  between the two is that Step5 calls Step7 via Step6, which performs
+  between the two is that Step4 calls Step7 via Step6, which performs
   inter-procedural analysis.
 
 \item \underline{Step6} can be conceptually partitioned into two
@@ -1717,7 +1720,7 @@ permanent heap space.
           \AdjConditionals($M$,31)\;
         }\lElse {
           \ReplaceMNewAA($pp$,$M$,$arg$,$size$)\;\label{batwo:l5}
-          \AdjConditionals($M$,30)\;
+          {\color{red}\AdjConditionals($M$,30)\;}
         }
       }
       \lElse {\texttt{raise error}}
@@ -1771,10 +1774,10 @@ alternative bytecodes in the second step, shown in Figure~\ref{fig:11b}.
   that allocates multidimensional arrays of type identified from the
   constant pool. This distinction is important since the number of bytes
   used to represent each of these bytecodes differ. The
-  \texttt{amultinewarray} bytecode takes 4 bytes in the class file. The
-  \texttt{new} and \texttt{anewarray} bytecodes are encoded in the class
-  file with three bytes, whereas the \texttt{newarray} bytecode only
-  uses two bytes in the class file representation.  
+  \texttt{amultinewarray} bytecode takes four bytes in the class
+  file. The \texttt{new} and \texttt{anewarray} bytecodes are encoded in
+  the class file with three bytes, whereas the \texttt{newarray}
+  bytecode only uses two bytes in the class file representation.
 
   Different methods are called to replace each of these allocation
   variants: Figure~\ref{fig:11b}, line~\ref{batwo:l1} replacing
@@ -1913,7 +1916,8 @@ alternative bytecodes in the second step, shown in Figure~\ref{fig:11b}.
   in Figure~\ref{fig:11d}. Finally, the fields of the object are zeroed,
   on lines~\ref{btwo:l7}-\ref{btwo:l9}. The method \texttt{Native.wrl}
   takes as input the start address of the object's fields and the size
-  of the object as the arguments and writes zeros in these memory words.
+  of the object as the arguments and writes zeros in these memory words
+  in a loop.
 
 }
 
@@ -1969,19 +1973,19 @@ The example benchmarks are available from~\cite{ipat13}.
   \centering
   \subfloat[Simple object memory allocation runtime without GC
   invocation.]{
-    \includegraphics[scale=0.29]{soruntime.PNG}
+    \includegraphics[scale=0.4]{soruntime.PNG}
     \label{fig:12a}
   }
   \qquad
   \subfloat[Simple array memory allocation runtime without GC
   invocation.]{
-    \includegraphics[scale=0.29]{aoruntime.PNG}
+    \includegraphics[scale=0.4]{aoruntime.PNG}
     \label{fig:12c}
   }
   \qquad
   \subfloat[Complex object memory allocation runtime without GC
   invocation.]{
-    \includegraphics[scale=0.29]{coruntime.PNG}
+    \includegraphics[scale=0.4]{coruntime.PNG}
     \label{fig:12e}
   }
   \caption{Runtime for micro-benchmarks without GC invocation.}
@@ -2229,14 +2233,14 @@ might be nested in another tasks scoped memory) in SCJ. This is because,
 SCJ allows preemption of tasks during program execution, whereas in
 SystemJ a clock-domain tick is atomic. RTSJ does allow access of scoped
 memory by concurrent threads and only when the last thread exits the
-scoped memory is the memory reclaimed.  Another important point of
-differentiation is the reuse of memory words enabled by the proposed
-approach. Consider the SystemJ code snippet in
-Figure~\ref{fig:reuse}. An object \texttt{a}, of type \texttt{A} is
-initialized multiple time on lines~\ref{reuse:l2}-\ref{reuse:l3}. The
-proposed approach \textit{replaces} the \texttt{new} bytecode with
-simple load instructions, hence, the object does \underline{not} get
-allocated multiple times in the loop. In fact, the same memory location
+scoped memory is reclaimed.  Another important point of differentiation
+is the reuse of memory words enabled by the proposed approach. Consider
+the SystemJ code snippet in Figure~\ref{fig:reuse}. An object
+\texttt{a}, of type \texttt{A} is initialized multiple time on
+lines~\ref{reuse:l2}-\ref{reuse:l3}. The proposed approach
+\textit{replaces} the \texttt{new} bytecode with simple load
+instructions, hence, the object does \underline{not} get allocated
+multiple times in the loop. In fact, the same memory location
 (address/words) are reused by the proposed approach. In the SCJ/RTSJ
 memory organization, every memory allocation bytecode (e.g.,
 \texttt{new}) allocates new memory words and hence, reuse is
@@ -2306,7 +2310,7 @@ while (true) {
  present(I) {
   list.add(new Integer(#I)); \label[li:l1]
   // O is a valued output signal
-  emit(O(list)); \label[li:l2]
+  emit O(list); \label[li:l2]
   pause;
   list = #O; \label[li:l3]
 }

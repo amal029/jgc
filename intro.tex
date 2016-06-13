@@ -18,15 +18,15 @@ detecting the event, the synchronous program \textit{reacts}
 \textit{instantaneously} in zero time to respond to these inputs and
 becomes quiescent until the next input events arrive. The start and the
 end of this reaction transition demarcate states of the program -- note
-that internal data updates do not lead to change in the program state
-thereby reducing the state space explosion problem. Furthermore, the
-reaction being logically in zero-time is by definition \textit{atomic}
-and always faster than the incoming input events, thereby guaranteeing
-that none of the incoming events are missed. In reality, the reaction
-does take time, one needs to find out the \textit{Worst Case Reaction
-  Time} (WCRT) of any given synchronous program. This WCRT value
-determines the shortest inter-arrival time for input events from the
-environment.
+that internal data updates do not lead to {\color{red} observable}
+change in the program state thereby reducing the state space explosion
+problem. Furthermore, the reaction being logically in zero-time is by
+definition \textit{atomic} and always faster than the incoming input
+events, thereby guaranteeing that none of the incoming events are
+missed. In reality, the reaction does take time, one needs to find out
+the \textit{Worst Case Reaction Time} (WCRT) of any given synchronous
+program. This WCRT value determines the shortest inter-arrival time for
+input events from the environment.
 
 Techniques exist for computing WCRT values for synchronous programs
 providing support for data-computation via a non-managed language
