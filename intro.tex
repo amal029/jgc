@@ -8,25 +8,28 @@ compiler itself to act as a model-checker~\cite{jagadeesan1995safety}
 verifying properties of the application. The major benefit of the
 synchronous \textit{Model of Computation} (MoC) is that it is based on
 the concept of a \textit{Finite State Machine} (FSM). Languages such as
-Esterel~\cite{berry92} and its derivation SystemJ~\cite{amal10} have
-been designed to reduce the state space explosion problem exhibited
-during formal verification, by adhering to a very strict programmer
-specified state demarcation approach. The programming model for these
-languages can be described as follows: a synchronous program is
-quiescent until one or more events occur from the environment. Upon
-detecting the event, the synchronous program \textit{reacts}
-\textit{instantaneously} in zero time to respond to these inputs and
-becomes quiescent until the next input events arrive. The start and the
-end of this reaction transition demarcate states of the program -- note
-that internal data updates do not lead to {\color{red} observable}
-change in the program state thereby reducing the state space explosion
-problem. Furthermore, the reaction being logically in zero-time is by
-definition \textit{atomic} and always faster than the incoming input
-events, thereby guaranteeing that none of the incoming events are
-missed. In reality, the reaction does take time, one needs to find out
-the \textit{Worst Case Reaction Time} (WCRT) of any given synchronous
-program. This WCRT value determines the shortest inter-arrival time for
-input events from the environment.
+Esterel~\cite{berry92} and its extension SystemJ~\cite{amal10} have been
+designed to reduce the state space explosion problem exhibited during
+formal verification, by adhering to a very strict programmer specified
+state demarcation approach. The programming model for these languages
+can be described as follows: a synchronous program is quiescent until
+one or more events occur from the environment. Upon detecting the event,
+the synchronous program \textit{reacts} \textit{instantaneously} in zero
+time to respond to these inputs and becomes quiescent until the next
+input events arrive. The start and the end of this reaction transition
+demarcate states of the program -- note that internal data updates do
+not lead to {\color{red} observable} change in the program state thereby
+reducing the state space explosion problem. Furthermore, the reaction
+being logically in zero-time is by definition \textit{atomic} and always
+faster than the incoming input events, thereby guaranteeing that none of
+the incoming events are missed. In reality, the reaction does take time,
+one needs to find out the \textit{Worst Case Reaction Time} (WCRT) of
+any given synchronous program. This WCRT value determines the shortest
+inter-arrival time for input events from the environment. {\color{red}
+  The requirement that all input events from the environment arrive at
+  beast (WCRT) time units apart, guarantee that no input event goes
+  unhandled and thereby enforcing the \textit{zero} delay synchronous
+  hypothesis.}
 
 Techniques exist for computing WCRT values for synchronous programs
 providing support for data-computation via a non-managed language
@@ -36,13 +39,42 @@ data-computations within the WCRT analysis framework, because of the
 many undefined behaviors, type unsafety and the general lack of formal
 operational semantics inherent to low-level non-managed
 languages. Hence, in this paper we are interested in the WCRT analysis
-of synchronous programs that support data computation via
-managed-languages like Java, which provides a well defined operational
-semantics. The key hurdle to the adoption of managed languages in the
-safety critical hard real-time application domain is \textit{Garbage
-  Collection} (GC) for automatic memory management, since worst case
-execution time estimates for real-time tasks with GC are very
-pessimistic~\cite{puffitsch2013design}.
+of programs that support data computation via managed-languages like
+Java, which provides a well defined operational semantics. {\color{red}
+  SystemJ is the only programming language based on the GALS MoC that
+  uses Java for its data computations.} The key hurdle to the adoption
+of managed languages in the safety critical hard real-time application
+domain is \textit{Garbage Collection} (GC) for automatic memory
+management, since worst case execution time estimates for GC cycles are
+very pessimistic~\cite{puffitsch2013design}.
+
+{\color{red}
+
+  We identify the following requirements for WCRT analysis of SystemJ
+  programs with automated memory management:
+
+  \begin{enumerate}
+
+  \item The number and clock-cycles of instructions used for memory
+    allocation and reclaim should be statically bounded (to a constant
+    value) at compile time. This is necessary, because the primary
+    problem with long GC times is the fact that GC time depends upon the
+    size of physical memory and the number of object allocated during
+    program execution~\cite{schoeberl2010scheduling}.
+
+  \item The size of each object and consequently the total memory
+    consumption should be bounded (to a constant value) statically at
+    compile time. JVM specification requires resetting all the memory
+    (filling it with zeros) allocated for each object. Adhering to the
+    first point requires that the size of the object be known
+    statically, so that the loop bound zeroing the memory of the
+    allocated object can be bounded. If all the object sizes can be
+    determined statically, then the physical memory size can also be
+    bounded.
+
+  \end{enumerate}
+
+}
 
 % On the one hand GC guarantees no memory leaks, thereby providing
 % functional safety, but on the other hand, it has been
@@ -55,30 +87,30 @@ pessimistic~\cite{puffitsch2013design}.
 % in the general case with a GC.
 
 The main \textbf{contribution} presented in this paper is a new memory
-management approach that is amenable to static WCRT analysis of
-synchronous programs intertwined with managed runtime environments for
-data-computation. More concretely our contributions are as follows:
+management approach that is amenable, to static WCRT analysis by
+satisfying the aforementioned requirements. More concretely our
+contributions are as follows:
 
 \begin{itemize}
 \item \textit{Programming model inspired memory organization}: In this
   paper we present a new memory organization for Java and an
-  accompanying static WCRT analysis based on the synchronous MoC.
+  accompanying static WCRT analysis based on SystemJ's MoC.
 \item \textit{Compiler supported memory allocation}: We present the
   compiler transformations that are needed to statically guarantee the
   \textit{Worst Case Memory Consumption} (WCMC) and \textit{allocation}.
-\item \textit{Real-time analyzable back-end code generation and garbage
+\item \textit{Time analyzable back-end code generation and garbage
     collection}: We present a strategy to replace the object allocation
   bytecodes with real-time analyzable alternatives. Furthermore, we also
   present an object placement strategy, which allows for O(1) heap
   accesses in all cases.
 \end{itemize}
 
-We use the SystemJ~\cite{amal10} programming language, because it
-provides the synchronous MoC as a subset along with Java data-driven
-computation support. Furthermore, there exist efficient and real-time
-analyzable execution architectures~\cite{nadeem2011rjop} and WCRT
-analysis tools~\cite{LiMS14} that support subset of SystemJ programs --
-those without GC invocation.
+% We use the SystemJ~\cite{amal10} programming language, because it
+% provides the synchronous MoC as a subset along with Java data-driven
+% computation support. Furthermore, there exist efficient and real-time
+% analyzable execution architectures~\cite{nadeem2011rjop} and WCRT
+% analysis tools~\cite{LiMS14} that support subset of SystemJ programs --
+% those without GC invocation.
 
 
 
