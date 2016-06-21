@@ -31,7 +31,7 @@ input events from the environment. {\color{black} The requirement that
   apart, guarantee that no input event goes unhandled and hence,
   enforces the \textit{zero} delay synchronous hypothesis.}
 
-Techniques exist for computing WCRT values for synchronous programs
+Techniques exist for computing WCRT estimates of synchronous programs
 providing support for data-computation via a non-managed language
 (primarily `C')~\cite{boldt07} and~\cite{proop10}. These WCRT estimation
 approaches suffer from a fundamental problem; they cannot incorporate
@@ -45,8 +45,8 @@ semantics. {\color{black} SystemJ is the only programming language based
   on the GALS MoC that uses Java for its data computations.} The key
 hurdle to the adoption of managed languages in the safety critical hard
 real-time application domain is \textit{Garbage Collection} (GC) for
-automatic memory management, since worst case execution time estimates
-for GC cycles are very pessimistic~\cite{puffitsch2013design}.
+automatic memory management, since WCET estimates for garbage collection
+cycles are very pessimistic~\cite{puffitsch2013design}.
 
 {\color{black}
 
@@ -59,7 +59,7 @@ for GC cycles are very pessimistic~\cite{puffitsch2013design}.
     allocation and reclaim should be statically bounded (to a constant
     value) at compile time. This is necessary, because the primary
     problem with long garbage collection times is the fact that garbage
-    collection time depends upon the size of physical memory and the
+    collection time depends upon the size of the physical memory and the
     number of object allocated during program
     execution~\cite{schoeberl2010scheduling}.
 
@@ -87,7 +87,7 @@ for GC cycles are very pessimistic~\cite{puffitsch2013design}.
 % in the general case with a GC.
 
 The main \textbf{contribution} presented in this paper is a new memory
-management approach that is amenable, to static WCRT analysis by
+management approach that is amenable to static WCRT analysis by
 satisfying the aforementioned requirements. More concretely our
 contributions are as follows:
 
@@ -99,10 +99,11 @@ contributions are as follows:
   compiler transformations that are needed to statically guarantee the
   \textit{Worst Case Memory Consumption} (WCMC) and \textit{allocation}.
 \item \textit{Time analyzable back-end code generation and garbage
-    collection}: We present a strategy to replace the object allocation
-  bytecodes with real-time analyzable alternatives. Furthermore, we also
-  present an object placement strategy, which allows for O(1) heap
-  accesses in all cases.
+    collection}: We present a strategy to replace the non timing
+  analyzable object allocation bytecodes (e.g., \texttt{new}) with
+  real-time analyzable alternatives. Furthermore, we also present an
+  object placement strategy, which allows for O(1) heap accesses in all
+  cases.
 \end{itemize}
 
 % We use the SystemJ~\cite{amal10} programming language, because it

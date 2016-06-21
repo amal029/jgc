@@ -361,32 +361,32 @@ reader.
 
 SystemJ~\cite{amal10} extends the Java programming language by
 introducing both synchronous and asynchronous concurrency. SystemJ
-integrates the synchronous essence of the Esterel\\ \cite{berry92}
+integrates the synchronous essence of the Esterel \cite{berry92}
 language with the asynchronous concurrency of \textit{Communicating
   Sequential Processes} (CSP)~\cite{choa78}. SystemJ is grounded on
 rigorous mathematical semantics and thus is amenable to formal
 verification. We will use the graphical representation of a SystemJ
 program in Figure~\ref{fig:sysjprog} for explaining the SystemJ MoC. On
 the top level, a SystemJ program comprises a set of clock-domains (CD1,
-CD2, CD3) executing asynchronously. Each clock-domain is a composition
-of one or more synchronous parallel reactions (Reaction11, Reaction12,
-etc), which are executed in lock-step with the logical tick of the
-clock-domain. Reactions within the same clock-domain exploit synchronous
-broadcast mechanism on objects called signals to communicate with each
-other. Reactions can themselves be composed of more synchronous parallel
-reactions, thereby forming a hierarchy. Finally, every reaction in the
-clock-domain communicates with the environment through a set of
-interface input and output signals. At the beginning of each
-clock-domain tick the input signals are captured, a reaction function
-processes these input signals and emits the output signals. These output
-signals are presented to the environment at the end of the clock-domain
-tick. Inter-clock-domain communication is achieved by implementing CSP
-style rendezvous mechanism through point-to-point unidirectional
-channels. A complete list of SystemJ kernel statements is shown in
-Figure~\ref{fig:1}. {\color{black} The compile time memory allocation
-  strategy described in this paper is applicable to each clock-domain
-  individually and hence, in the rest of the paper we concentrate only
-  on a single clock-domain.  }
+CD2, CD3) executing asynchronously each to the other. Each clock-domain
+is a composition of one or more synchronous parallel reactions
+(Reaction11, Reaction12, etc), which are executed in lock-step with the
+\textit{logical} tick of the clock-domain. Reactions within the same
+clock-domain exploit synchronous broadcast mechanism on objects called
+signals to communicate with each other. Reactions can themselves be
+composed of more synchronous parallel reactions, thereby forming a
+hierarchy. Finally, every reaction in the clock-domain communicates with
+the environment through a set of interface input and output signals. At
+the beginning of each clock-domain tick the input signals are captured,
+a reaction function processes these input signals and emits the output
+signals. These output signals are presented to the environment at the
+end of the clock-domain tick. Inter-clock-domain communication is
+achieved by implementing CSP style rendezvous mechanism through
+point-to-point unidirectional channels. A complete list of SystemJ
+kernel statements is shown in Figure~\ref{fig:1}. {\color{black} The
+  compile time memory allocation strategy described in this paper is
+  applicable to each clock-domain individually and hence, in the rest of
+  the paper we concentrate only on a single clock-domain.  }
 
 % In this work we are only interested in the synchronous subset of
 % SystemJ, i.e., a single clock-domain.
@@ -436,7 +436,7 @@ Figure~\ref{fig:1}. {\color{black} The compile time memory allocation
       \hline
       \mathbf{send\ \rho [(value)]} &  \mathrm{Send\ a\ value\ to\ reaction\ in\ another\ CD} \\
       \hline
-      \mathbf{receive\ \rho} &  \mathrm{Symchronize\ and receive\ on\ channel\ \rho} \\
+      \mathbf{receive\ \rho} &  \mathrm{Synchronize\ and\ receive\ a\ value\ on\ channel\ \rho} \\
       \hline
     \end{array}
   \end{scriptsize}
@@ -458,7 +458,7 @@ statement. Once emitted, the status of a signal is \texttt{true} only
 for a single tick, but the value of a signal is persistent over
 ticks. Emission of a signal, broadcasts it across all reactions within
 the clock-domain. Moreover, the updated status and value of the signal,
-upon emission, is only visible in the next tick.
+upon emission, are only visible in the next tick.
 
 SystemJ provides mechanisms to describe reactivity via statements such
 as $\mathbf{present}$, $\mathbf{abort}$, and $\mathbf{suspend}$, which
@@ -522,9 +522,9 @@ acts as a replacement for program cache. A complete Java method is
 loaded into the method cache before execution and hence, there are only
 two program points: the \textit{invoke} and the \textit{return}
 bytecodes, which can lead to a method cache miss, which can be accounted
-for in the static WCRT analysis procedure with ease. Finally, the
-interface connecting the ReCOP and JOP has single clock cycle latency as
-described in~\cite{DBLP:journals/tecs/SalcicM13}.
+for in the static WCRT analysis. Finally, the interface connecting the
+ReCOP and JOP has single clock cycle latency as described
+in~\cite{DBLP:journals/tecs/SalcicM13}.
 
 The overall program execution on the TP-JOP architecture proceeds as
 follows: the ReCOP leads the program execution since it executes the
@@ -755,25 +755,26 @@ SysJ_Example(
 % \end{figure}
 
 In this section we use a pedagogical SystemJ synchronous program to
-describe the static analysis technique used to estimate the WCRT of
-SystemJ clock-domains. The WCRT estimation technique is not the main
+describe the static analysis technique used to estimate the WCRT of a
+SystemJ clock-domain. The WCRT estimation technique is not the main
 contribution of this paper and hence, we only give a brief overview of
 the approach. The reader is referred to~\cite{LiMS14} for a more
 detailed description of the technique.
 
-Figure~\ref{fig:4} shows a simple SystemJ synchronous program. The
-program declares two input signals (lines~\ref{ex1:l2} and~\ref{ex1:l3})
-that are used to capture events generated from the external environment
-and one output signal (line~\ref{ex1:l1o}) used to produce events back
-to the external environment. Two concurrent reactions
-(lines~\ref{ex1:r1s}-\ref{ex1:r1e} and~\ref{ex1:r2s}-\ref{ex1:r2e})
-execute in lock-step parallel, composed using the synchronous parallel
-operator ($||$) on line~\ref{ex1:sc}. Reaction R1 checks for an incoming
-event on the input signal \texttt{INPUT\_A} (line~\ref{ex1:cA}). If an
-event is detected, and the value of the input signal is not zero, then a
-counter is incremented, else, it is decremented. This logic is carried
-out forever using an infinite loop (line~\ref{ex1:l1}). The pause
-construct (line~\ref{ex1:p1}) explicitly demarcates the end of program
+Figure~\ref{fig:4} shows a simple SystemJ synchronous clock-domain. The
+clock-domain declares two input signals (lines~\ref{ex1:l2}
+and~\ref{ex1:l3}) that are used to capture events generated from the
+external environment and one output signal (line~\ref{ex1:l1o}) used to
+produce events back to the external environment. Two concurrent
+reactions (lines~\ref{ex1:r1s}-\ref{ex1:r1e}
+and~\ref{ex1:r2s}-\ref{ex1:r2e}) execute in lock-step parallel, composed
+using the synchronous parallel operator ($||$) on
+line~\ref{ex1:sc}. Reaction R1 checks for an incoming event on the input
+signal \texttt{INPUT\_A} (line~\ref{ex1:cA}). If an event is detected,
+and the value of the input signal is not zero, then a counter is
+incremented, else, it is decremented. This logic is carried out forever
+using an infinite loop (line~\ref{ex1:l1}). The pause construct
+(line~\ref{ex1:p1}) explicitly demarcates the end of program
 transition. Similarly, a counter \texttt{count\_b} is incremented upon
 reception of an event on signal \texttt{INPUT\_B} in reaction R2, else
 signal \texttt{OUTPUT} is emitted to the external environment.
@@ -791,9 +792,10 @@ signal \texttt{OUTPUT} is emitted to the external environment.
 
 The semantics of a synchronous program described in SystemJ is captured
 using an intermediate format called \textit{GRaph Code}
-(GRC)~\cite{amal10}. The GRC is a directed acyclic graph that explicitly
-describes the control flow of a synchronous program through primitive
-nodes.
+(GRC)~\cite{amal10}. The GRC of the SystemJ program shown in
+Figure~\ref{fig:4} is depicted in Figure~\ref{fig:2a}. The GRC is a
+directed acyclic graph that explicitly describes the control flow of a
+synchronous program through primitive nodes.
 
 \begin{definition} \textit{Clock-domain transition (or tick)}: A single
   clock-domain transition also called a clock-domain tick is a
@@ -815,9 +817,8 @@ either: (a) a Java data node (JDN) representing data-driven computation
 implemented as Java methods, or (b) a control node (CN) representing all
 nodes other than JDNs, implemented on the ReCOP. All control nodes
 between two data nodes are grouped together to form a single compound
-control node in order to simplify the GRC. The GRC of the SystemJ
-program shown in Figure~\ref{fig:4} is depicted in
-Figure~\ref{fig:2a}. The fork node F1 creates two parallel reactions R1
+control node in order to simplify the GRC. For the GRC in
+Figure~\ref{fig:2a}, the fork node F1 creates two parallel reactions R1
 and R2 at the start of the program. The present statements
 (lines~\ref{ex1:cA} and~\ref{ex1:cB}) are represented as nodes T11 and
 T21, respectively in the GRC. The Java data computations at
@@ -869,17 +870,18 @@ steps involved in finding the WCRT of a clock-domain using Uppaal:
 
 \begin{enumerate}
 \item \textit{Annotating the GRC nodes with \textit{Worst Case Execution
-      Time} (WCET) values}: The GRC is annotated with timing information
-  in order to compute the WCRT of the clock-domain. All CNs are executed
-  on the ReCOP and hence, their timing information can be easily
-  computed, as all native ReCOP instructions take 3 clock cycles to
-  execute. The JDNs are dispatched, encapsulated within individual Java
-  methods, for execution on JOP. One needs to compute the \textit{Worst
-    Case Execution Time} (WCET) for each of these JDNs, using the JOP
-  provided worst case analysis tool (WCA)~\cite{jop:wcet:jtres06}. The
-  computed worst case execution times for both CNs and JDNs are back
-  annotated onto the GRC. The numerical annotations on the nodes in
-  Figure~\ref{fig:2b} show these back annotated WCETs.
+      Time} (WCET) values}: Every GRC is annotated with timing
+  information in order to compute the WCRT of the clock-domain. All CNs
+  are executed on the ReCOP and hence, their timing information can be
+  easily computed, as all native ReCOP instructions take 3 clock cycles
+  to execute. The JDNs are dispatched, encapsulated within individual
+  Java methods, for execution on JOP. One needs to compute the
+  \textit{Worst Case Execution Time} (WCET) for each of these JDNs,
+  using the JOP provided worst case analysis tool
+  (WCA)~\cite{jop:wcet:jtres06}. The computed worst case execution times
+  for both CNs and JDNs are back annotated onto the GRC. The numerical
+  annotations on the nodes in Figure~\ref{fig:2b} show these back
+  annotated WCETs.
 
 \item \textit{Translating the GRC into an Uppaal timed automaton}:
   Figure~\ref{fig:2b} shows the GRC of the pedagogical SystemJ
@@ -952,39 +954,25 @@ steps involved in finding the WCRT of a clock-domain using Uppaal:
 \section{A new memory management approach for SystemJ}
 \label{sec:new-memory-model}
 
-The WCRT approach described above is suitable \textit{only} for programs
-that do not invoke \textit{Garbage Collection} (GC), since the GC
-execution time is unaccounted for in the aforementioned WCRT analysis
-framework. The main reason for this lack of GC incorporation is that the
-GC cycle time cannot be \textit{practically} bounded; as the number of
-heap allocations in a Java program depends upon the application and
-during garbage collection a {\color{black} linked list of allocated
-  objects may need to be traversed }as one of the collection
+The WCRT approach described in Section~\ref{sec:motiv-example-curr} is
+suitable \textit{only} for programs that do not invoke the
+\textit{Garbage Collector} (GC), since the GC execution time is
+unaccounted for in the aforementioned WCRT analysis framework. The main
+reason for this lack of GC incorporation is that the GC cycle time
+cannot be \textit{practically} bounded; as the number of heap
+allocations in a Java program depends upon the application and during
+garbage collection a {\color{black} linked list of allocated objects may
+  need to be traversed }as one of the collection
 phases. Puffitsch~\cite{puffitsch2013design} shows that a WCRT value can
 be obtained for programs, which invoke the GC, by pessimistically
 bounding the collection phase during static analysis. But, the resultant
 WCRT value is in seconds, orders of magnitude larger than the real
 execution time (usually in micro-seconds), which makes incorporating GC
-difficult within the hard real-time scheduling framework.
-
-% One needs to include the GC time within the WCRT analysis framework of
-% SystemJ clock-domain for the WCRT analysis to be of any practical
-% use. The very first approach might be to include an incremental RTGC as
-% described in Section~\ref{sec:introduction}, but all current RTGC
-% proposals require preemptive scheduling, which does not bode well with
-% the atomic tick based execution of SystemJ clock-domains. Giving up on
-% atomicity of SystemJ clock-domain execution is not a viable option,
-% since atomic tick based clock-domain execution is the corner stone for
-% formal verification and WCRT analysis of synchronous programs. Of
-% course, an RTGC might be scheduled in the slack time -- time between
-% completion of a clock-domain transition and arrival of next set of input
-% events, but one still suffers from the problem of unpredictable GC cycle
-% time, since a GC cycle needs to complete within the available slack.
-
-Our solution to the above problem is to eliminate garbage collection
-altogether. More concretely, we divide the heap space into two parts: a
-bounded permanent heap and a transient heap, which are time and space
-bounded and efficient.
+difficult within the hard real-time scheduling framework. Our solution
+to the above problem is to eliminate garbage collection altogether. More
+concretely, we divide the heap space into two parts: a bounded permanent
+heap and a transient heap, which are time and space bounded and
+efficient.
 
 Signals (valued or pure) are the only communication primitive within a
 SystemJ clock-domain. Signals, internally themselves implemented as Java
@@ -998,19 +986,19 @@ are two types of Java objects in a SystemJ clock-domain:
 \item \textit{Transient objects}: Java objects that are created
   internally for computation, but are never emitted via
   signals. Transient objects are only alive during a single clock-domain
-  tick transition and can be garbage collected at the end of the tick
+  tick transition and can be deallocated at the end of the tick
   transition.
 \end{itemize}
 
 The basic idea is to allocate the permanent objects, we consider signals
 and the values associated with them to be permanent objects as well,
-within a special memory area called \textit{permanent heap} and allocate
-all transient objects within a \textit{transient heap}. The transient
-heap gets reclaimed at the end of every clock-domain tick transition, by
-simply resetting the allocation pointer to the start of the transient
-heap space. With this change, the proposed runtime Java memory
-organization is compared with the original real-time GC based memory
-organization in Figure~\ref{fig:6}.
+within a special memory area called the \textit{permanent heap} and
+allocate all transient objects within a \textit{transient heap}. The
+transient heap gets reclaimed at the end of every clock-domain tick
+transition, by simply resetting the allocation pointer to the start of
+the transient heap space. With this change, the proposed runtime Java
+memory organization is compared with the original real-time GC based
+memory organization in Figure~\ref{fig:6}.
 
 \begin{figure}[t!]
   \centering
@@ -1032,7 +1020,7 @@ organization in Figure~\ref{fig:6}.
   \label{fig:6}
 \end{figure}
 
-Both runtime memory organizations original (Figure~\ref{fig:6a}) and
+Both runtime memory organizations; original (Figure~\ref{fig:6a}) and
 proposed (Figure~\ref{fig:6b}), consist of a number of common elements
 required to execute every Java application such as, the constant pool,
 method structure table for instance method invocation, references to
@@ -1041,7 +1029,7 @@ static objects, etc. The major point of difference is that the
 itself, does not exist in the proposed runtime memory organization and
 the \textit{heap} space is divided into two parts; the transient heap
 and the permanent heap. Looking at the proposed runtime memory
-organization two \underline{requirements} become very important:
+organizations two \underline{requirements} become very important:
 
 \begin{enumerate}
 \item There should be no pointer pointing from the permanent heap to the
@@ -1355,11 +1343,11 @@ areturn
 \end{lrbox}
 
 Given the class file(s), the data-flow analysis carried out is shown in
-the flow-chart in Figure~\ref{fig:fanalysis}. The detailed algorithm for
-each step is provided in~\cite{supp_amal02916}. Being a complex
-procedure, we use simple code examples to describe the data-flow
-analysis. We divide the presentation of our data-flow analysis into two
-sections. Section~\ref{sec:intra-proc-analys} presents the
+the flow-chart in Figure~\ref{fig:fanalysis}. % The detailed algorithm for
+% each step is provided in~\cite{supp_amal02916}.
+Being a complex procedure, we use simple code examples to describe the
+data-flow analysis. We divide the presentation of our data-flow analysis
+into two sections. Section~\ref{sec:intra-proc-analys} presents the
 \textit{Intra-procedural} data-flow analysis, which is complemented with
 the \textit{Inter-procedural} data-flow analysis in
 Section~\ref{sec:inter-proc-analys}.
@@ -1564,13 +1552,13 @@ signal \texttt{S} (BB4, line~1).
   \begin{compactitem}[$\bullet$]
   \item \textbf{Design decision}: We have consciously decided to not
     allow object allocation outside the method that uses that object in
-    Step7. The objective of our data-flow algorithm is to identify all
+    Step7. The objective of our data-flow analysis is to identify all
     the program points that allocate objects whose returned references
     are emitted as signal values. We are performing compile time memory
     allocation, which, as we will see later, requires us to replace the
-    \texttt{new} and \texttt{newarray} bytecodes with a different set of
-    bytecodes (c.f. Section~\ref{sec:prod-back-code}). We cannot blindly
-    replace these bytecodes in methods other than the ones being
+    \texttt{new}, \texttt{newarray}, etc, bytecodes with a different set
+    of bytecodes (c.f. Section~\ref{sec:prod-back-code}). We cannot
+    blindly replace these bytecodes in methods other than the ones being
     analyzed, because, consequently \textit{any} other program point,
     related or unrelated to signals, using the same object
     initialization program point would overwrite the object value as it
@@ -1605,8 +1593,8 @@ signal \texttt{S} (BB4, line~1).
     the actual object allocation and so on and so forth). To put the
     cache size restriction into perspective, all our benchmarks have a
     very limited cache size of only 1KB. Thus, we have decided to
-    disallow, object allocation outside of the method being analyzed.
-    As a consequence of this design decision, the SystemJ programmer now
+    disallow object allocation outside of the method being analyzed.  As
+    a consequence of this design decision, the SystemJ programmer now
     needs to make explicit deep copies as shown in Figure~\ref{fig:8h}
     BB2 line~3 and BB3 line~4.
   \end{compactitem}
@@ -1813,59 +1801,59 @@ alternative bytecodes in the second step, shown in Figure~\ref{fig:11b}.
 \end{figure}
 
 
-{\color{black} The algorithm (Figure~\ref{fig:11b}) used to replace the
-  object allocation bytecodes takes as input four arguments: the
-  allocation pointer, $allocPtr$, the program point to replace $pp$, and
-  the method containing the program point: $M$ and the size to
-  allocate. There are \textit{four} types of bytecodes in the JVM
-  specification: (1) the \texttt{new} bytecode that allocates an
-  object. (2) The \texttt{newarray} bytecode that allocates arrays
-  holding primitives, (3) \texttt{anewarray} bytecode that allocates
-  arrays holding references and (4) \texttt{amultinewarray} bytecode
-  that allocates multidimensional arrays of type identified from the
-  constant pool. This distinction is important since the number of bytes
-  used to represent each of these bytecodes differ. The
-  \texttt{amultinewarray} bytecode takes four bytes in the class
-  file. The \texttt{new} and \texttt{anewarray} bytecodes are encoded in
-  the class file with three bytes, whereas the \texttt{newarray}
-  bytecode only uses two bytes in the class file representation.
+The algorithm (Figure~\ref{fig:11b}) used to replace the object
+allocation bytecodes takes as input four arguments: the allocation
+pointer: $allocPtr$, the program point to replace: $pp$, the method
+containing the program point: $M$ and the size to allocate:
+$size$. There are \textit{four} types of bytecodes in the JVM
+specification: (1) the \texttt{new} bytecode that allocates an
+object. (2) The \texttt{newarray} bytecode that allocates arrays holding
+primitives, (3) \texttt{anewarray} bytecode that allocates arrays
+holding references, and (4) \texttt{amultinewarray} bytecode that
+allocates multidimensional arrays of type identified from the constant
+pool. This distinction is important since the number of bytes used to
+represent each of these bytecodes differ. The \texttt{amultinewarray}
+bytecode takes four bytes in the class file. The \texttt{new} and
+\texttt{anewarray} bytecodes are encoded in the class file with three
+bytes, whereas the \texttt{newarray} bytecode only uses two bytes in the
+class file representation.
 
-  Different methods are called to replace each of these allocation
-  variants: Figure~\ref{fig:11b}, line~\ref{batwo:l1} replacing
-  \texttt{new}, line~\ref{batwo:l2} replacing \texttt{newarray}, and
-  lines~\ref{batwo:l3} and~\ref{batwo:l5} replacing the
-  \texttt{anewarray} and \texttt{amultinewarray} bytecodes,
-  respectively. All methods have the same logic, except that the target
-  addresses of jump bytecodes need to be correctly updated after
-  replacement. The target addresses of all branching bytecodes' that
-  follow the object allocation bytecode(s), need to be incremented by 31
-  bytes after replacement\footnote{In case of \texttt{newarray} bytecode
-    the following target addresses are updated by an offset of 32
-    bytes. In case of \texttt{anewarray} the update offset is 31 bytes,
-    and in case of \texttt{amultinewarray} it is 30 bytes,
-    respectively}. This {\color{black} 31} byte increment is made
-  obvious by Figures~\ref{fig:11c} and~\ref{fig:11d}, which show the
-  Java bytecode snippets for the example program in Figure~\ref{fig:8j}
-  before and after \texttt{new} bytecode replacement,
-  respectively\footnote{In both these figures, the line numbers are
-    shown on the right of the program. The numbers adjacent to the
-    bytecodes are the starting bytes for each of the bytecodes as
-    obtained by the \texttt{javap -c -v} command}. Figure~\ref{fig:11c}
-  shows the bytecode produced by the Java compiler for the \texttt{A}
-  object allocation in the \texttt{main} method. The very first
-  bytecode, \texttt{new}, takes as argument the index, \texttt{2}, into
-  the constant pool that holds the type of object to allocate. The
-  returned object reference is then duplicated (\texttt{dup}
-  instruction). Next, the constructor of the class \texttt{a} is invoked
-  to initialize the returned reference and, finally the returned
-  reference is put into a static field of the class. The \texttt{new}
-  bytecode is timing \textit{unpredictable}, because it might invoke the
-  GC (e.g., in case of work based GCs~\cite{schoeberl2010scheduling}),
-  which has an unbounded collection cycle. It might also generate a
-  runtime out of memory exception, thereby violating safety
-  criticality. We replace this \texttt{new} bytecode with safe and time
-  predictable bytecodes as shown in Figure~\ref{fig:11d}.
-  \newsavebox{\bone}
+Different methods are called to replace each of these allocation
+variants: Figure~\ref{fig:11b}, line~\ref{batwo:l1} replacing
+\texttt{new}, line~\ref{batwo:l2} replacing \texttt{newarray}, and
+lines~\ref{batwo:l3} and~\ref{batwo:l5} replacing the \texttt{anewarray}
+and \texttt{amultinewarray} bytecodes, respectively. All methods have
+the same logic, except that the target addresses of jump bytecodes need
+to be correctly updated after replacement. The target addresses of all
+branching bytecodes' that follow the object allocation bytecode(s), need
+to be updated. In case of the \texttt{new} bytecode the branching
+bytecode' target addresses need to be incremented by 31 bytes after
+replacement\footnote{In case of \texttt{newarray} bytecode the following
+  target addresses are updated by an offset of 32 bytes. In case of
+  \texttt{anewarray} the update offset is 31 bytes, and in case of
+  \texttt{amultinewarray} it is 30 bytes, respectively}. This
+{\color{black} 31} byte increment is made obvious by
+Figures~\ref{fig:11c} and~\ref{fig:11d}, which show the Java bytecode
+snippets for the example program in Figure~\ref{fig:8j} before and after
+\texttt{new} bytecode replacement, respectively\footnote{In both these
+  figures, the line numbers are shown on the right of the program. The
+  numbers adjacent to the bytecodes are the starting byte offsets for
+  each of the bytecodes as obtained by the \texttt{javap -c -v}
+  command}. Figure~\ref{fig:11c} shows the bytecode produced by the Java
+compiler for the \texttt{A} object allocation in the \texttt{main}
+method of Figure~\ref{fig:8j}. The very first bytecode, \texttt{new},
+takes as argument the index, \texttt{2}, into the constant pool that
+holds the type of the object to allocate. The returned object reference
+is then duplicated using \texttt{dup} instruction. Next, the constructor
+of the class \texttt{a} is invoked to initialize the returned reference
+and, finally the returned reference is put into a static field of the
+class. The \texttt{new} bytecode is timing \textit{unpredictable},
+because it might invoke the GC (e.g., in case of work based
+GCs~\cite{schoeberl2010scheduling}), which has an unbounded collection
+cycle. It might also generate a runtime out of memory exception, thereby
+violating safety criticality. We replace this \texttt{new} bytecode with
+safe and time predictable bytecodes as shown in Figure~\ref{fig:11d}.
+\newsavebox{\bone}
   \begin{lrbox}{\bone}
     \begin{minipage}[b]{\linewidth}
       \begin{Verbatim}[numbers=right,commandchars=\\\[\]]
@@ -1968,22 +1956,22 @@ alternative bytecodes in the second step, shown in Figure~\ref{fig:11b}.
   on lines~\ref{btwo:l7}-\ref{btwo:l9}. The method \texttt{Native.wrl}
   takes as input the start address of the object's fields and the size
   of the object as the arguments and writes zeros in these memory words
-  in a loop.
+  using a loop.
 
-}
 
-In case of \texttt{newarray} and \texttt{anewarray} bytecodes, the array
-layout (shown in Figure~\ref{fig:11f}) differs from standard real-time
-JVM implementations. For array allocation, we again use a 2 word object
-header. The first word contains the pointer to the start of array
-data. The second word of the object header contains the size of the
-array. Other than the smaller object header size compared to standard
-real-time JVM object header size (usually 8 words), which uses
-spines~\cite{pizlo2010schism} or handles~\cite{msch05} for arrays and
-regular objects, respectively, we also structure our arrays
-differently. We have decided to place arrays in a row major order and
-contiguously irrespective of the array dimensions (as in `C') in order
-to allow $O(1)$ array accesses.
+
+  In case of \texttt{newarray}, \texttt{anewarray}, and
+  \texttt{amultinewarray} bytecodes, the array layout (shown in
+  Figure~\ref{fig:11f}) differs from standard real-time JVM
+  implementations. For array allocation, we again use a 2 word object
+  header. The first word contains the pointer to the start of array
+  data. The second word of the object header contains the size of the
+  array. Other than the smaller object header size compared to standard
+  real-time JVM object header size (usually 8 words), which uses
+  spines~\cite{pizlo2010schism} or handles~\cite{msch05} for arrays and
+  regular objects, respectively, we also structure our arrays
+  differently. We have decided to place arrays in a row major order and
+  contiguously (as in `C') in order to allow $O(1)$ array accesses.
 
 \section{Experimental results}
 \label{sec:experimental-results}
@@ -2086,13 +2074,13 @@ GC invocation when compared to the case of no GC invocation.
 SCJ specification prohibits GC~\cite{scj2013} and divides the memory
 into regions such as immortal memory and scoped memory, similar to the
 permanent and transient heap spaces described in this
-paper. {\color{black} A more through comparison between the proposed
+paper. {\color{black} A more thorough comparison between the proposed
   approach and the SCJ memory organization is given later in
   Section~\ref{sec:scj-rtsj}.} Given this similarity in the memory
 organization schemes, we expected to observe memory allocation times,
 for SCJ, similar to those obtained in the No-GC approach proposed in
 this paper. Yet, as we see from Figures~\ref{fig:12} and \ref{fig:16},
-the SCJ memory allocation times are far longer compared to all the other
+the SCJ memory allocation times are far larger compared to all the other
 memory allocation approaches. In particular, SCJ's memory allocation
 implementation, in our experiments, is, on average, $\approx 7.3 \times$
 slower than the proposed approach.  Close analysis of the SCJ
@@ -2104,13 +2092,13 @@ result in faster memory allocation times for SCJ.
 In case of memory allocation time when no GC is invoked, there are
 multiple reasons for the speedup in the No-GC case, compared to other
 approaches: (1) there are no read/write barriers when allocating memory,
-which are needed by JOP-GC, AGC, and SCJ. (2) The memory allocations
+which are needed by JOP-GC, AGC, and SCJ. (2) The memory allocation
 bytecodes are implemented in software, which means, on \textit{every}
 execution of these bytecodes, a method may be loaded into the method
 cache, which results in increased program latency. (3) In case of the
-\texttt{newarray} and \texttt{anewarray} bytecode execution, array
-spines need to be initialized for AGC~\cite{pizlo2008study,ipat13},
-which leads to further slow-down in memory allocation times.
+array allocation bytecode execution, array spines need to be initialized
+for AGC~\cite{pizlo2008study,ipat13}, which leads to further slow-down
+in memory allocation times.
 
 \begin{table}[t!]
   \centering
@@ -2144,18 +2132,18 @@ Table~\ref{tab:1} gives the number of words allocated for the complex
 object allocation benchmark for all the four approaches. In the proposed
 approach, every iteration of the loop reuses the space allocated on the
 permanent heap space. The RTGC approaches on the other hand, allocate
-memory on each \texttt{new}, \texttt{newarray}, and \texttt{anewarray}
-bytecode execution. Our compile time memory allocation approach simply
-replaces these memory allocation bytecodes as described in
-Section~\ref{sec:prod-back-code} and hence, we do not keep on allocating
-more words. On the other hand, the RTGC approaches, inherently allocate
-memory on every \texttt{new} call. Another important point to note is
-that AGC although faster when it comes to memory allocation runtime
-compared to JOP-GC, allocates more words, because AGC uses block based
-allocation, which leads to internal memory fragmentation, whereas JOP-GC
-uses object replication strategy with semi-space
-partitioning~\footnote{In the numbers in Table~\ref{tab:1}, we have not
-  included the semi-space reserved by JOP-GC.}.
+memory on each allocation bytecode execution. Our compile time memory
+allocation approach simply replaces these memory allocation bytecodes as
+described in Section~\ref{sec:prod-back-code} and hence, we do not keep
+on allocating more words. On the other hand, the RTGC approaches,
+inherently allocate memory on every object and array allocation
+call. Another important point to note is that AGC although faster when
+it comes to memory allocation runtime compared to JOP-GC, allocates more
+words, because AGC uses block based allocation, which leads to internal
+memory fragmentation, whereas JOP-GC uses object replication strategy
+with semi-space partitioning~\footnote{In the numbers in
+  Table~\ref{tab:1}, we have not included the semi-space reserved by
+  JOP-GC.}.
 
 {\iffalse SCJ, like the RTGC approaches, allocates memory on each memory
   allocation bytecode execution. SCJ, \underline{unlike} the proposed
@@ -2183,7 +2171,7 @@ times of real-time tasks. Explicitly deleting all GC related code also
 makes it a fair comparison. The JOP-GC WCRT results are not shown,
 because JOP-GC always results in \texttt{NullPointer} exceptions for all
 these examples. We also do not compare with SCJ because: (1) the open
-source JOP based SCJ implementation is na{\"i}ve resulting in large
+source JOP based SCJ implementation is na{\"i}ve, resulting in large
 slowdowns during memory allocations, as seen in Figures~\ref{fig:12} and
 \ref{fig:16} and (2) all the real-time benchmark programs are reactive,
 and run in an infinite loop allocating and releasing memory. SCJ
@@ -2293,17 +2281,17 @@ permanent memory area, called the immortal memory, similar to the
 permanent heap advocated in this paper. Any object allocated in the
 immortal memory lives throughout the lifetime of the application. One
 major difference between the presented memory partitioning approach and
-the memory partitioning in SCJ/Ravenscar-Java and RTSJ approaches is
-that in the presented approach the same transient heap space (similar to
-scoped memory in SCJ) can be shared by multiple synchronous parallel
-reactions, whereas every single task gets allocated its own scoped
-memory (which might be nested in another tasks scoped memory) in
-SCJ. This is because, SCJ allows context switching of tasks during
-program execution, whereas in SystemJ a clock-domain tick is
-atomic. RTSJ does allow access of scoped memory by concurrent threads
-and only when the last thread exits the scoped memory is reclaimed.
-Another important point of differentiation is the reuse of memory words
-enabled by the proposed approach. Consider the SystemJ code snippet in
+the memory partitioning in SCJ and Ravenscar-Java approaches is that in
+the presented approach the same transient heap space (similar to scoped
+memory in SCJ) can be shared by multiple synchronous parallel reactions,
+whereas every single task gets allocated its own scoped memory (which
+might be nested in another tasks scoped memory) in SCJ. This is because,
+SCJ allows context switching of tasks during program execution, whereas
+in SystemJ a clock-domain tick is atomic. RTSJ does allow access of
+scoped memory by concurrent threads and only when the last thread exits,
+the scoped memory is reclaimed.  Another important point of
+differentiation is the reuse of memory words enabled by the proposed
+approach. Consider the SystemJ code snippet in
 Figure~\ref{fig:reuse}. An object \texttt{a}, of type \texttt{A} is
 initialized multiple times on lines~\ref{reuse:l2}-\ref{reuse:l3}. The
 proposed approach \textit{replaces} the \texttt{new} bytecode with
@@ -2312,8 +2300,8 @@ allocated multiple times in the loop. In fact, the same memory location
 (address/words) is reused by the proposed approach. In the SCJ/RTSJ
 memory organization, every memory allocation bytecode (e.g.,
 \texttt{new}) allocates new memory words and hence, reuse is
-impossible. This is also the primary reason for the results shown in
-Table~\ref{tab:1}.
+impossible. % This is also the primary reason for the results shown in
+% Table~\ref{tab:1}.
 
 \begin{figure}[h!]
   \centering
@@ -2399,12 +2387,12 @@ The primary limitation of the approach proposed in this paper is the
 fact that the compiler should be able to determine the size of the
 object to allocate statically. Consider the SystemJ code snippet in
 Figure~\ref{fig:limitation}. In this example, a \texttt{List} type
-object (\texttt{list}) is allocated with default size of $10$ on
-line~\ref{li:l0}. New \texttt{Integer} type objects are allocated and
-added to this \texttt{list} if and only if the valued signal \texttt{I}
-is present from the environment. Moreover, the value carried by the
-signal \texttt{I} is added into the \texttt{list}. In the first tick,
-the list object is emitted back to the environment via signal \texttt{O}
+object (\texttt{list}) is allocated on line~\ref{li:l0}. New
+\texttt{Integer} type objects are allocated and added to this
+\texttt{list} if and only if the valued signal \texttt{I} is present
+from the environment. Moreover, the value carried by the signal
+\texttt{I} is added into the \texttt{list}. In the first tick, the list
+object is emitted back to the environment via signal \texttt{O}
 (line~\ref{li:l2}). Finally, the \texttt{list} object has a lifetime
 greater than one tick, because it is reused in the second tick
 (line~\ref{li:l3}). Hence, the \texttt{list} object has to be allocated
@@ -2416,7 +2404,7 @@ size cannot be bounded at compile time. The proposed approach terminates
 compilation in such cases stating that the heap size is unbounded.
 
 In all safety critical and hard real-time application, including those
-developed in SCJ~\cite{andersen2013worst} one needs to statically
+developed in SCJ~\cite{andersen2013worst}, one needs to statically
 determine the worst case memory consumption. This is important, because
 runtime ``out of memory'' exceptions can lead to catastrophic
 damages. Hence, the need of our approach to statically bound the memory

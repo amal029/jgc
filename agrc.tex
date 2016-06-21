@@ -16,10 +16,10 @@ GRC is a \textit{directed graph} $G =(V,E)$, where $V$ is the set of
 vertices (nodes of GRC) and $E$ is the set of ordered pairs of
 vertices. Each edge
 $e = (v_i,v_j), \forall e \in E, v_i \in V, v_j \in V$ is a tuple
-denoting that the edge is directed from $v_i$ to $v_j$.  Then a lambda
+denoting that the edge is directed from $v_i$ to $v_j$.  Then a 
 function $\lambda:v \rightarrow E_i$, $E_i \subseteq E$, maps
 \textit{each} vertex to a set of edge(s) where $\forall (v_i,v) \in E_i$
-and $E_i$ may be $\emptyset$. When $|E_i| = 1$ we call $v_i$
+and $E_i$ may be $\emptyset$. When $|E_i| = 1$ we say $v_i$
 \textit{must} happen before $v$ whereas when $|E_i| > 1$ we say any
 $v_i \in E_i$ \textit{may} happen before $v$.
 
@@ -66,7 +66,7 @@ no parent whereas it has an immediate child \texttt{CN1}. \texttt{CN1}
 has two children, \texttt{JDN2} and \texttt{JDN3}, and both of these
 JDNs have the same child \texttt{JDN4}. This graph when given as an
 input to our GRC analysis tool, returns the result as a S-expression as
-shown in Figure~\ref{fig:tttt}. The resultant recursive data-structure
+shown in Figure~\ref{fig:tttt}. The resultant inductive data-structure
 consists of a set of nodes called \texttt{mNode}, which has three
 fields: (1) the node name of type string, (2) \texttt{Must} field of
 type \texttt{mNode} and (3) \texttt{May} field, which is a set of type
@@ -91,5 +91,5 @@ included in the final result (Figure~\ref{fig:tttt}). % A complete
 
 %%% Local Variables:
 %%% mode: latex
-%%% TeX-master: "jgc_cc_pe"
+%%% TeX-master: "rts"
 %%% End:
