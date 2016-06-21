@@ -854,10 +854,10 @@ GRC. Finding this longest path is non-trivial due to concurrent
 execution of the synchronous parallel reactions, the execution of
 different control branches depending upon the incoming input events from
 the external environment, and the state decoding within the switch
-nodes. {\color{red} There are a plethora of static WCRT estimation
+nodes. {\color{black} There are a plethora of static WCRT estimation
   techniques in the research
   literature~\cite{proop10,bbec10,roop09,sand11,theiling2000fast}. In
-  this paper we describe one of the original techniques based on
+  this paper we describe the WCRT estimation technique based on
   model-checking. Any other static WCRT estimation technique can be used
   in our compiler framework. We use the Uppaal~\cite{gbeh04}
   model-checker to perform an exhaustive state space exploration of the
@@ -958,7 +958,7 @@ execution time is unaccounted for in the aforementioned WCRT analysis
 framework. The main reason for this lack of GC incorporation is that the
 GC cycle time cannot be \textit{practically} bounded; as the number of
 heap allocations in a Java program depends upon the application and
-during garbage collection a {\color{red} linked list of allocated
+during garbage collection a {\color{black} linked list of allocated
   objects may need to be traversed }as one of the collection
 phases. Puffitsch~\cite{puffitsch2013design} shows that a WCRT value can
 be obtained for programs, which invoke the GC, by pessimistically
@@ -1312,47 +1312,6 @@ public boolean MethodCall0_0(){
   \end{minipage}
 \end{lrbox}
 
-\begin{figure}[t!]
-  % \centering
-  \subfloat[The call-graph for the running example]{
-    \scalebox{0.5}{\input{Callgraph}}
-    % \scalebox{0.7}{\usebox{\exonec}}
-    \label{fig:8hc}
-  }
-  \subfloat[The control-flow graph of the MCall method]{
-    \scalebox{0.4}{\input{MCall}}
-    % \scalebox{0.7}{\usebox{\exone}}
-    \label{fig:8h}
-  }
-  \caption{Running example used to explain the intra-procedural
-    data-flow analysis}
-  \label{fig:8}
-\end{figure}
-
-\begin{figure}[t!]
-  \centering
-  \subfloat[UML class hierarchy for classes \texttt{a}, \texttt{b} and
-  \texttt{c} used in Figure~\ref{fig:8h}]{
-    \scalebox{0.5}{\input{UML}}
-    % \includegraphics[scale=0.5]{umlex1}
-    \label{fig:8i}
-  }
-  \qquad
-  \subfloat[Pointers from permanent heap to transient heap]{
-    \includegraphics[scale=0.45]{ptp1}
-    \label{fig:9a}
-  }
-  \qquad
-  \subfloat[Points-to only in permanent heap]{
-    \includegraphics[scale=0.45]{ptp2}
-    \label{fig:9b}
-  }
-  \caption{The UML representation of the class hierarchy used in
-    Figure~\ref{fig:8} and the points-to problem}
-  \label{fig:9}
-\end{figure}
-
-
 \newsavebox{\exinv}
 \begin{lrbox}{\exinv}
   \begin{minipage}[b]{0.7\linewidth}
@@ -1406,6 +1365,7 @@ the \textit{Inter-procedural} data-flow analysis in
 Section~\ref{sec:inter-proc-analys}.
 
 
+
 \subsection{Intra-procedural analysis}
 \label{sec:intra-proc-analys}
 
@@ -1423,6 +1383,48 @@ line~3) of type \texttt{a} is initialized to either type \texttt{b} or
 \texttt{c} (BB2, line~2, BB3, line~3) depending upon the value of the
 Boolean \texttt{a\_thread}. Finally, object \texttt{t} is emitted via
 signal \texttt{S} (BB4, line~1).
+
+\begin{figure}[t!]
+  % \centering
+  \subfloat[The call-graph for the running example]{
+    \scalebox{0.5}{\input{Callgraph}}
+    % \scalebox{0.7}{\usebox{\exonec}}
+    \label{fig:8hc}
+  }
+  \subfloat[The control-flow graph of the MCall method]{
+    \scalebox{0.4}{\input{MCall}}
+    % \scalebox{0.7}{\usebox{\exone}}
+    \label{fig:8h}
+  }
+  \caption{Running example used to explain the intra-procedural
+    data-flow analysis}
+  \label{fig:8}
+\end{figure}
+
+\begin{figure}[t!]
+  \centering
+  \subfloat[UML class hierarchy for classes \texttt{a}, \texttt{b} and
+  \texttt{c} used in Figure~\ref{fig:8h}]{
+    \scalebox{0.5}{\input{UML}}
+    % \includegraphics[scale=0.5]{umlex1}
+    \label{fig:8i}
+  }
+  \qquad
+  \subfloat[Pointers from permanent heap to transient heap]{
+    \includegraphics[scale=0.45]{ptp1}
+    \label{fig:9a}
+  }
+  \qquad
+  \subfloat[Points-to only in permanent heap]{
+    \includegraphics[scale=0.45]{ptp2}
+    \label{fig:9b}
+  }
+  \caption{The UML representation of the class hierarchy used in
+    Figure~\ref{fig:8} and the points-to problem}
+  \label{fig:9}
+\end{figure}
+
+
 
 \begin{compactitem}[-]
 
@@ -2228,12 +2230,27 @@ allocation bytecode execution in the AGC approach.
 
 \begin{figure}[t!]
   \centering
-  \subfloat[WCRT values for benchmarks without GC invocation]{
-    \includegraphics[scale=0.45]{wcetb.PNG}
+  \subfloat[WCRT values (in clock cycles) for benchmarks without GC invocation]{
+    \begin{tabular}{|c|c|c|}
+      \hline
+      \textbf{Benchmarks}&\textbf{No-GC}& \textbf{AGC}\\
+      \hline
+      \hline
+      Pacemaker & 14424205 & 19485761 \\
+      \hline
+      Motor & 2674 & 1087387 \\
+      \hline
+      Conveyor controller & 3325301 & 4048418 \\
+      \hline
+      Hrtcs & 318 & 318 \\
+      \hline
+      Cruise control & 2218493 & 2941605 \\
+      \hline
+    \end{tabular}
     \label{fig:13a}
   }
   \subfloat[Method sizes for benchmarks]{
-    \includegraphics[scale=0.45]{msizeb.PNG}
+    \raisebox{-.5\height}{\includegraphics[scale=0.45]{msizeb.PNG}}
     \label{fig:13b}
   }
   \caption{WCRT and method size comparison: No-GC vs. AGC}
@@ -2305,11 +2322,11 @@ Table~\ref{tab:1}.
   \label{fig:reuse}
 \end{figure}
 
-Furthermore, in the proposed approach the compiler automatically decides
-where to place the allocated objects, whereas in the SCJ and RTSJ
-approaches, the programmer needs to explicitly and carefully allocate
-objects to the correct memory areas manually. We believe that our
-approach is safer and helps speed up development times.
+Furthermore, in the approach proposed in this paper the compiler
+automatically decides where to place the allocated objects, whereas in
+the SCJ and RTSJ approaches, the programmer needs to explicitly and
+carefully allocate objects to the correct memory areas manually. We
+believe that our approach is safer and helps speed up development times.
 
 The proposed algorithms also have a lot in common with a number of tools
 proposed for easing development of programs in SCJ and RTSJ. The worst
@@ -2378,9 +2395,9 @@ while (true) {
   \label{fig:limitation}
 \end{figure}
 
-The primary limitation of the proposed approach is the fact that the
-compiler should be able to determine the size of the object to allocate
-statically. Consider the SystemJ code snippet in
+The primary limitation of the approach proposed in this paper is the
+fact that the compiler should be able to determine the size of the
+object to allocate statically. Consider the SystemJ code snippet in
 Figure~\ref{fig:limitation}. In this example, a \texttt{List} type
 object (\texttt{list}) is allocated with default size of $10$ on
 line~\ref{li:l0}. New \texttt{Integer} type objects are allocated and
