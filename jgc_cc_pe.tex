@@ -14,7 +14,7 @@
 
 % \documentclass[prodmode,acmtecs]{acmsmall} % Aptara syntax
 \documentclass[times]{cpeauth}
-
+\synctex=1
 % Package to generate and customize Algorithm as per ACM style
 \usepackage[colorlinks,bookmarksopen,bookmarksnumbered,citecolor=red,urlcolor=red]{hyperref}
 \usepackage[linesnumbered]{algorithm2e}
@@ -426,6 +426,7 @@ explicitly by programmers using the $\mathbf{pause}$
 construct. {\color{red} Finally, there are two types of loops in
   SystemJ: temporal loops; consisting of a $\mathbf{pause}$ statement,
   that execute forever and bounded data-loops like in standard Java.  }
+
 \subsection{The real-time execution architecture}
 \label{sec:real-time-execution}
 
