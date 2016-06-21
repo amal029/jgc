@@ -33,11 +33,11 @@ inter-arrival time for input events from the environment. {\color{red}
 
 Techniques exist for computing WCRT values for synchronous programs
 providing support for data-computation via a non-managed language
-(primarily `C')~\cite{boldt07,proop10}. These WCRT estimation approaches
-suffer from a fundamental problem; they cannot incorporate complex
-data-computations within the WCRT analysis framework, because of the
-many undefined behaviors, type unsafety and the general lack of formal
-operational semantics inherent to low-level non-managed
+(primarily `C')~\cite{boldt07} and~\cite{proop10}. These WCRT estimation
+approaches suffer from a fundamental problem; they cannot incorporate
+complex data-computations within the WCRT analysis framework, because of
+the many undefined behaviors, type unsafety and the general lack of
+formal operational semantics inherent to low-level non-managed
 languages. Hence, in this paper we are interested in the WCRT analysis
 of programs that support data computation via managed-languages like
 Java, which provides a well defined operational semantics. {\color{red}
@@ -48,7 +48,7 @@ domain is \textit{Garbage Collection} (GC) for automatic memory
 management, since worst case execution time estimates for GC cycles are
 very pessimistic~\cite{puffitsch2013design}.
 
-{\color{red}
+{\color{black}
 
   We identify the following requirements for WCRT analysis of SystemJ
   programs with automated memory management:
@@ -58,19 +58,19 @@ very pessimistic~\cite{puffitsch2013design}.
   \item The number and clock-cycles of instructions used for memory
     allocation and reclaim should be statically bounded (to a constant
     value) at compile time. This is necessary, because the primary
-    problem with long GC times is the fact that GC time depends upon the
-    size of physical memory and the number of object allocated during
-    program execution~\cite{schoeberl2010scheduling}.
+    problem with long garbage collection times is the fact that garbage
+    collection time depends upon the size of physical memory and the
+    number of object allocated during program
+    execution~\cite{schoeberl2010scheduling}.
 
   \item The size of each object and consequently the total memory
     consumption should be bounded (to a constant value) statically at
     compile time. JVM specification requires resetting all the memory
     (filling it with zeros) allocated for each object. Adhering to the
     first point requires that the size of the object be known
-    statically, so that the loop bound zeroing the memory of the
-    allocated object can be bounded. If all the object sizes can be
-    determined statically, then the physical memory size can also be
-    bounded.
+    statically, so that the loop zeroing the memory of the allocated
+    object can be bounded. If all the object sizes can be determined
+    statically, then the physical memory size can also be bounded.
 
   \end{enumerate}
 
@@ -114,7 +114,8 @@ contributions are as follows:
 
 
 
+
 %%% Local Variables:
 %%% mode: latex
-%%% TeX-master: "jgc_cc_pe"
+%%% TeX-master: "rts"
 %%% End:
