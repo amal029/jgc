@@ -136,11 +136,11 @@
   language, for carrying out data computations, because Java provides
   clearly defined operational semantics, type and memory safety in the
   form of the \textit{Garbage Collector} (GC), which help with formal
-  property verification. The same GC, which helps in functional
+  functional verification. The same GC, which helps in functional
   verification, makes \textit{Worst Case Execution Time} (WCET) analysis
   challenging. Any WCET analysis framework for GALS programs needs to
   consider the operations performed by the host language. It has been
-  shown that the WCET estimates for garbage collection cycle are very
+  shown that the WCET estimates for garbage collection cycles are very
   pessimistic (in seconds, whereas the program's WCET itself is in
   micro-seconds). These pessimistic estimates renders the WCET analysis
   framework ineffective. In order to overcome this problem, we develop a
@@ -1843,9 +1843,9 @@ alternative bytecodes in the second step, shown in Figure~\ref{fig:11b}.
     the following target addresses are updated by an offset of 32
     bytes. In case of \texttt{anewarray} the update offset is 31 bytes,
     and in case of \texttt{amultinewarray} it is 30 bytes,
-    respectively}. This {\color{red} 31} byte increment is made obvious
-  by Figures~\ref{fig:11c} and~\ref{fig:11d}, which show the Java
-  bytecode snippets for the example program in Figure~\ref{fig:8j}
+    respectively}. This {\color{black} 31} byte increment is made
+  obvious by Figures~\ref{fig:11c} and~\ref{fig:11d}, which show the
+  Java bytecode snippets for the example program in Figure~\ref{fig:8j}
   before and after \texttt{new} bytecode replacement,
   respectively\footnote{In both these figures, the line numbers are
     shown on the right of the program. The numbers adjacent to the
@@ -1948,18 +1948,18 @@ alternative bytecodes in the second step, shown in Figure~\ref{fig:11b}.
   A single \texttt{new} bytecode (consuming 3 bytes in the class file)
   is replaced with a list of bytecodes in
   lines~\ref{btwo:l1}-\ref{btwo:l2} (line numbers are given on the
-  right) consuming {\color{red} 34} bytes in the class file, hence the
-  {\color{red} 31} byte increment of target addresses of the conditional
-  bytecodes. The core idea is very simple; since we have already
-  allocated memory for the object (Figure~\ref{fig:11a}), we can simply
-  replace the \texttt{new} bytecode with a bytecode that loads the
-  allocation pointer ($allocPtr$) onto the stack (line~\ref{btwo:l1}) as
-  the object reference. The rest of the bytecodes setup the object
-  header for the allocated object. Our object header is two words (the
-  object structure for the running example is shown in
-  Figure~\ref{fig:11e}), the first word contains the pointer to the
-  start of data (in the current example it is the address 65485). The
-  first word of the object header is initialized in
+  right) consuming {\color{black} 34} bytes in the class file, hence the
+  {\color{black} 31} byte increment of target addresses of the
+  conditional bytecodes. The core idea is very simple; since we have
+  already allocated memory for the object (Figure~\ref{fig:11a}), we can
+  simply replace the \texttt{new} bytecode with a bytecode that loads
+  the allocation pointer ($allocPtr$) onto the stack
+  (line~\ref{btwo:l1}) as the object reference. The rest of the
+  bytecodes setup the object header for the allocated object. Our object
+  header is two words (the object structure for the running example is
+  shown in Figure~\ref{fig:11e}), the first word contains the pointer to
+  the start of data (in the current example it is the address
+  65485). The first word of the object header is initialized in
   lines~\ref{btwo:l3}-\ref{btwo:l4} in Figure~\ref{fig:11d}. The second
   word of the object header is the pointer to the start of the method
   structure of the class (c.f. Figure~\ref{fig:6b}). The second word of
