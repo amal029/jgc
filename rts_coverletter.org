@@ -1,0 +1,107 @@
+#+DATE: <2016-06-23 Thu>
+#+TITLE: Cover letter
+#+DATE: <2016-06-23 Thu>
+#+AUTHOR: Avinash Malik
+#+EMAIL: avinash.malik@auckland.ac.nz
+#+OPTIONS: ':nil *:t -:t ::t <:t H:3 \n:nil ^:t arch:headline author:t
+#+OPTIONS: c:nil creator:comment d:(not "LOGBOOK") date:t e:t email:nil
+#+OPTIONS: f:t inline:t num:t p:nil pri:nil stat:t tags:t tasks:nil tex:t
+#+OPTIONS: timestamp:nil toc:nil todo:nil |:t
+#+CREATOR: Emacs 24.5.1 (Org mode 8.2.10)
+#+DESCRIPTION:
+#+EXCLUDE_TAGS: noexport
+#+KEYWORDS:
+#+LANGUAGE: en
+#+SELECT_TAGS: export
+#+OPTIONS: texht:t
+#+LATEX_CLASS: article
+#+LATEX_CLASS_OPTIONS:[12pt]
+#+LATEX_HEADER:
+#+LATEX_HEADER_EXTRA:
+
+Dear Editors,
+
+We are submitting the article titled: "Compiler assisted memory
+management for safety-critical hard real-time applications" to the
+Real-time Systems Journal. This is an original manuscript, with no
+component of the manuscript appearing in any previous publication venue.
+
+The list of authors, their affiliations, biographies, and photots are as
+follows:
+
+** First author
+
+1. Name: Dr. Avinash Malik
+2. Address: Department of Electrical and Computer Engineering,
+   University of Auckland, New Zealand.
+3. Biography: Avinash Malik is a lecturer at the University of Auckland,
+   New Zealand. His main research interest lies in programming languages
+   for multicore and distributed systems and their formal semantics and
+   compilation. He has worked at organisations such as INRIA in France,
+   Trinity College Dublin, IBM research Ireland, and IBM Watson on the
+   design and the compilation of programming languages. He holds
+   B.E. and Ph.D degrees from the University of Auckland.
+#+BEGIN_LaTeX
+  \begin{figure}[h!]
+    \centering
+    \includegraphics [scale=0.6] {avinash_my_photo.jpg}
+    \caption{Avinash Malik photo}
+  \end{figure}
+#+END_LaTeX
+
+
+** Second author
+1. Name: Dr. Heejong Park
+2. Address: Department of Electrical and Computer Engineering,
+   University of Auckland, New Zealand.
+3. Biography: Heejong Park received his B.E. degree in Computer Systems
+   Engineering and Ph.D. degree in Electrical and Electronics
+   Engineering in 2010 and 2016, respectively, both from the University
+   of Auckland, Auckland, New Zealand. He is currently working as a
+   postdoctoral research fellow in the Department of Electrical and
+   Computer Engineering, the University of Auckland. His main research
+   interests include compilation and verification techniques for
+   safety-critical systems, formal semantics of programming languages,
+   and real-time computing.
+
+#+BEGIN_LaTeX
+  \begin{figure}[h!]
+    \centering
+    \includegraphics[scale=0.4] {HJ_Park.jpg}
+    \caption{Heejong Park photo}
+  \end{figure}
+#+END_LaTeX
+
+** Third author 
+1. Name: Dr. Muhammad Nadeem
+2. Address: Department of Electrical and Computer Engineering,
+   University of Auckland, New Zealand.
+   
+3. Biography: Muhammad Nadeem was born in Lahore, Pakistan. He is a
+   Professional Teaching Fellow at Electrical and Computer Engineering
+   Department at The University of Auckland, New Zealand. He received
+   his doctorate from the same department in 2012. He received his MSc
+   Engineering degree from Royal Institute of Technology, Sweden, in
+   2003 and BSc Engineering degree in Electrical and Electronics from
+   University of Engineering and Technology, Lahore, Pakistan, in
+   1998. His current research include multiprocessors systems,
+   real-time systems and mixed-criticality systems.
+
+#+BEGIN_LaTeX
+  \begin{figure}[h!]
+    \centering
+    \includegraphics[scale=1] {Nadeem.jpg}
+    \caption{Muhammad Nadeem photo}
+  \end{figure}
+#+END_LaTeX
+
+** Fourth author
+1. Name: Prof. Zoran Salcic
+2. Address: Department of Electrical and Computer Engineering,
+   University of Auckland, New Zealand.
+
+
+
+Regards,
+
+Dr. Avinash Malik
