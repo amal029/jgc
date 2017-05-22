@@ -18,13 +18,13 @@ detecting the event, the synchronous program \textit{reacts}
 \textit{instantaneously} in zero time to respond to these inputs and
 becomes quiescent until the next input events arrive. The start and the
 end of this reaction transition demarcate states of the program -- note
-that internal data updates do not lead to {\color{red} observable}
-change in the program state thereby reducing the state space explosion
-problem. Furthermore, the reaction being logically in zero-time is by
-definition \textit{atomic} and always faster than the incoming input
-events, thereby guaranteeing that none of the incoming events are
-missed. In reality, the reaction does take time, one needs to find out
-the \textit{Worst Case Reaction Time} (WCRT) of any given synchronous
+that internal data updates do not lead to observable change in the
+program state thereby reducing the state space explosion problem.
+Furthermore, the reaction being logically in zero-time is by definition
+\textit{atomic} and always faster than the incoming input events,
+thereby guaranteeing that none of the incoming events are missed. In
+reality, the reaction does take time, one needs to find out the
+\textit{Worst Case Reaction Time} (WCRT) of any given synchronous
 program. This WCRT value determines the shortest inter-arrival time for
 input events from the environment. {\color{black} The requirement that
   all input events from the environment arrive at beast WCRT time units
@@ -106,6 +106,23 @@ contributions are as follows:
   cases.
 \end{itemize}
 
+{\color{red}
+  
+  Our technique works under the following assumptions:
+  \begin{itemize}
+  \item All loops in the programs, whether allocating memory or not,
+    should be bounded statically.
+  \item Program recursion should be bounded statically.
+  \item All memory allocation should be bounded statically.
+  \end{itemize}
+  
+  These assumptions are necessary for approaches to worst case execution
+  time analysis and worst case memory consumption
+  analysis~\cite{jop:wcet:jtres06}.
+
+}
+
+
 % We use the SystemJ~\cite{amal10} programming language, because it
 % provides the synchronous MoC as a subset along with Java data-driven
 % computation support. Furthermore, there exist efficient and real-time
@@ -116,7 +133,8 @@ contributions are as follows:
 
 
 
+
 %%% Local Variables:
 %%% mode: latex
-%%% TeX-master: "rts"
+%%% TeX-master: "mem_css"
 %%% End:

@@ -99,7 +99,25 @@ follows:
 1. Name: Prof. Zoran Salcic
 2. Address: Department of Electrical and Computer Engineering,
    University of Auckland, New Zealand.
+3. Biography: Zoran Salcic holds a chair in computer systems engineering
+   at the University of Auckland. He has the BE ('72), ME ('74) and PhD
+   ('76) degrees in electrical and computer engineering (Sarajevo
+   University).  His main research interests include complex digital
+   systems, custom-computing machines, embedded systems and their
+   implementation, design automation tools, hardware-software co-design,
+   models of computation and languages for concurrent and distributed
+   systems and cyber-physical systems. He has published near 300
+   peer-reviewed journal and conference papers and several books. He is
+   a Fellow of the Royal Society New Zealand and recipient of Alexander
+   von Humboldt Research Award in 2010.
 
+#+BEGIN_LaTeX
+  \begin{figure}[h!]
+    \centering
+    \includegraphics[scale=1]{Zoran.png}
+    \caption{Zoran Salcic photo}
+  \end{figure}
+#+END_LaTeX
 
 
 Regards,
