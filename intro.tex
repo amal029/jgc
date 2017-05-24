@@ -112,13 +112,13 @@ contributions are as follows:
   \begin{itemize}
   \item All loops in the programs, whether allocating memory or not,
     should be bounded statically.
-  \item Program recursion should be bounded statically.
+  \item All recursions in the program should be bounded statically.
   \item All memory allocation should be bounded statically.
   \end{itemize}
   
   These assumptions are necessary for approaches to worst case execution
-  time analysis and worst case memory consumption
-  analysis~\cite{jop:wcet:jtres06}.
+  time analysis~\cite{jop:wcet:jtres06} and worst case memory
+  consumption analysis~\cite{andersen2013worst}.
 
 }
 

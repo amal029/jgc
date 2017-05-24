@@ -12,7 +12,7 @@
 %
 % For tracking purposes => this is v1.3 - March 2012
 
-\documentclass[authoryear,preprint,review,12pt]{elsarticle}
+\documentclass[preprint,review,12pt]{elsarticle}
 \synctex=1
 % Package to generate and customize Algorithm as per ACM style
 \usepackage[colorlinks,bookmarksopen,bookmarksnumbered,citecolor=red,urlcolor=red]{hyperref}
@@ -2195,7 +2195,8 @@ allocation bytecode execution in the AGC approach.
 {\color{black}
 
 
-  \subsection{Comparison with SCJ and RTSJ memory organization}
+  \subsection{Comparison with region based, SCJ and RTSJ memory
+    management approaches}
 \label{sec:scj-rtsj}
 
 \newsavebox{\reuse}
@@ -2210,37 +2211,72 @@ emit S(a); \label[reuse:l4]
   \end{minipage}
 \end{lrbox}
 
-We are not the first to advocate a GC-less approach for hard real-time
-applications with memory managed languages, especially Java. There exist
-previous works like the Safety Critical Java (SCJ)~\cite{scj2013}
-specification, Ravenscar-Java~\cite{kwon2005ravenscar} and Real Time
-Specification for Java (RTSJ)~\cite{bollella2000real} that present a
-memory organization approach similar to the one presented in this
-paper. SCJ, Ravenscar-Java and the RTSJ approaches divide the backing
-store into multiple parts. A memory region called scoped memory is
-allocated per real-time task (called a schedulable object in SCJ/RTSJ
-terminology), which is automatically reclaimed, using pointer reset like
-in our case, once the task completes execution. There also exists a
-permanent memory area, called the immortal memory, similar to the
-permanent heap advocated in this paper. Any object allocated in the
-immortal memory lives throughout the lifetime of the application. One
-major difference between the presented memory partitioning approach and
-the memory partitioning in SCJ and Ravenscar-Java approaches is that in
-the presented approach the same transient heap space (similar to scoped
-memory in SCJ) can be shared by multiple synchronous parallel reactions,
-whereas every single task gets allocated its own scoped memory (which
-might be nested in another tasks scoped memory) in SCJ. This is because,
-SCJ allows context switching of tasks during program execution, whereas
-in SystemJ a clock-domain tick is atomic. RTSJ does allow access of
-scoped memory by concurrent threads and only when the last thread exits,
-the scoped memory is reclaimed.  Another important point of
-differentiation is the reuse of memory words enabled by the proposed
-approach. Consider the SystemJ code snippet in
-Figure~\ref{fig:reuse}. An object \texttt{a}, of type \texttt{A} is
-initialized multiple times on lines~\ref{reuse:l2}-\ref{reuse:l3}. The
-proposed approach \textit{replaces} the \texttt{new} bytecode with
-simple load instructions, hence, the object does \underline{not} get
-allocated multiple times in the loop. In fact, the same memory location
+{\color{red}
+
+  We are not the first to advocate a GC-less approach for hard real-time
+  applications with memory managed languages, especially Java. Earlier
+  works on \textit{region} based memory
+  management~\cite{gay1998memory,nguyen2007detecting}, advocate the use
+  of different regions, similar to transient and permanent heap proposed
+  in this work, for safely managing memory. The work
+  of~\cite{nguyen2007detecting} uses cyclic memory
+  allocation/deallocation scheme per allocation site in C programs. They
+  empirically estimate the size and the number of memory allocations for
+  each allocation site in the program using trial runs. Once both these
+  quantities are estimated, a $N \times S$ memory region is dedicated
+  for allocation for each allocation site, where $N$ and $S$ are the
+  number of allocations and size of objects to be allocated for that
+  site obtained from the trial runs. The problem with this approach is
+  that the trial runs are not exhaustive, i.e., the number of
+  allocations for any site can potentially be underestimated. Such
+  underestimation can lead to overwriting live objects, resulting in
+  wrong program execution.
+
+  The work in~\cite{gay1998memory} propose a region based memory
+  management approach for C. In their approach, a reference count for
+  complete regions is used for garbage collection. Managing reference
+  counts results in additional overhead during program execution. The
+  authors in~\cite{gay1998memory} posit that region based memory
+  management is useful only when life-time of objects can be determined
+  statically. SystemJ's MoC allows exactly determining the life-time of
+  objects, due to the state demarcation approach inherent in synchronous
+  programming. Hence, our proposed approach does not incur any overheads
+  (like reference counting) and leverages the synchronous MoC to provide
+  an elegant region based memory management solution unlike any previous
+  approaches.
+
+}
+
+There also exists previous works like the Safety Critical Java
+(SCJ)~\cite{scj2013} specification,
+Ravenscar-Java~\cite{kwon2005ravenscar} and Real Time Specification for
+Java (RTSJ)~\cite{bollella2000real} that present a memory organization
+approach similar to the one presented in this paper. SCJ, Ravenscar-Java
+and the RTSJ approaches divide the backing store into multiple parts. A
+memory region called scoped memory is allocated per real-time task
+(called a schedulable object in SCJ/RTSJ terminology), which is
+automatically reclaimed, using pointer reset like in our case, once the
+task completes execution. There also exists a permanent memory area,
+called the immortal memory, similar to the permanent heap advocated in
+this paper. Any object allocated in the immortal memory lives throughout
+the lifetime of the application. One major difference between the
+presented memory partitioning approach and the memory partitioning in
+SCJ and Ravenscar-Java approaches is that in the presented approach the
+same transient heap space (similar to scoped memory in SCJ) can be
+shared by multiple synchronous parallel reactions, whereas every single
+task gets allocated its own scoped memory (which might be nested in
+another tasks scoped memory) in SCJ. This is because, SCJ allows context
+switching of tasks during program execution, whereas in SystemJ a
+clock-domain tick is atomic. RTSJ does allow access of scoped memory by
+concurrent threads and only when the last thread exits, the scoped
+memory is reclaimed. Another important point of differentiation is the
+reuse of memory words enabled by the proposed approach. Consider the
+SystemJ code snippet in Figure~\ref{fig:reuse}. An object \texttt{a}, of
+type \texttt{A} is initialized multiple times on
+lines~\ref{reuse:l2}-\ref{reuse:l3}. The proposed approach
+\textit{replaces} the \texttt{new} bytecode with simple load
+instructions, hence, the object does \underline{not} get allocated
+multiple times in the loop. In fact, the same memory location
 (address/words) is reused by the proposed approach. In the SCJ/RTSJ
 memory organization, every memory allocation bytecode (e.g.,
 \texttt{new}) allocates new memory words and hence, reuse is
@@ -2416,8 +2452,8 @@ permanent heap memory allocations across clock-domain tick boundaries,
 which we plan to address in the future.
 
 % Bibliography
-\bibliographystyle{spbasic}      % basic style, author-year citations
-% \bibliographystyle{elsarticle-harv}      % basic style, author-year citations
+% \bibliographystyle{spbasic}      % basic style, author-year citations
+\bibliographystyle{elsarticle-num}      % basic style, author-year citations
 \bibliography{main_bib}
 
 % \begin{thebibliography}{40}
