@@ -1076,7 +1076,7 @@ public class FruitSorterController {
 \begin{figure}[t!]
   \centering
   \subfloat[SystemJ code snippet of a single sequential reaction]{
-    \scalebox{0.7}{\usebox{\eone}}
+    \scalebox{0.6}{\usebox{\eone}}
     \label{fig:7a}
   }
   \qquad
@@ -1731,13 +1731,13 @@ alternative bytecodes in the second step, shown in Figure~\ref{fig:11b}.
 \begin{figure}[t!]
   \centering
   \subfloat[Bump-pointer memory allocation] {
-    \scalebox{0.9}{\usebox{\baone}}
+    \scalebox{0.8}{\usebox{\baone}}
     \label{fig:11a}
   }
   \qquad
   \subfloat[Replacing the \texttt{new}, \texttt{newarray},
   \texttt{anewarray} and \texttt{amultinewarray} bytecodes]
-  { \scalebox{0.9}{\usebox{\batwo}}
+  { \scalebox{0.8}{\usebox{\batwo}}
     \label{fig:11b}
   }
   \caption{The back-end code generation pseudo-algorithm}
@@ -1849,31 +1849,31 @@ safe and time predictable bytecodes as shown in Figure~\ref{fig:11d}.
     \end{minipage}
   \end{lrbox}
 
-  \begin{figure}[t!]
+  \begin{figure}[!pthb]
     \centering
     \subfloat[Java bytecode snippet and class constant-pool for example in
     Figure~\ref{fig:8j}]{
-      \scalebox{0.65}{\usebox{\bone}}
+      \scalebox{0.5}{\usebox{\bone}}
       \label{fig:11c}
     }
-    \qquad
-    \subfloat[Java bytecode snippet and class constant-pool for example in
+    % \qquad
+    \subfloat[Java bytecode and class constant-pool for example in
     Figure~\ref{fig:8j} after \texttt{new} bytecode replacement]{
-      \scalebox{0.65}{\usebox{\btwo}}
+      \scalebox{0.55}{\usebox{\btwo}}
       \label{fig:11d}
     }
-
-    \subfloat[Java object allocation in permanent heap]{
-      \includegraphics[scale=0.5]{oalloc}
+    \qquad
+    \subfloat[Java object allocation]{
+      \includegraphics[scale=0.44]{oalloc}
       \label{fig:11e}
     }
     \qquad\qquad
-    \subfloat[Java (2x2x2) array allocation in permanent heap]{
-      \includegraphics[scale=0.5]{aalloc}
+    \subfloat[Java (2x2x2) array allocation]{
+      \includegraphics[scale=0.44]{aalloc}
       \label{fig:11f}
     }
     \caption{The back-end generated code and compacted object
-      representation in heap}
+      representation in permanent heap}
     \label{fig:15}
   \end{figure}
 
@@ -1952,7 +1952,7 @@ every outer loop iteration, a \textit{reference} type 1D array of size
 allocated and the second object's reference is set as the array value.
 The example benchmarks are available from~\cite{ipat13}.
 
-\begin{figure}[t!]
+\begin{figure}[!ptbh]
   \centering
   \subfloat[Simple object memory allocation runtime without GC
   invocation.]{
@@ -2160,25 +2160,28 @@ the method cache load time increases, but it is not as significant as
 loading the methods implementing the object allocation for every memory
 allocation bytecode execution in the AGC approach.
 
-\begin{figure}[t!]
+\begin{figure}[!htbp]
   \centering
   \subfloat[WCRT values (in clock cycles) for benchmarks without GC invocation]{
-    \begin{tabular}{|c|c|c|}
-      \hline
-      \textbf{Benchmarks}&\textbf{No-GC}& \textbf{AGC}\\
-      \hline
-      \hline
-      Pacemaker & 14424205 & 19485761 \\
-      \hline
-      Motor & 2674 & 1087387 \\
-      \hline
-      Conveyor controller & 3325301 & 4048418 \\
-      \hline
-      Hrtcs & 318 & 318 \\
-      \hline
-      Cruise control & 2218493 & 2941605 \\
-      \hline
-    \end{tabular}
+    \begin{scriptsize}
+      
+      \begin{tabular}{|c|c|c|}
+        \hline
+        \textbf{Benchmarks}&\textbf{No-GC}& \textbf{AGC}\\
+        \hline
+        \hline
+        Pacemaker & 14424205 & 19485761 \\
+        \hline
+        Motor & 2674 & 1087387 \\
+        \hline
+        Conveyor controller & 3325301 & 4048418 \\
+        \hline
+        Hrtcs & 318 & 318 \\
+        \hline
+        Cruise control & 2218493 & 2941605 \\
+        \hline
+      \end{tabular}
+    \end{scriptsize}
     \label{fig:13a}
   }
   \subfloat[Method sizes for benchmarks]{
@@ -2355,7 +2358,7 @@ while (true) {
   \end{minipage}
 \end{lrbox}
 
-\begin{figure}[h!]
+\begin{figure}[t!]
   \centering
   \scalebox{0.7}{\usebox{\limitation}}
   \caption{Example SystemJ code snippet that cannot be compiled using
