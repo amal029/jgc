@@ -27,7 +27,7 @@ reality, the reaction does take time, one needs to find out the
 \textit{Worst Case Reaction Time} (WCRT) of any given synchronous
 program. This WCRT value determines the shortest inter-arrival time for
 input events from the environment. {\color{black} The requirement that
-  all input events from the environment arrive at beast WCRT time units
+  all input events from the environment arrive at best WCRT time units
   apart, guarantee that no input event goes unhandled and hence,
   enforces the \textit{zero} delay synchronous hypothesis.}
 
@@ -40,18 +40,23 @@ the many undefined behaviors, type unsafety and the general lack of
 formal operational semantics inherent to low-level non-managed
 languages. Hence, in this paper we are interested in the WCRT analysis
 of programs that support data computation via managed-languages like
-Java, which provides a well defined operational
-semantics. {\color{black} SystemJ is the only programming language based
-  on the GALS MoC that uses Java for its data computations.} The key
-hurdle to the adoption of managed languages in the safety critical hard
-real-time application domain is \textit{Garbage Collection} (GC) for
-automatic memory management, since WCET estimates for garbage collection
-cycles are very pessimistic~\cite{puffitsch2013design}.
+Java, which provides a well defined operational semantics.
+{\color{black} SystemJ is the only programming language based on the
+  GALS MoC that uses Java for its data computations.} The key hurdle to
+the adoption of managed languages in the safety critical hard real-time
+application domain is \textit{Garbage Collection} (GC) for automatic
+memory management, since WCET estimates for garbage collection cycles
+are very pessimistic~\cite{puffitsch2013design}. However, by
+constraining Java within synchronous and GALS MoC, the opportunities for
+safe memory management for hard real-time systems become possible.
 
 {\color{black}
 
-  We identify the following requirements for WCRT analysis of SystemJ
-  programs with automated memory management:
+  While static WCRT analysis is a must for real-time systems, it is not
+  sufficient to guarantee the system safety, as the system can run out
+  of memory during program execution. We identify the following
+  requirements for WCRT analysis of SystemJ programs with automated
+  memory management:
 
   \begin{enumerate}
 
@@ -60,7 +65,7 @@ cycles are very pessimistic~\cite{puffitsch2013design}.
     value) at compile time. This is necessary, because the primary
     problem with long garbage collection times is the fact that garbage
     collection time depends upon the size of the physical memory and the
-    number of object allocated during program
+    number of objects allocated during program
     execution~\cite{schoeberl2010scheduling}.
 
   \item The size of each object and consequently the total memory
@@ -106,7 +111,7 @@ contributions are as follows:
   cases.
 \end{itemize}
 
-{\color{red}
+{\color{black}
   
   Our technique works under the following assumptions:
   \begin{itemize}

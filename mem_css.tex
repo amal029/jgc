@@ -99,18 +99,18 @@
   verification, makes \textit{Worst Case Execution Time} (WCET) analysis
   challenging. Any WCET analysis framework for GALS programs needs to
   consider the operations performed by the host language. It has been
-  shown that the WCET estimates for garbage collection cycles are very
-  pessimistic (in seconds, whereas the program's WCET itself is in
-  micro-seconds). These pessimistic estimates renders the WCET analysis
-  framework ineffective. In order to overcome this problem, we develop a
-  compiler assisted memory management technique for applications written
-  in SystemJ. {\color{red} The SystemJ MoC plays the central role in the
-    proposed technique. The SystemJ MoC allows clearly demarcating the
-    state boundaries of the program, which in turn allows us to
-    partition the heap, at compile time, into two distinct areas: (1)
-    the memory area called the \textit{permanent heap}, which holds
-    objects that are alive throughout the life time of the application,
-    and (2) the memory area used to hold all other objects, called the
+  shown that the WCET estimates for garbage collection cycles are in
+  seconds, whereas the program's WCET itself is in micro-seconds. These
+  pessimistic estimates renders the WCET analysis framework ineffective.
+  In order to overcome this problem, we develop a compiler assisted
+  memory management technique for applications written in SystemJ.
+  {\color{black} The SystemJ MoC plays the central role in the proposed
+    technique. The SystemJ MoC allows clearly demarcating the state
+    boundaries of the program, which in turn allows us to partition the
+    heap, at compile time, into two distinct areas: (1) the memory area
+    called the \textit{permanent heap}, which holds objects that are
+    alive throughout the life time of the application, and (2) the
+    memory area used to hold all other objects, called the
     \textit{transient heap}.} The size of these memory areas are bounded
   statically. Furthermore, the memory allocation and reclaim procedures
   are simple load and pointer reset operations, respectively, which are
@@ -396,7 +396,7 @@ only consists of a Boolean status, which can be set to \texttt{true} or
 A typed signal is called a valued signal, and consists of a value (of
 any Java data-type) in addition to the status. The value of a typed
 signal can also be set, optionally, via the $\mathbf{emit}$ statement.
-{\color{red}Once emitted, the status of a signal is \texttt{true} only
+{\color{black} Once emitted, the status of a signal is \texttt{true} only
   in the next tick, but the value of a signal is persistent over ticks.
 }Emission of a signal, broadcasts it across all reactions within the
 clock-domain.
@@ -416,9 +416,11 @@ communication between synchronous parallel reactions is not allowed in
 SystemJ. The shared memory communication model is replaced by the signal
 emission based communication mechanism. State boundaries are demarcated
 explicitly by programmers using the $\mathbf{pause}$ construct.
-{\color{red} Finally, there are two types of loops in SystemJ: temporal
-  loops consisting at least one $\mathbf{pause}$ statement, that execute
-  forever and bounded data-loops like in standard Java. }
+{\color{black} Finally, there are two types of loops in SystemJ:
+  temporal loops consisting of at least one $\mathbf{pause}$ statement,
+  which execute forever and bounded data-loops like in standard Java.
+  These data-loops are instantaneous and complete within the current
+  tick. }
 
 \subsection{The real-time execution architecture}
 \label{sec:real-time-execution}
@@ -572,13 +574,12 @@ SysJ_Example(
 
 \begin{figure}[b!]
   \centering
-  \subfloat[Example synchronous SystemJ clock-domain]{
+  \subfloat[Synchronous SystemJ clock-domain]{
     \scalebox{0.65}{\usebox{\verbboxx}}
     \label{fig:4}}
-  \subfloat[GRC of the SystemJ clock-domain in
+  \subfloat[GRC of the clock-domain in
   Figure~\ref{fig:4}] 
-  {\includegraphics[scale=0.6]{grc}\label{fig:2a}}
-
+  {\includegraphics[scale=0.7]{grc}\label{fig:2a}}
   \subfloat[Uppaal representation of GRC] 
   {\includegraphics[scale=0.7]{ugrc}\label{fig:2b}}
   \caption{Example SystemJ program with its GRC and Uppaal
@@ -742,9 +743,8 @@ synchronous program through primitive nodes.
 
 \begin{definition} \textit{Clock-domain transition (or tick)}: A single
   clock-domain transition also called a clock-domain tick is a
-  \underline{single} traversal of the GRC from the source node (node
-  with no incoming edges, e.g., node S1 in Figure~\ref{fig:2a}) to the
-  sink node (node with no outgoing edges, e.g., node J1 in
+  \underline{single} traversal of the GRC from the source node (e.g.,
+  node S1 in Figure~\ref{fig:2a}) to the sink node (e.g., node J1 in
   Figure~\ref{fig:2a}).
 \end{definition}
 
@@ -972,7 +972,7 @@ static objects, etc. The major point of difference is that the
 itself, does not exist in the proposed runtime memory organization and
 the \textit{heap} space is divided into two parts; the transient heap
 and the permanent heap. Looking at the proposed runtime memory
-organizations two \underline{requirements} become very important:
+organization two \underline{requirements} become very important:
 
 \begin{enumerate}
 \item There should be no pointer pointing from the permanent heap to the
@@ -1391,7 +1391,7 @@ signal \texttt{S} (BB4, line~1).
   
 \item \underline{Step3} analyzes the emission expression for every
   program point in set $PPC$. An emitting expression can \textit{only}
-  emit a method local variable or a field. Either Step4 or Step5 are
+  emit a method local variable or a field. Either Step4 or Step5 is
   called, depending on whether a field or a local variable is affected,
   respectively. In our current example a local variable (\texttt{t}) in
   Figure~\ref{fig:8h}, BB4, line~1, is being emitted (or formally called
@@ -1511,19 +1511,19 @@ signal \texttt{S} (BB4, line~1).
     In Figure~\ref{fig:10a}, we initialize two \texttt{Integer} object
     type variables; \texttt{A} and \texttt{B} to constant \texttt{int}
     values. Then we emit \texttt{A} via signal \texttt{S}. The bytecode
-    produced from this Java program is shown in
-    Figure~\ref{fig:10b}. First, the constant 0 is loaded onto the stack
-    and the method \texttt{valueOf} in the \texttt{Integer} class, from
-    the Java standard library, is invoked, which allocates memory and
-    initializes the returned reference field to 0, the returned
-    reference is then stored on the stack
-    (lines~\ref{exinvt:l0}-\ref{exinvt:l2}), same is done for the object
-    \texttt{B} in lines~\ref{exinvt:l3}-\ref{exinvt:l5}. The actual
-    object initialization is carried out inside the \texttt{valueOf}
-    method, Figure~\ref{fig:10c}, line~\ref{exinvtt:l1}. If we were to
-    replace this \texttt{new} bytecode, to point to some memory words in
-    the permanent heap, then both; \texttt{A} and \texttt{B} will point
-    to the same place in permanent heap. Consequently, first a constant
+    produced from this Java program is shown in Figure~\ref{fig:10b}.
+    First, the constant 0 is loaded onto the stack and the method
+    \texttt{valueOf} in the \texttt{Integer} class, from the Java
+    standard library, is invoked, which allocates memory and initializes
+    the returned reference field to 0, the returned reference is then
+    stored on the stack (lines~\ref{exinvt:l0}-\ref{exinvt:l2}), same is
+    done for the object \texttt{B} in
+    lines~\ref{exinvt:l3}-\ref{exinvt:l5}. The actual object
+    initialization is carried out inside the \texttt{valueOf} method,
+    Figure~\ref{fig:10c}, line~\ref{exinvtt:l1}. If we were to replace
+    this \texttt{new} bytecode, to point to some memory words in the
+    permanent heap, then both; \texttt{A} and \texttt{B} will point to
+    the same place in the permanent heap. Consequently, first a constant
     0 will be written in the allocated memory (Figure~\ref{fig:10b},
     lines~\ref{exinvt:l0}-\ref{exinvt:l2}) and then this value will be
     overwritten to 1 (Figure~\ref{fig:10b}, line~\ref{exinvt:l4}),
@@ -1536,7 +1536,7 @@ signal \texttt{S} (BB4, line~1).
     the actual object allocation and so on and so forth). To put the
     cache size restriction into perspective, all our benchmarks have a
     very limited cache size of only 1KB. Thus, we have decided to
-    disallow object allocation outside of the method being analyzed.  As
+    disallow object allocation outside of the method being analyzed. As
     a consequence of this design decision, the SystemJ programmer now
     needs to make explicit deep copies as shown in Figure~\ref{fig:8h}
     BB2 line~3 and BB3 line~4.
@@ -1589,11 +1589,11 @@ describe Step4 and Step6 of our data-flow analysis.
 \item \underline{Step4} is the dual of Step5. It works on Java fields
   rather than method local variables like Step5. The other difference
   between the two is that Step4 calls Step7 via Step6, which performs
-  inter-procedural analysis.
+  the inter-procedural analysis.
 
 \item \underline{Step6} can be conceptually partitioned into two parts.
   Part-1 returns the program points allocating objects within the same
-  method that the field is being used. {\color{red} The more interesting
+  method that the field is being used. {\color{black} The more interesting
     part is part-2, which carries out \textit{inter-procedural} analysis
     if the object containing the affected field being analyzed is not
     allocated in the same method.}
@@ -2027,11 +2027,12 @@ this paper. Yet, as we see from Figures~\ref{fig:12} and \ref{fig:16},
 the SCJ memory allocation times are far larger compared to all the other
 memory allocation approaches. In particular, SCJ's memory allocation
 implementation, in our experiments, is, on average, $\approx 7.3 \times$
-slower than the proposed approach. {\color{red} Close analysis of the
+slower than the proposed approach. {\color{black} Close analysis of the
   SCJ implementation on the JOP platform indicates that the memory
   allocation code consists of a number of branch statements, which cause
   this slowdown. }We expect that a better memory allocation
-implementation would result in faster memory allocation times for SCJ.
+implementation would result in faster memory allocation times for SCJ,
+too.
 
 In case of memory allocation time when no GC is invoked, there are
 multiple reasons for the speedup in the No-GC case, compared to other
@@ -2192,7 +2193,7 @@ allocation bytecode execution in the AGC approach.
   \label{fig:13}
 \end{figure}
 
-\section{Related Work and discussion}
+\section{Related Work and Discussion}
 \label{sec:related-work}
 
 {\color{black}
@@ -2214,12 +2215,12 @@ emit S(a); \label[reuse:l4]
   \end{minipage}
 \end{lrbox}
 
-{\color{red}
+{\color{black}
 
   We are not the first to advocate a GC-less approach for hard real-time
   applications with memory managed languages, especially Java. Earlier
   works on \textit{region} based memory
-  management~\cite{gay1998memory,nguyen2007detecting}, advocate the use
+  management~\cite{gay1998memory,nguyen2007detecting} advocate the use
   of different regions, similar to transient and permanent heap proposed
   in this work, for safely managing memory. The work
   of~\cite{nguyen2007detecting} uses cyclic memory
@@ -2235,7 +2236,7 @@ emit S(a); \label[reuse:l4]
   underestimation can lead to overwriting live objects, resulting in
   wrong program execution.
 
-  The work in~\cite{gay1998memory} propose a region based memory
+  The work in~\cite{gay1998memory} proposes a region based memory
   management approach for C. In their approach, a reference count for
   complete regions is used for garbage collection. Managing reference
   counts results in additional overhead during program execution. The
@@ -2268,10 +2269,10 @@ SCJ and Ravenscar-Java approaches is that in the presented approach the
 same transient heap space (similar to scoped memory in SCJ) can be
 shared by multiple synchronous parallel reactions, whereas every single
 task gets allocated its own scoped memory (which might be nested in
-another tasks scoped memory) in SCJ. This is because, SCJ allows context
-switching of tasks during program execution, whereas in SystemJ a
-clock-domain tick is atomic. RTSJ does allow access of scoped memory by
-concurrent threads and only when the last thread exits, the scoped
+another tasks' scoped memory) in SCJ. This is because, SCJ allows
+context switching of tasks during program execution, whereas in SystemJ
+a clock-domain tick is atomic. RTSJ does allow access of scoped memory
+by concurrent threads and only when the last thread exits, the scoped
 memory is reclaimed. Another important point of differentiation is the
 reuse of memory words enabled by the proposed approach. Consider the
 SystemJ code snippet in Figure~\ref{fig:reuse}. An object \texttt{a}, of
@@ -2289,7 +2290,7 @@ impossible. % This is also the primary reason for the results shown in
 \begin{figure}[h!]
   \centering
   \scalebox{0.7}{\usebox{\reuse}}
-  \caption{SystemJ code snippet to show resue of memory words}
+  \caption{SystemJ code snippet to show reuse of memory words}
   \label{fig:reuse}
 \end{figure}
 
@@ -2409,8 +2410,8 @@ consumption is actually a blessing in disguise.
 In this paper we have presented a new memory organization and model for
 hard real-time and safety-critical applications programmed in formal
 synchronous languages with data support being provided by managed
-language runtimes, primarily Java. {\color{red} The SystemJ model of
-  computation, plays a central role in the presented memory management
+language runtimes, primarily Java. {\color{black} The SystemJ model of
+  computation plays a central role in the presented memory management
   approach. The ``tick'' demarcation inherent in the formal synchronous
   programming model, provided by SystemJ, allows dividing the Java
   objects into two types: (1) transient objects, which are allocated for
@@ -2422,10 +2423,10 @@ memory allocation, which means that our programs are guaranteed to be
 free of execution time \mbox{\textit{out of memory}} exceptions.
 Furthermore, we are able to replace object allocation bytecodes, with
 real-time analyzable alternatives, which makes our approach amenable to
-non-pessimistic worst case execution time analysis. {\color{red} Java
-  lacks a clear state (``tick'') demarcation, and hence, dividing
+non-pessimistic worst case execution time analysis. {\color{black} Java
+  lacks a clear state (``tick'') demarcation and, hence, dividing
   memory, and associated objects, into efficient collectable memory
-  spaces, is a challenge.}
+  spaces is a challenge.}
 
 All the aforementioned qualitative improvements are further accompanied
 by improvements in the program throughput (approximately $3\times$
@@ -2456,6 +2457,7 @@ which we plan to address in the future.
 
 % Bibliography
 % \bibliographystyle{spbasic}      % basic style, author-year citations
+
 \bibliographystyle{elsarticle-num}      % basic style, author-year citations
 \bibliography{main_bib}
 
