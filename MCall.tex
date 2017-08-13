@@ -31,15 +31,15 @@
 % setfont left to latex
 \definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
 \pgfsetstrokecolor{dialinecolor}
-\node[anchor=west] at (23.431250\du,9.011767\du){1: b B = new b(33);};
+\node[anchor=west] at (23.431250\du,9.011767\du){1: b ob = new b(33);};
 % setfont left to latex
 \definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
 \pgfsetstrokecolor{dialinecolor}
-\node[anchor=west] at (23.431250\du,9.818922\du){2: c C = new c(1001,101);};
+\node[anchor=west] at (23.431250\du,9.818922\du){2: c oc = new c(1001,101);};
 % setfont left to latex
 \definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
 \pgfsetstrokecolor{dialinecolor}
-\node[anchor=west] at (23.431250\du,10.626078\du){3: a t;};
+\node[anchor=west] at (23.431250\du,10.626078\du){3: a oa;};
 % setfont left to latex
 \definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
 \pgfsetstrokecolor{dialinecolor}
@@ -84,15 +84,15 @@
 % setfont left to latex
 \definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
 \pgfsetstrokecolor{dialinecolor}
-\node[anchor=west] at (14.938750\du,19.356767\du){1: int b1 = B.getb1();};
+\node[anchor=west] at (14.938750\du,19.356767\du){1: int b1 = ob.getfb1();};
 % setfont left to latex
 \definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
 \pgfsetstrokecolor{dialinecolor}
-\node[anchor=west] at (14.938750\du,20.163922\du){2: t = new b(b1);};
+\node[anchor=west] at (14.938750\du,20.163922\du){2: oa = new b(b1);};
 % setfont left to latex
 \definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
 \pgfsetstrokecolor{dialinecolor}
-\node[anchor=west] at (14.938750\du,20.971078\du){3: ((b)t).bbb = new Integer(99);};
+\node[anchor=west] at (14.938750\du,20.971078\du){3: ((af1)oa).bf2 = new Integer(99);};
 \definecolor{dialinecolor}{rgb}{1.000000, 1.000000, 1.000000}
 \pgfsetfillcolor{dialinecolor}
 \fill (30.933750\du,17.550689\du)--(30.933750\du,21.879311\du)--(44.433750\du,21.879311\du)--(44.433750\du,17.550689\du)--cycle;
@@ -106,19 +106,19 @@
 % setfont left to latex
 \definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
 \pgfsetstrokecolor{dialinecolor}
-\node[anchor=west] at (31.383750\du,18.698189\du){1: int cc = C.getcc();};
+\node[anchor=west] at (31.383750\du,18.698189\du){1: int c1 = oc.getcf1();};
 % setfont left to latex
 \definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
 \pgfsetstrokecolor{dialinecolor}
-\node[anchor=west] at (31.383750\du,19.505344\du){2: int ccc = C.getccc();};
+\node[anchor=west] at (31.383750\du,19.505344\du){2: int c2 = oc.getcf2();};
 % setfont left to latex
 \definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
 \pgfsetstrokecolor{dialinecolor}
-\node[anchor=west] at (31.383750\du,20.312500\du){3: t = new c(cc,ccc);};
+\node[anchor=west] at (31.383750\du,20.312500\du){3: oa = new c(c1,c2);};
 % setfont left to latex
 \definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
 \pgfsetstrokecolor{dialinecolor}
-\node[anchor=west] at (31.383750\du,21.119656\du){4: ((c)t).mm = new Integer(999);};
+\node[anchor=west] at (31.383750\du,21.119656\du){4: ((c)oa).cf3 = new Integer(999);};
 % setfont left to latex
 \definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
 \pgfsetstrokecolor{dialinecolor}
@@ -176,7 +176,7 @@
 % setfont left to latex
 \definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
 \pgfsetstrokecolor{dialinecolor}
-\node[anchor=west] at (24.245000\du,26.185344\du){1: S.setValue(t);};
+\node[anchor=west] at (24.245000\du,26.185344\du){1: S.setValue(oa);};
 % setfont left to latex
 \definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
 \pgfsetstrokecolor{dialinecolor}
@@ -226,7 +226,7 @@
 % setfont left to latex
 \definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
 \pgfsetstrokecolor{dialinecolor}
-\node[anchor=west] at (13.900000\du,26.950000\du){Allocate t at line 2};
+\node[anchor=west] at (13.900000\du,26.950000\du){Allocate \texttt{oa} at line 2};
 \pgfsetlinewidth{0.100000\du}
 \pgfsetdash{{1.000000\du}{1.000000\du}}{0\du}
 \pgfsetdash{{1.000000\du}{1.000000\du}}{0\du}
@@ -244,5 +244,5 @@
 % setfont left to latex
 \definecolor{dialinecolor}{rgb}{0.000000, 0.000000, 0.000000}
 \pgfsetstrokecolor{dialinecolor}
-\node[anchor=west] at (34.995000\du,27.020000\du){Allocate t at line 3};
+\node[anchor=west] at (34.995000\du,27.020000\du){Allocate \texttt{oa} at line 3};
 \end{tikzpicture}

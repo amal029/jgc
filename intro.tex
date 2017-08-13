@@ -97,12 +97,20 @@ satisfying the aforementioned requirements. More concretely our
 contributions are as follows:
 
 \begin{itemize}
-\item \textit{Programming model inspired memory organization}: In this
-  paper we present a new memory organization for Java and an
-  accompanying static WCRT analysis based on SystemJ's MoC.
-\item \textit{Compiler supported memory allocation}: We present the
-  compiler transformations that are needed to statically guarantee the
-  \textit{Worst Case Memory Consumption} (WCMC) and \textit{allocation}.
+\item \textit{Programming model inspired memory organization}:
+  {\color{red} In this paper we present a new memory organization for
+    programs developed in the SystemJ programming language. % We also
+    % develop an accompanying static WCRT analysis based on SystemJ's MoC.
+    
+  \item \textit{Algorithmic analysis of memory consumption}: We develop
+    the algorithm to statically analyse the \textit{Worst Case Memory
+      Consumption} (WCMC) of the data-computations performed using Java
+    within the larger SystemJ MoC.
+
+  }
+% \item \textit{Compiler supported memory allocation}: We present the
+%   compiler transformations that are needed to statically guarantee the
+%   \textit{allocation}.
 \item \textit{Time analyzable back-end code generation and garbage
     collection}: We present a strategy to replace the non timing
   analyzable object allocation bytecodes (e.g., \texttt{new}) with
@@ -123,7 +131,8 @@ contributions are as follows:
   
   These assumptions are necessary for approaches to worst case execution
   time analysis~\cite{jop:wcet:jtres06} and worst case memory
-  consumption analysis~\cite{andersen2013worst}.
+  consumption analysis~\cite{andersen2013worst}, {\color{red} especially
+    in the context of developing safety-critical real-time systems.}
 
 }
 
