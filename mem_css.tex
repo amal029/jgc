@@ -100,27 +100,27 @@
   (WCRT)\footnote{Similar to \textit{Worst Case Execution Time}}
   analysis challenging. Any WCRT analysis framework for GALS programs
   needs to consider the operations performed by the host language. It
-  has been shown that the WCRT estimates for garbage collection cycles
-  are in seconds, whereas the program's WCRT itself is in micro-seconds.
-  These pessimistic estimates renders the WCRT analysis framework
-  ineffective. In order to overcome this problem, we develop a compiler
-  assisted memory management technique for applications written in
-  SystemJ. {\color{black} The SystemJ MoC plays the central role in the
-    proposed technique. The SystemJ MoC allows clearly demarcating the
-    state boundaries of the program, which in turn allows us to
-    partition the heap, at compile time, into two distinct areas: (1)
-    the memory area called the \textit{permanent heap}, which holds
-    objects that are alive throughout the life time of the application,
-    and (2) the memory area used to hold all other objects, called the
-    \textit{transient heap}.} The size of these memory areas are bounded
-  statically. Furthermore, the memory allocation and reclaim procedures
-  are simple load and pointer reset operations, respectively, which are
-  guaranteed to complete within a bounded number of clock-cycles,
-  thereby alleviating the need for large pessimistic WCRT bounds
-  obtained due to the GC.\@ Experimental results also show that the
-  proposed approach is approximately three times faster, in terms of
-  memory allocation times as compared to standard real-time GC
-  approaches.
+  has been shown that the worst case time estimates for garbage
+  collection cycles are in seconds, whereas the program's WCRT itself is
+  in micro-seconds.  These pessimistic estimates renders the WCRT
+  analysis framework ineffective. In order to overcome this problem, we
+  develop a compiler assisted memory management technique for
+  applications written in SystemJ. {\color{black} The SystemJ MoC plays
+    the central role in the proposed technique. The SystemJ MoC allows
+    clearly demarcating the state boundaries of the program, which in
+    turn allows us to partition the heap, at compile time, into two
+    distinct areas: (1) the memory area called the \textit{permanent
+      heap}, which holds objects that are alive throughout the life time
+    of the application, and (2) the memory area used to hold all other
+    objects, called the \textit{transient heap}.} The size of these
+  memory areas are bounded statically. Furthermore, the memory
+  allocation and reclaim procedures are simple load and pointer reset
+  operations, respectively, which are guaranteed to complete within a
+  bounded number of clock-cycles, thereby alleviating the need for large
+  pessimistic WCRT bounds obtained due to the GC.\@ Experimental results
+  also show that the proposed approach is approximately three times
+  faster, in terms of memory allocation times as compared to standard
+  real-time GC approaches.
 
 \end{abstract}
 
@@ -1427,22 +1427,22 @@ Section~\ref{sec:inter-proc-analys}.
     allocations, whose returned reference is held in these fields, into
     the permanent heap.
 
-    Consider the program point in BB3 at line~3. Object \texttt{t} is
+    Consider the program point in BB3 at line~3. Object \texttt{oa} is
     initialized as class \texttt{c} (for program point in BB2 line~2,
     \texttt{oa} is initialized and analyzed as class \texttt{b}), which
     has three fields (c.f. Figure~\ref{fig:8i}): two (\texttt{cf1} and
     \texttt{cf2}) are primitive fields, but the third: \texttt{cf3} is a
     reference field of type \texttt{Integer}. The \texttt{cf3} reference
     field is initialized to an \texttt{Integer} object in BB3 line~4.
-    Figure~\ref{fig:9a} shows the address held in \texttt{cf3} if Step3 is
-    not called from Step5. Reference field \texttt{cf3} points to an
+    Figure~\ref{fig:9a} shows the address held in \texttt{cf3} if Step3
+    is not called from Step5. Reference field \texttt{cf3} points to an
     object in transient heap space, which violates the first requirement
-    in Section~\ref{sec:new-memory-model}. Calling Step3, guarantees that
-    all potential \textit{pointed-to} objects from the permanent heap are
-    also migrated to the permanent-heap. Note that Step3 and Step5 are
-    mutually recursive and hence, perform a chained permanent heap
-    migration. For the running example, the result of calling Step3 from
-    Step5 is shown in Figure~\ref{fig:9b}.
+    in Section~\ref{sec:new-memory-model}. Calling Step3, guarantees
+    that all potential \textit{pointed-to} objects from the permanent
+    heap are also migrated to the permanent-heap. Note that Step3 and
+    Step5 are mutually recursive and hence, perform a chained permanent
+    heap migration. For the running example, the result of calling Step3
+    from Step5 is shown in Figure~\ref{fig:9b}.
     
     The final computation that Step5 performs is computing the size, which
     will be reserved in the permanent heap, of object \texttt{oa}, given
@@ -1461,18 +1461,19 @@ Section~\ref{sec:inter-proc-analys}.
     can be \textit{reused} at runtime by all program points in set
     $alloc\_pps$. \newline
     \begin{compactitem}[$\bullet$]
-    \item \textbf{Design decision}: We have disallowed method local object
-      references from escaping as a trade-off between space utilization
-      and functional correctness. If we allow, for example \texttt{t} in
-      Figure~\ref{fig:8h}, to escape method \texttt{MCall}, then any of
-      the reference fields of \texttt{oa} (e.g., \texttt{cf3}) might be
-      reinitialized at some other program point. This new program point
-      would also then need to be considered and space on the permanent
-      heap would need to be reserved for the object allocation. This can
-      result in the permanent heap becoming too large. Conversely, if the
-      escape analysis is not performed, then there will be pointers
-      pointing from the permanent heap to transient heap, which may result
-      in potentially incorrect program behavior. Simply not allowing any
+    \item \textbf{Design decision}: We have disallowed method local
+      object references from escaping as a trade-off between space
+      utilization and functional correctness. If we allow, for example
+      \texttt{oa} in Figure~\ref{fig:8h}, to escape method
+      \texttt{MCall}, then any of the reference fields of \texttt{oa}
+      (e.g., \texttt{cf3}) might be reinitialized at some other program
+      point. This new program point would also then need to be
+      considered and space on the permanent heap would need to be
+      reserved for the object allocation. This can result in the
+      permanent heap becoming too large. Conversely, if the escape
+      analysis is not performed, then there will be pointers pointing
+      from the permanent heap to transient heap, which may result in
+      potentially incorrect program behavior. Simply not allowing any
       object reference to exceed the lifetime of the method avoids both
       these problems.
     \end{compactitem}
@@ -1517,36 +1518,37 @@ Section~\ref{sec:inter-proc-analys}.
       
       In Figure~\ref{fig:10a}, we initialize two \texttt{Integer} object
       type variables; \texttt{A} and \texttt{B} to constant \texttt{int}
-      values. Then we emit \texttt{A} via signal \texttt{S}. The bytecode
-      produced from this Java program is shown in Figure~\ref{fig:10b}.
-      First, the constant 0 is loaded onto the stack and the method
-      \texttt{valueOf} in the \texttt{Integer} class, from the Java
-      standard library, is invoked, which allocates memory and initializes
-      the returned reference field to 0, the returned reference is then
-      stored on the stack (lines~\ref{exinvt:l0}-\ref{exinvt:l2}), same is
-      done for the object \texttt{B} in
-      lines~\ref{exinvt:l3}-\ref{exinvt:l5}. The actual object
-      initialization is carried out inside the \texttt{valueOf} method,
-      Figure~\ref{fig:10c}, line~\ref{exinvtt:l1}. If we were to replace
-      this \texttt{new} bytecode, to point to some memory words in the
-      permanent heap, then both; \texttt{A} and \texttt{B} will point to
-      the same place in the permanent heap. Consequently, first a constant
-      0 will be written in the allocated memory (Figure~\ref{fig:10b},
+      values. Then we emit \texttt{A} via signal \texttt{S}. The
+      bytecode produced from this Java program is shown in
+      Figure~\ref{fig:10b}.  First, the constant 0 is loaded onto the
+      stack and the method \texttt{valueOf} in the \texttt{Integer}
+      class, from the Java standard library, is invoked, which allocates
+      memory and initializes the returned reference field to 0, the
+      returned reference is then stored on the stack
+      (lines~\ref{exinvt:l0}-\ref{exinvt:l2}), same is done for the
+      object \texttt{B} in lines~\ref{exinvt:l3}-\ref{exinvt:l5}. The
+      actual object initialization is carried out inside the
+      \texttt{valueOf} method, Figure~\ref{fig:10c},
+      line~\ref{exinvtt:l1}. If we were to replace this \texttt{new}
+      bytecode, to point to some memory words in the permanent heap,
+      then both; \texttt{A} and \texttt{B} will point to the same place
+      in the permanent heap. Consequently, first a constant 0 will be
+      written in the allocated memory (Figure~\ref{fig:10b},
       lines~\ref{exinvt:l0}-\ref{exinvt:l2}) and then this value will be
       overwritten to 1 (Figure~\ref{fig:10b}, line~\ref{exinvt:l4}),
-      resulting in functionally incorrect code. The \textit{only} solution
-      to this problem is to \textit{inline} the called method,
-      \texttt{valueOf} in this case. But, extreme caution is required when
-      in-lining methods, because the method might be too large to fit in
-      the method cache, or more than one such methods might need to be
-      in-lined (in case a method itself calls another method, which does
-      the actual object allocation and so on and so forth). To put the
-      cache size restriction into perspective, all our benchmarks have a
-      very limited cache size of only 1KB. Thus, we have decided to
-      disallow object allocation outside of the method being analyzed. As
-      a consequence of this design decision, the SystemJ programmer now
-      needs to make explicit deep copies as shown in Figure~\ref{fig:8h}
-      BB2 line~3 and BB3 line~4.
+      resulting in functionally incorrect code. The \textit{only}
+      solution to this problem is to \textit{inline} the called method,
+      \texttt{valueOf} in this case. But, extreme caution is required
+      when in-lining methods, because the method might be too large to
+      fit in the method cache, or more than one such methods might need
+      to be in-lined (in case a method itself calls another method,
+      which does the actual object allocation and so on and so
+      forth). To put the cache size restriction into perspective, our
+      benchmark execution platform has a very limited cache size of only
+      1KB. Thus, we have decided to disallow object allocation outside
+      of the method being analyzed. As a consequence of this design
+      decision, the SystemJ programmer now needs to make explicit deep
+      copies as shown in Figure~\ref{fig:8h} BB2 line~3 and BB3 line~4.
 
     \end{compactitem}
 
@@ -2008,9 +2010,9 @@ The example benchmarks are available from~\cite{ipat13}.
   \label{fig:16}
 \end{figure}
 
-{\color{red} The exact same micro-benchmarks are written in Java are
+{\color{red} The exact same micro-benchmarks, all written in Java, are
   executed in all four approaches. Only the back-end memory management
-  technique differs in these approaches. } The runtime comparison
+  technique differs in the four executions. } The runtime comparison
 between the four approaches for each of the micro-benchmarks is shown in
 Figures~\ref{fig:12} and~\ref{fig:16}. Figures~\ref{fig:12}
 and~\ref{fig:16} give the execution times for completion of a memory
