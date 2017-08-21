@@ -1366,42 +1366,44 @@ Section~\ref{sec:inter-proc-analys}.
   \begin{compactitem}[-]
 
   \item \underline{Step1} of the data-flow analysis algorithm starts by
-    scanning the Java program for program points allocating signals (e.g.,
-    method \texttt{init} in Figure~\ref{fig:8hc}). A globally accessible
-    set $pp$ is defined, which holds all the program points allocating
-    objects that will be placed in the permanent heap. Step1 scans the
-    call graph from the starting program point (usually the \texttt{main}
-    method) for signal allocation and places these program points into the
-    set $pp$. Each individual tuple within the set $pp$ consists of one or
-    more program points that allocate objects. After the scan phase, the
-    set $pp$ holds $\{(5,\{\mathtt{init:BB1:1}\})\}$ for the example in
+    scanning the Java program for program points allocating signals
+    (e.g., method \texttt{init} in Figure~\ref{fig:8hc}). A globally
+    accessible set $pp$ is defined, which holds all the program points
+    allocating objects that will be placed in the permanent heap. Step1
+    scans the call graph from the starting program point (usually the
+    \texttt{main} method) for signal allocation and places these program
+    points (including the one in \texttt{main}) into the set $pp$. Each
+    individual tuple within the set $pp$ consists of one or more program
+    points that allocate objects. After the scan phase, the set $pp$
+    holds $\{(5,\{\mathtt{init:BB1:1}\})\}$ for the example in
     Figure~\ref{fig:8hc}. The first element of the tuple gives the
     \textit{instance} size of the \texttt{Signal} class, the second
     element is the allocation program point~\footnote{The allocation
       program point is actually at the bytecode level, but in this paper
-      we keep the program points at the Java source code level for ease of
-      understanding.} for the example in Figure~\ref{fig:8hc}. If more
-    than one signal is allocated, all these program points are placed in
-    the set $pp$. Finally, Step2 is called to find all the signal emission
-    program points.
+      we keep the program points at the Java source code level for ease
+      of understanding.} for the example in Figure~\ref{fig:8hc}. If
+    more than one signal is allocated, all these program points are
+    placed in the set $pp$. Finally, Step2 is called to find all the
+    signal emission program points.
 
   \item \underline{Step2} is a recursive procedure that scans all
     reachable methods, in the call-graph, for the \texttt{setValue}
     virtual method call on the signal objects. These program points are
-    placed in the set $PPC$ for each reachable method individually. For
+    placed in the set $ppc$ for each reachable method individually. For
     the example in Figure~\ref{fig:8}, this involves scanning method
     \texttt{MCall} and placing the program point: `BB4:line~1', in set
-    $PPC$. Finally, Step3 of the algorithm is called to obtain all object
-    allocation program points whose returned references are emitted via
-    signals.
+    $ppc$. Finally, Step3 of the algorithm is called to obtain all
+    object allocation program points whose returned object references
+    are emitted via signals.
     
-  \item \underline{Step3} analyzes the emission expression for every
-    program point in set $PPC$. An emitting expression can \textit{only}
-    emit a method local variable or a field. Either Step4 or Step5 is
-    called, depending on whether a field or a local variable is affected,
-    respectively. In our current example a local variable (\texttt{oa}) in
-    Figure~\ref{fig:8h}, BB4, line~1, is being emitted (or formally called
-    being affected) and hence, Step5 is called.
+  \item \underline{Step3} analyzes the emission expression
+    (\texttt{setValue} method) for every program point in set $ppc$. An
+    emitting expression can \textit{only} emit a method local variable
+    or a field. Either Step4 or Step5 is called, depending on whether a
+    field or a local variable is emitted (or formally called affected),
+    respectively. In our current example a local variable (\texttt{oa})
+    in Figure~\ref{fig:8h}, BB4, line~1, is being affected and hence,
+    Step5 is called.
     
   \item \underline{Step5} extracts the variable from the affected
     expression and calls Step7 for analysis. Step7 is the core of the
@@ -1423,9 +1425,9 @@ Section~\ref{sec:inter-proc-analys}.
       $M$, if the lifetime of $O$ may exceed the lifetime of $M$.} If
     the object reference does not escape the lifetime of the method,
     then the algorithm checks if there are any reference fields within
-    this object. If so, Step3 is invoked for migrating all object
-    allocations, whose returned reference is held in these fields, into
-    the permanent heap.
+    this object. If so, the algorithm returns back to Step3, for
+    migrating all object allocations, whose returned reference is held
+    in these fields, into the permanent heap.
 
     Consider the program point in BB3 at line~3. Object \texttt{t} is
     initialized as class \texttt{c} (for program point in BB2 line~2,
@@ -2754,13 +2756,13 @@ which we plan to address in the future.
 %       \BlankLine
 %       \Let $S \leftarrow$ \Signalset(pp)\;
 %       \Let $C \leftarrow$ \Code(\texttt{method})\;
-%       \Let $PPC \leftarrow \emptyset$\;
+%       \Let $ppc \leftarrow \emptyset$\;
 %       \ForEach{$c \in C$}{\label{algtwo:l1}
 %         \If{\Emits($c$,$S$)}{
-%           $PPC \leftarrow PPC\ \cup \{c\}$\;
+%           $ppc \leftarrow ppc\ \cup \{c\}$\;
 %         }
 %       }\label{algtwo:l2}
-%       \Stepthree(program,$PPC$,$C$)\;
+%       \Stepthree(program,$ppc$,$C$)\;
 %       \ForEach{$c \in C$}{
 %         \If{\InvokesMethod($c$)}{
 %           \Steptwo(program,$c$,\GetMethod($c$))\;
@@ -2785,10 +2787,10 @@ which we plan to address in the future.
 %       \SetKwFunction{StepFive}{Step5}
 %       \KwIn{program: Program in RTL format} 
 %       % \KwIn{pp: Set of program points} 
-%       \KwIn{$PPC$: Set of program points affected} 
-%       \KwIn{$C$: code of the method containing $PPC$}
+%       \KwIn{$ppc$: Set of program points affected} 
+%       \KwIn{$C$: code of the method containing $ppc$}
 %       \BlankLine
-%       \ForEach{$ppc \in PPC$}{
+%       \ForEach{$ppc \in ppc$}{
 %         \uIf{\AffectsFields(\GetExpr($ppc$))}{
 %           \Let $pp \leftarrow pp\ \cup$ \StepFour(program,$ppc$,\GetExpr($ppc$),$C$)\;
 %         }
@@ -2828,8 +2830,8 @@ which we plan to address in the future.
 %         \uIf{!\Escape(program,$C$,$d$)} {
 %           \If {\HasRefFields($f$)} {
 %             % start2
-%             \Let $PPC \leftarrow$ \GetAffectedFeilds(\GetFields($f$))\;
-%             \StepThree(program,$PPC$,$C$)\;
+%             \Let $ppc \leftarrow$ \GetAffectedFeilds(\GetFields($f$))\;
+%             \StepThree(program,$ppc$,$C$)\;
 %           }
 %         }
 %         \lElse {
@@ -2868,8 +2870,8 @@ which we plan to address in the future.
 %         \uIf{!\Escape(program,$C$,$d$)} {
 %           \If {\HasRefFields($v$)} {\label{algfive:l1}
 %             % start2
-%             \Let $PPC \leftarrow$ \GetAffectedFields(\GetFields($v$))\;
-%             \StepThree(program,$PPC$,$C$)\;
+%             \Let $ppc \leftarrow$ \GetAffectedFields(\GetFields($v$))\;
+%             \StepThree(program,$ppc$,$C$)\;
 %           }\label{algfive:l2}
 %         }
 %         \lElse {
@@ -2891,7 +2893,7 @@ which we plan to address in the future.
 %       \SetKwFunction{ReachDef}{reachDef}
 %       \SetKwFunction{GetAllFields}{getAllFields}
 %       \SetKwFunction{GetCallers}{getCallers}
-%       \SetKwFunction{GetCallerPPC}{getCallerPPC}
+%       \SetKwFunction{GetCallerppc}{getCallerppc}
 %       \SetKwFunction{GetVarSetting}{getVarSetting}
 %       \SetKwFunction{StepSeven}{Step7}
 %       \KwIn{program: Program in RTL format} 
@@ -2924,7 +2926,7 @@ which we plan to address in the future.
 %         \Let $defs \leftarrow \emptyset$\;  
 %         \Let $sizes \leftarrow \emptyset$\;  
 %         \ForEach {$caller \in Callers$} {
-%           \Let $defs \leftarrow defs\ \cup$ \StepSix(program,\GetCallerPPC($C$),$f$,$caller$)\;
+%           \Let $defs \leftarrow defs\ \cup$ \StepSix(program,\GetCallerppc($C$),$f$,$caller$)\;
 %           \tcc*[h]{Similar to Figure~\ref{fig:8d}
 %             lines~\ref{step4:s}-\ref{step4:e}, to fill in the sizes set.}
 %         }
