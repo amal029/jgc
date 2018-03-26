@@ -88,7 +88,7 @@
 
 \begin{abstract}
 
-  {\color{red} SystemJ is a programming language based on the
+  {\color{black} SystemJ is a programming language based on the
     \textit{Globally Asynchronous Locally Synchronous} (GALS)
     \textit{Model of Computation} (MoC) used to design safety critical
     hard real-time systems. SystemJ uses the Java programming language
@@ -331,7 +331,7 @@ point-to-point unidirectional channels. A complete list of SystemJ
 kernel statements is shown in Figure~\ref{fig:1}. {\color{black} The
   compile time memory allocation strategy described in this paper is
   applicable to each clock-domain individually and hence, in the rest of
-  the paper we concentrate only on a single clock-domain.  }
+  the paper we concentrate only on a single clock-domain. }
 
 % In this work we are only interested in the synchronous subset of
 % SystemJ, i.e., a single clock-domain.
@@ -1301,7 +1301,7 @@ Section~\ref{sec:inter-proc-analys}.
 
 
 
-{\color{red}
+{\color{black}
 
   \subsection{Intra-procedural analysis}
   \label{sec:intra-proc-analys}
@@ -1949,7 +1949,7 @@ real-time collector described in~\cite{pizlo2010schism}, in the rest of
 the section we call it AGC. The SCJ framework on the other hand is a GC
 less Java specification, designed to build hard real-time safety
 critical applications. All our micro-benchmark experiments are run in
-ModelSim, {\color{red} performing cycle-accurate simulation of the
+ModelSim, {\color{black} performing cycle-accurate simulation of the
   real-time hardware implemented JVM called JOP, running at 100 MHz,
   with 256KB of main memory, 1KB of method cache, and 4KB of stack
   cache. }
@@ -2014,7 +2014,7 @@ The example benchmarks are available from~\cite{ipat13}.
   \label{fig:16}
 \end{figure}
 
-{\color{red} The exact same micro-benchmarks, all written in Java, are
+{\color{black} The exact same micro-benchmarks, all written in Java, are
   executed in all four approaches. Only the back-end memory management
   technique differs in the four executions. } The runtime comparison
 between the four approaches for each of the micro-benchmarks is shown in
@@ -2155,7 +2155,7 @@ stepper motor control system for a printer and finally,
 \texttt{Pacemaker}~\cite{ParkMNS14}, is a real-time pacemaker used to
 control arrhythmia. These benchmarks are compiled to the TP-JOP
 architecture for execution and their WCRT values are analyzed.
-{\color{red} All benchmarks are written in SystemJ, and only the backend
+{\color{black} All benchmarks are written in SystemJ, and only the backend
   memory management techniques differ for the two approaches being
   compared. The benchmarks are available
   from~\cite{bitbucketBenchmarks}} The results are shown in
